@@ -1,4 +1,4 @@
-package de.twometer.amongus3d.engine;
+package de.twometer.amongus3d.core;
 
 import de.twometer.amongus3d.core.ILifecycle;
 import org.joml.Vector2f;
@@ -41,7 +41,7 @@ public class GameWindow implements ILifecycle {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_SAMPLES, 8);
+        glfwWindowHint(GLFW_SAMPLES, 4);
 
         handle = glfwCreateWindow(width, height, title, NULL, NULL);
         if (handle == NULL)
@@ -83,6 +83,14 @@ public class GameWindow implements ILifecycle {
         return glfwWindowShouldClose(handle);
     }
 
+    public void setCursorPosition(Vector2f vec) {
+        glfwSetCursorPos(handle, vec.x, vec.y);
+    }
+
+    public boolean isKeyPressed(int key) {
+        return glfwGetKey(handle, key) == GLFW_PRESS;
+    }
+
     public Vector2f getCursorPosition() {
         double[] xPos = new double[1];
         double[] yPos = new double[1];
@@ -96,5 +104,11 @@ public class GameWindow implements ILifecycle {
         glfwSetWindowSize(handle, width, height);
     }
 
+    public int getWidth() {
+        return width;
+    }
 
+    public int getHeight() {
+        return height;
+    }
 }

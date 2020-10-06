@@ -7,7 +7,7 @@ public class Bootstrap {
 
     public static void main(String[] args) {
         Log.i("Starting Among Us 3D...");
-        Game.getInstance().run();
+        Game.instance().run();
         Log.i("Shutting down...");
     }
 
