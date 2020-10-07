@@ -2,6 +2,7 @@ package de.twometer.amongus3d.obj;
 
 import de.twometer.amongus3d.mesh.Renderable;
 import de.twometer.amongus3d.model.Room;
+import de.twometer.amongus3d.render.RenderLayer;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -69,7 +70,10 @@ public class DoorGameObject extends GameObject {
     }
 
     @Override
-    public void render() {
+    public void render(RenderLayer layer) {
+        if (layer != RenderLayer.Base)
+            return;
+
         if (leftDoor == null || rightDoor == null)
             throw new IllegalStateException("Incomplete door object");
 

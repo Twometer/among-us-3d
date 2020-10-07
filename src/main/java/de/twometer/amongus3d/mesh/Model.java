@@ -87,6 +87,8 @@ public class Model extends Renderable {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 
+
+
         Vector3f min = new Vector3f(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
         Vector3f max = new Vector3f(Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE);
         Vector3f com = new Vector3f();
@@ -97,10 +99,11 @@ public class Model extends Renderable {
             float y = mesh.getVertices().get(bi + 1);
             float z = mesh.getVertices().get(bi + 2);
             if (x < min.x) min.x = x;
-            if (x > max.x) max.x = x;
             if (y < min.y) min.y = y;
-            if (y > max.y) max.y = y;
             if (z < min.z) min.z = z;
+
+            if (x > max.x) max.x = x;
+            if (y > max.y) max.y = y;
             if (z > max.z) max.z = z;
         }
 

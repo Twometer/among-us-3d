@@ -1,10 +1,11 @@
 package de.twometer.amongus3d.obj;
 
 import de.twometer.amongus3d.mesh.Renderable;
+import de.twometer.amongus3d.render.RenderLayer;
 
 public class StaticGameObject extends GameObject {
 
-    private final Renderable model;
+    final Renderable model;
 
     public StaticGameObject(String name, Renderable model) {
         super(name);
@@ -12,7 +13,9 @@ public class StaticGameObject extends GameObject {
     }
 
     @Override
-    public void render() {
+    public void render(RenderLayer layer) {
+        if (layer != RenderLayer.Base)
+            return;
         model.render();
     }
 

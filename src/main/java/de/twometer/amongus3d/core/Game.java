@@ -3,6 +3,7 @@ package de.twometer.amongus3d.core;
 import de.twometer.amongus3d.io.MapLoader;
 import de.twometer.amongus3d.obj.GameObject;
 import de.twometer.amongus3d.render.Camera;
+import de.twometer.amongus3d.render.RenderLayer;
 import de.twometer.amongus3d.render.ShaderProvider;
 import de.twometer.amongus3d.render.TextureProvider;
 import de.twometer.amongus3d.util.Fps;
@@ -86,7 +87,13 @@ public class Game {
 
     private void renderScene() {
         for (GameObject go : gameObjects)
-            go.render();
+            go.render(RenderLayer.Base);
+
+        for (GameObject go : gameObjects)
+            go.render(RenderLayer.Glow);
+
+        for (GameObject go : gameObjects)
+            go.render(RenderLayer.Transparency);
     }
 
     private void handleControls() {

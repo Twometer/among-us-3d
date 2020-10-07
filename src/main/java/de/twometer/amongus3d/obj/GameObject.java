@@ -1,5 +1,7 @@
 package de.twometer.amongus3d.obj;
 
+import de.twometer.amongus3d.render.RenderLayer;
+
 public abstract class GameObject {
 
     private static int idCounter = 0;
@@ -17,7 +19,7 @@ public abstract class GameObject {
 
     }
 
-    public abstract void render();
+    public abstract void render(RenderLayer layer);
 
     public abstract boolean canPlayerInteract();
 

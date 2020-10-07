@@ -2,6 +2,7 @@ package de.twometer.amongus3d.io;
 
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.mesh.*;
+import de.twometer.amongus3d.model.AnimationType;
 import de.twometer.amongus3d.model.Room;
 import de.twometer.amongus3d.model.TaskType;
 import de.twometer.amongus3d.obj.*;
@@ -26,8 +27,30 @@ public class MapLoader {
         String[] args = name.split("_");
 
         switch (args[0]) {
-            case "TASK":
-                return new TaskGameObject(name, model, Room.parse(args[1]), TaskType.parse(args[2]), args[3]);
+            case "ANIM": {
+                AnimationType type = AnimationType.parse(args[1]);
+                return new StaticAnimGameObject(name, model, type);
+            }
+            case "TASK": {
+                Room room = Room.parse(args[1]);
+                TaskType taskType = TaskType.parse(args[2]);
+                String ext = args[3];
+
+                if (ext.equals("FX")) {
+                    for (GameObject object : registeredObjects) {
+                        if (object instanceof TaskGameObject) {
+                            TaskGameObject task = (TaskGameObject) object;
+                            if (task.getTaskType() == taskType && task.getRoom() == room) {
+                                task.setFxModel(model);
+                                return null;
+                            }
+                        }
+                    }
+                    Log.w("Dangling FX model: " + name);
+                }
+
+                return new TaskGameObject(name, model, Room.parse(args[1]), TaskType.parse(args[2]));
+            }
             case "VENT":
                 try {
                     int id = Integer.parseInt(args[2]);
