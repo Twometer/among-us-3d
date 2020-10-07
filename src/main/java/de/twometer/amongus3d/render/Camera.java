@@ -6,9 +6,9 @@ import org.joml.Vector3f;
 
 public class Camera {
 
-    private Vector3f position = new Vector3f(0, 3, 0);
+    private final Vector3f position = new Vector3f(1, 0, 0);
 
-    private Vector2f angle = new Vector2f(0, 0);
+    private final Vector2f angle = new Vector2f(0, 0);
 
     public Matrix4f calcViewMatrix() {
         float yaw = (float) Math.toRadians(angle.x);

@@ -2,10 +2,7 @@ package de.twometer.amongus3d.io;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 
 public class ResourceLoader {
@@ -24,6 +21,16 @@ public class ResourceLoader {
         while ((line = reader.readLine()) != null)
             builder.append(line).append("\n");
         return builder.toString();
+    }
+
+    public static byte[] readData(String path) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        InputStream reader = openStream(path);
+        byte[] buf = new byte[8192];
+        int read;
+        while ((read = reader.read(buf)) > 0)
+            outputStream.write(buf, 0, read);
+        return outputStream.toByteArray();
     }
 
     /**
@@ -49,10 +56,7 @@ public class ResourceLoader {
     }
 
     private static InputStream openStream(String path) throws IOException {
-        InputStream stream = ResourceLoader.class.getClassLoader().getResourceAsStream(path);
-        if (stream == null)
-            throw new IOException(String.format("Failed to load '%s' from resources", path));
-        return stream;
+        return new FileInputStream("assets\\" + path);
     }
 
 }

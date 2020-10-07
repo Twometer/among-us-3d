@@ -1,7 +1,14 @@
 package de.twometer.amongus3d.core;
 
+import de.twometer.amongus3d.io.ModelLoader;
+import de.twometer.amongus3d.mesh.Mesh;
+import de.twometer.amongus3d.mesh.Model;
 import de.twometer.amongus3d.render.Camera;
 import de.twometer.amongus3d.render.shaders.ShaderProvider;
+import de.twometer.amongus3d.render.shaders.ShaderSimple;
+import de.twometer.amongus3d.util.Fps;
+import de.twometer.amongus3d.util.Timer;
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
@@ -12,11 +19,15 @@ public class Game {
 
     private static final Game gameInstance = new Game();
 
-    private final GameWindow window = new GameWindow("Among Us 3D - v0.1.0", 800, 600);
-
-    private final Camera camera = new Camera();
-
+    private final GameWindow window = new GameWindow("Among Us 3D", 800, 600);
+    private final Timer updateTimer = new Timer(90);
     private final ShaderProvider shaderProvider = new ShaderProvider();
+    private final Camera camera = new Camera();
+    private final Fps fps = new Fps();
+
+    private Model ship;
+    private Matrix4f projMatrix;
+    private ShaderSimple shaderSimple;
 
     private Game() {
     }
@@ -44,22 +55,38 @@ public class Game {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         glClearColor(0, 0, 0, 0);
+
+        ship = ModelLoader.load("models\\the_skeld.obj");
+
+        projMatrix = new Matrix4f().perspective((float) Math.toRadians(70), (float) window.getWidth() / window.getHeight(), 0.1f, 200.0f);
+
+        shaderSimple = shaderProvider.getShader(ShaderSimple.class);
     }
 
     private void renderFrame() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        shaderSimple.bind();
+        shaderSimple.setProjMatrix(projMatrix);
+        shaderSimple.setViewMatrix(camera.calcViewMatrix());
+        ship.draw();
+
         handleControls();
+        fps.frame();
     }
 
     private void handleControls() {
+        if (!updateTimer.elapsed())
+            return;
+        updateTimer.reset();
+
         float yaw = (float) Math.toRadians(camera.getAngle().x);
 
-        float dx = (float) Math.sin(yaw) * 0.2f;
-        float dz = (float) Math.cos(yaw) * 0.2f;
+        float dx = (float) Math.sin(yaw) * 0.1f;
+        float dz = (float) Math.cos(yaw) * 0.1f;
 
-        float dx2 = (float) Math.sin(yaw + Math.PI / 2) * 0.2f;
-        float dz2 = (float) Math.cos(yaw + Math.PI / 2) * 0.2f;
+        float dx2 = (float) Math.sin(yaw + Math.PI / 2) * 0.1f;
+        float dz2 = (float) Math.cos(yaw + Math.PI / 2) * 0.1f;
 
         if (window.isKeyPressed(GLFW_KEY_W))
             camera.getPosition().add(new Vector3f(dx, 0.0f, dz));
@@ -74,17 +101,16 @@ public class Game {
             camera.getPosition().sub(new Vector3f(dx2, 0.0f, dz2));
 
         if (window.isKeyPressed(GLFW_KEY_SPACE))
-            camera.getPosition().add(new Vector3f(0f, 0.2f, 0f));
+            camera.getPosition().add(new Vector3f(0f, 0.1f, 0f));
 
         if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT))
-            camera.getPosition().add(new Vector3f(0f, -0.2f, 0f));
+            camera.getPosition().add(new Vector3f(0f, -0.1f, 0f));
 
         Vector2f pos = window.getCursorPosition();
         Vector2f delta = pos.sub(new Vector2f(window.getWidth() / 2.0f, window.getHeight() / 2.0f));
         camera.getAngle().add(new Vector2f(-delta.x * 0.04f, -delta.y * 0.04f));
         window.setCursorPosition(new Vector2f(window.getWidth() / 2.0f, window.getHeight() / 2.0f));
     }
-
 
     public GameWindow getWindow() {
         return window;
