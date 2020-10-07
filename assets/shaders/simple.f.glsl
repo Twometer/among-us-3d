@@ -10,8 +10,7 @@ void main(void) {
     vec3 norm = normalize(fragmentNormal);
     vec3 lightDir = vec3(1, 1, 0);
     float ambient = 0.5;
-    float diff = max(dot(norm, lightDir) + ambient, 0.0);
+    float diff = max(dot(norm, lightDir), 0.25);
 
-    color =  vec4(diff * fragmentColor, 1.0);
-
+    color = vec4(diff * fragmentColor, 1.0);
 }

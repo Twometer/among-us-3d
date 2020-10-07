@@ -1,6 +1,7 @@
 package de.twometer.amongus3d.core;
 
 import de.twometer.amongus3d.io.MapLoader;
+import de.twometer.amongus3d.mesh.Renderable;
 import de.twometer.amongus3d.obj.GameObject;
 import de.twometer.amongus3d.render.Camera;
 import de.twometer.amongus3d.render.RenderLayer;
@@ -33,6 +34,7 @@ public class Game {
     private final List<GameObject> gameObjects = new ArrayList<>();
     private Matrix4f viewMatrix;
     private Matrix4f projMatrix;
+    private Matrix4f guiMatrix;
 
     private Game() {
     }
@@ -43,6 +45,7 @@ public class Game {
 
     public void run() {
         window.create();
+        window.setCursorVisible(false);
         setup();
 
         while (!window.shouldClose()) {
@@ -76,6 +79,7 @@ public class Game {
 
     private void recalculateMatrix(int w, int h) {
         projMatrix = new Matrix4f().perspective((float) Math.toRadians(70), (float) w / h, 0.1f, 200.0f);
+        guiMatrix = new Matrix4f().ortho2D(0, w, h, 0);
     }
 
     private void renderFrame() {

@@ -41,6 +41,10 @@ public class GameWindow implements ILifecycle {
         this.sizeCallback = sizeCallback;
     }
 
+    public void setCursorVisible(boolean visible) {
+        glfwSetInputMode(handle, GLFW_CURSOR, visible ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+    }
+
     @Override
     public void create() {
         GLFWErrorCallback.createPrint(System.err).set();
