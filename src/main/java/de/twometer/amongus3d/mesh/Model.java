@@ -2,7 +2,7 @@ package de.twometer.amongus3d.mesh;
 
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.render.shaders.ShaderSimple;
-import de.twometer.amongus3d.render.shaders.ShaderSimpleTextured;
+import de.twometer.amongus3d.render.shaders.ShaderTextured;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -134,7 +134,7 @@ public class Model extends Renderable {
         } else {
             glActiveTexture(0);
             game.getTextureProvider().getTexture(material.getTexture()).bind();
-            ShaderSimpleTextured tex = Game.instance().getShaderProvider().getShader(ShaderSimpleTextured.class);
+            ShaderTextured tex = Game.instance().getShaderProvider().getShader(ShaderTextured.class);
             tex.setTexSampler(0);
             tex.setVertexColor(material.getDiffuseColor());
             shader = tex;

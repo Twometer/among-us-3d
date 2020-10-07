@@ -22,6 +22,11 @@ public class TaskGameObject extends StaticGameObject {
     @Override
     public void render(RenderLayer layer) {
         super.render(layer);
+        if (taskType != TaskType.Scan)
+            renderFx(layer);
+    }
+
+    private void renderFx(RenderLayer layer) {
         if (fxModel != null && layer == RenderLayer.Transparency)
             fxModel.render();
     }

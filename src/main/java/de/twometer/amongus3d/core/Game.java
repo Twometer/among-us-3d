@@ -125,11 +125,11 @@ public class Game {
         if (window.isKeyPressed(GLFW_KEY_D))
             camera.getPosition().sub(new Vector3f(dx2, 0.0f, dz2));
 
-        if (window.isKeyPressed(GLFW_KEY_SPACE))
+        /*if (window.isKeyPressed(GLFW_KEY_SPACE))
             camera.getPosition().add(new Vector3f(0f, 0.1f, 0f));
 
         if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT))
-            camera.getPosition().add(new Vector3f(0f, -0.1f, 0f));
+            camera.getPosition().add(new Vector3f(0f, -0.1f, 0f));*/
 
         Vector2f pos = window.getCursorPosition();
         Vector2f delta = pos.sub(new Vector2f(window.getWidth() / 2.0f, window.getHeight() / 2.0f));
