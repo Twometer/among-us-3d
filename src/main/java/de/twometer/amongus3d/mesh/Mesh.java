@@ -141,7 +141,7 @@ public class Mesh {
 
     public Model bake(int primitiveType) {
         Model model = Model.create(this, primitiveType);
-       // destroy();
+        destroy();
         return model;
     }
 

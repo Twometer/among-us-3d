@@ -16,4 +16,14 @@ public class StaticGameObject extends GameObject {
         model.render();
     }
 
+    @Override
+    public boolean canPlayerInteract() {
+        return false;
+    }
+
+
+    @Override
+    public String toString() {
+        return "STATIC." + getName();
+    }
 }

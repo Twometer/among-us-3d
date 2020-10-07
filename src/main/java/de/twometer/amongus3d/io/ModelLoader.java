@@ -2,12 +2,14 @@ package de.twometer.amongus3d.io;
 
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.mesh.*;
+import de.twometer.amongus3d.model.Room;
+import de.twometer.amongus3d.model.TaskType;
 import de.twometer.amongus3d.obj.GameObject;
 import de.twometer.amongus3d.obj.StaticGameObject;
+import de.twometer.amongus3d.obj.TaskGameObject;
 import de.twometer.amongus3d.obj.VentGameObject;
 import de.twometer.amongus3d.util.Log;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.*;
 
@@ -21,21 +23,27 @@ import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 public class ModelLoader {
 
     private static GameObject buildObject(String name, IRenderable model) {
-        Log.i("Building object " + name);
         if (!name.contains("_"))
             return new StaticGameObject(name, model);
 
         String[] args = name.split("_");
 
         switch (args[0]) {
-            case "DOOR":
             case "TASK":
+                return new TaskGameObject(name, model, Room.parse(args[1]), TaskType.parse(args[2]), args[3]);
             case "VENT":
-                return new VentGameObject(name, model);
-            default:
-                return new StaticGameObject(name, model);
+                try {
+                    int id = Integer.parseInt(args[2]);
+                    return new VentGameObject(name, model, Room.parse(args[1]), id);
+                } catch (Exception e) {
+                    return new VentGameObject(name, model, Room.parse(args[1]), 1);
+                }
+            case "DOOR":
         }
+
+        return new StaticGameObject(name, model);
     }
+
 
     public static List<GameObject> loadShip(String path) {
         List<GameObject> gameObjects = new ArrayList<>();
@@ -63,7 +71,6 @@ public class ModelLoader {
 
             if (jtp.length() == 0)
                 continue;
-            Log.i("Preloading texture " + jtp);
             Game.instance().getTextureProvider().getTexture(jtp);
         }
 
@@ -79,11 +86,7 @@ public class ModelLoader {
             String name = aiMesh.mName().dataString();
 
             if (name.startsWith("OBJ_")) { // actual original object
-                if (currentModels.size() != 0) {
-                    IRenderable model = currentModels.size() == 1 ? currentModels.get(0) : new CompositeModel(currentModels);
-                    gameObjects.add(buildObject(currentName, model));
-                    currentModels.clear();
-                }
+                convertModelList(currentName, currentModels, gameObjects);
 
                 currentName = name.substring("OBJ_".length());
             }
@@ -91,14 +94,21 @@ public class ModelLoader {
             currentModels.add(convert(aiMesh, materials));
         }
 
-        if (currentModels.size() != 0) {
-            IRenderable model = currentModels.size() == 1 ? currentModels.get(0) : new CompositeModel(currentModels);
-            gameObjects.add(buildObject(currentName, model));
-        }
+        convertModelList(currentName, currentModels, gameObjects);
 
         Log.i("Loaded " + numMaterials + " materials");
 
         return gameObjects;
+    }
+
+    private static void convertModelList(String name, List<Model> models, List<GameObject> gameObjects) {
+        if (models.size() != 0) {
+            IRenderable model = models.size() == 1 ? models.get(0) : new CompositeModel(models);
+            GameObject object = buildObject(name, model);
+            Log.d("Building game object " + object + " from " + models.size() + " chunks");
+            gameObjects.add(object);
+            models.clear();
+        }
     }
 
     private static Model convert(AIMesh aiMesh, List<Material> mats) {
@@ -120,7 +130,7 @@ public class ModelLoader {
         AIVector3D.Buffer buffer = aiMesh.mTextureCoords(0);
         while (buffer.remaining() > 0) {
             AIVector3D aiTexCoord = buffer.get();
-            mesh.putTexCoord(aiTexCoord.x(), aiTexCoord.y());
+            mesh.putTexCoord(aiTexCoord.x(), 1-aiTexCoord.y());
         }
 
         Model model = mesh.bake(GL_TRIANGLES);

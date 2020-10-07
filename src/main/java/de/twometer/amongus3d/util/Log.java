@@ -6,6 +6,10 @@ public class Log {
         System.out.printf("[%s] %s%n", prefix, message);
     }
 
+    public static void d(String message) {
+        write("DEBUG", message);
+    }
+
     public static void i(String message) {
         write("INFO", message);
     }

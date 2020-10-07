@@ -1,6 +1,7 @@
 package de.twometer.amongus3d.io;
 
 import de.twometer.amongus3d.render.Texture;
+import de.twometer.amongus3d.util.Log;
 import org.lwjgl.BufferUtils;
 
 import java.awt.*;
@@ -14,6 +15,7 @@ import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 public class TextureLoader {
 
     public static Texture loadTexture(String path) {
+        Log.i("Loading texture " + path);
         try {
             BufferedImage image = ResourceLoader.loadImage(path);
             ByteBuffer buffer = loadPixels(image);

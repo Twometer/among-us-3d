@@ -2,11 +2,9 @@ package de.twometer.amongus3d.core;
 
 import de.twometer.amongus3d.io.ModelLoader;
 import de.twometer.amongus3d.obj.GameObject;
-import de.twometer.amongus3d.postproc.SSAOFilter;
 import de.twometer.amongus3d.render.Camera;
 import de.twometer.amongus3d.render.ShaderProvider;
 import de.twometer.amongus3d.render.TextureProvider;
-import de.twometer.amongus3d.render.shaders.ShaderSimple;
 import de.twometer.amongus3d.util.Fps;
 import de.twometer.amongus3d.util.Log;
 import de.twometer.amongus3d.util.Timer;
@@ -30,7 +28,6 @@ public class Game {
     private final TextureProvider textureProvider = new TextureProvider();
     private final Camera camera = new Camera();
     private final Fps fps = new Fps();
-    private final SSAOFilter ssao = new SSAOFilter();
 
     private final List<GameObject> gameObjects = new ArrayList<>();
     private Matrix4f viewMatrix;
@@ -71,8 +68,6 @@ public class Game {
             recalculateMatrix(width, height);
         });
         recalculateMatrix(window.getWidth(), window.getHeight());
-
-        ssao.init();
     }
 
     private void recalculateMatrix(int w, int h) {
@@ -81,12 +76,8 @@ public class Game {
 
     private void renderFrame() {
         handleControls();
-
-        //ssao.begin();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderScene();
-        //ssao.end();
-
         fps.frame();
     }
 
