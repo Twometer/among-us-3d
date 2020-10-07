@@ -1,6 +1,6 @@
 package de.twometer.amongus3d.core;
 
-import de.twometer.amongus3d.io.ModelLoader;
+import de.twometer.amongus3d.io.MapLoader;
 import de.twometer.amongus3d.obj.GameObject;
 import de.twometer.amongus3d.render.Camera;
 import de.twometer.amongus3d.render.ShaderProvider;
@@ -59,7 +59,7 @@ public class Game {
 
         glClearColor(0, 0, 0, 0);
 
-        gameObjects.addAll(ModelLoader.loadShip("models\\the_skeld.obj"));
+        gameObjects.addAll(MapLoader.loadMap("models\\the_skeld.obj"));
 
         Log.i("Loaded " + gameObjects.size() + " game objects.");
 
@@ -68,6 +68,9 @@ public class Game {
             recalculateMatrix(width, height);
         });
         recalculateMatrix(window.getWidth(), window.getHeight());
+
+        for (GameObject object : gameObjects)
+            object.init();
     }
 
     private void recalculateMatrix(int w, int h) {

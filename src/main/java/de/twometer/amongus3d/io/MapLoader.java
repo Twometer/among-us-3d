@@ -4,10 +4,7 @@ import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.mesh.*;
 import de.twometer.amongus3d.model.Room;
 import de.twometer.amongus3d.model.TaskType;
-import de.twometer.amongus3d.obj.GameObject;
-import de.twometer.amongus3d.obj.StaticGameObject;
-import de.twometer.amongus3d.obj.TaskGameObject;
-import de.twometer.amongus3d.obj.VentGameObject;
+import de.twometer.amongus3d.obj.*;
 import de.twometer.amongus3d.util.Log;
 import org.joml.Vector3f;
 import org.lwjgl.PointerBuffer;
@@ -20,9 +17,9 @@ import java.util.List;
 import static org.lwjgl.assimp.Assimp.*;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 
-public class ModelLoader {
+public class MapLoader {
 
-    private static GameObject buildObject(String name, IRenderable model) {
+    private static GameObject buildObject(String name, Renderable model, List<GameObject> registeredObjects) {
         if (!name.contains("_"))
             return new StaticGameObject(name, model);
 
@@ -39,13 +36,28 @@ public class ModelLoader {
                     return new VentGameObject(name, model, Room.parse(args[1]), 1);
                 }
             case "DOOR":
+                Room room = Room.parse(args[1]);
+                int doorId = Integer.parseInt(args[2]);
+                int otherDoorId = doorId % 2 == 0 ? doorId - 1 : doorId + 1;
+
+                for (GameObject object : registeredObjects) {
+                    if (object instanceof DoorGameObject) {
+                        DoorGameObject door = (DoorGameObject) object;
+                        if (door.getRoom() == room && door.getFirstHalfId() == otherDoorId) {
+                            door.setSecondHalf(model);
+                            return null;
+                        }
+                    }
+                }
+
+                return new DoorGameObject(name, room, model, doorId);
         }
 
         return new StaticGameObject(name, model);
     }
 
 
-    public static List<GameObject> loadShip(String path) {
+    public static List<GameObject> loadMap(String path) {
         List<GameObject> gameObjects = new ArrayList<>();
         AIScene aiScene = aiImportFile("assets\\" + path, aiProcess_Triangulate);
 
@@ -103,10 +115,12 @@ public class ModelLoader {
 
     private static void convertModelList(String name, List<Model> models, List<GameObject> gameObjects) {
         if (models.size() != 0) {
-            IRenderable model = models.size() == 1 ? models.get(0) : new CompositeModel(models);
-            GameObject object = buildObject(name, model);
-            Log.d("Building game object " + object + " from " + models.size() + " chunks");
-            gameObjects.add(object);
+            Renderable model = models.size() == 1 ? models.get(0) : new CompositeModel(models);
+            GameObject object = buildObject(name, model, gameObjects);
+            if (object != null) {
+                Log.d("Building game object " + object + " from " + models.size() + " chunks");
+                gameObjects.add(object);
+            }
             models.clear();
         }
     }
@@ -130,7 +144,7 @@ public class ModelLoader {
         AIVector3D.Buffer buffer = aiMesh.mTextureCoords(0);
         while (buffer.remaining() > 0) {
             AIVector3D aiTexCoord = buffer.get();
-            mesh.putTexCoord(aiTexCoord.x(), 1-aiTexCoord.y());
+            mesh.putTexCoord(aiTexCoord.x(), 1 - aiTexCoord.y());
         }
 
         Model model = mesh.bake(GL_TRIANGLES);

@@ -3,6 +3,7 @@ package de.twometer.amongus3d.mesh;
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.render.shaders.ShaderSimple;
 import de.twometer.amongus3d.render.shaders.ShaderSimpleTextured;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
@@ -11,7 +12,7 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
-public class Model implements IRenderable {
+public class Model extends Renderable {
 
     private final int vao;
 
@@ -24,9 +25,13 @@ public class Model implements IRenderable {
 
     private final int primitiveType;
 
+    private final Vector3f minimum;
+    private final Vector3f maximum;
+    private final Vector3f centerOfMass;
+
     private Material material;
 
-    private Model(int vao, int vertexBuffer, int colorBuffer, int normalBuffer, int texCoordBuffer, int vertices, int primitiveType) {
+    private Model(int vao, int vertexBuffer, int colorBuffer, int normalBuffer, int texCoordBuffer, int vertices, int primitiveType, Vector3f min, Vector3f max, Vector3f com) {
         this.vao = vao;
         this.vertexBuffer = vertexBuffer;
         this.colorBuffer = colorBuffer;
@@ -34,6 +39,9 @@ public class Model implements IRenderable {
         this.texCoordBuffer = texCoordBuffer;
         this.vertices = vertices;
         this.primitiveType = primitiveType;
+        this.minimum = min;
+        this.maximum = max;
+        this.centerOfMass = com;
     }
 
     public static Model create(Mesh mesh, int primitiveType) {
@@ -79,7 +87,28 @@ public class Model implements IRenderable {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 
-        return new Model(vao, vertexBuffer, colorBuffer, normalBuffer, texCoordBuffer, mesh.getVertexCount(), primitiveType);
+        Vector3f min = new Vector3f(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
+        Vector3f max = new Vector3f(Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE);
+        Vector3f com = new Vector3f();
+
+        for (int i = 0; i < mesh.getVertexCount(); i++) {
+            int bi = i * 3;
+            float x = mesh.getVertices().get(bi);
+            float y = mesh.getVertices().get(bi + 1);
+            float z = mesh.getVertices().get(bi + 2);
+            if (x < min.x) min.x = x;
+            if (x > max.x) max.x = x;
+            if (y < min.y) min.y = y;
+            if (y > max.y) max.y = y;
+            if (z < min.z) min.z = z;
+            if (z > max.z) max.z = z;
+        }
+
+        com.x = (min.x + max.x) / 2;
+        com.y = (min.y + max.y) / 2;
+        com.z = (min.z + max.z) / 2;
+
+        return new Model(vao, vertexBuffer, colorBuffer, normalBuffer, texCoordBuffer, mesh.getVertexCount(), primitiveType, min, max, com);
     }
 
     public void destroy() {
@@ -91,7 +120,7 @@ public class Model implements IRenderable {
     }
 
     @Override
-    public void render() {
+    public void render(Matrix4f mat) {
         ShaderSimple shader;
         Game game = Game.instance();
 
@@ -111,6 +140,7 @@ public class Model implements IRenderable {
         shader.bind();
         shader.setProjMatrix(game.getProjMatrix());
         shader.setViewMatrix(game.getViewMatrix());
+        shader.setModelMatrix(mat);
 
         boolean hasColors = colorBuffer != -1;
         boolean hasNormals = normalBuffer != -1;
@@ -131,6 +161,11 @@ public class Model implements IRenderable {
         glDisableVertexAttribArray(0);
 
         glBindVertexArray(0);
+    }
+
+    @Override
+    public Vector3f getCenterOfMass() {
+        return centerOfMass;
     }
 
     public Material getMaterial() {

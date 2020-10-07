@@ -13,6 +13,10 @@ public abstract class GameObject {
         this.name = name;
     }
 
+    public void init() {
+
+    }
+
     public abstract void render();
 
     public abstract boolean canPlayerInteract();

@@ -1,9 +1,12 @@
 package de.twometer.amongus3d.mesh;
 
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompositeModel implements IRenderable {
+public class CompositeModel extends Renderable {
 
     private final List<Model> models;
 
@@ -12,9 +15,26 @@ public class CompositeModel implements IRenderable {
     }
 
     @Override
-    public void render() {
+    public void render(Matrix4f mat) {
         for (Model model : models)
-            model.render();
+            model.render(mat);
+    }
+
+    @Override
+    public Vector3f getCenterOfMass() {
+        float x = 0;
+        float y = 0;
+        float z = 0;
+
+        for (Model model : models) {
+            Vector3f com = model.getCenterOfMass();
+            x += com.x;
+            y += com.y;
+            z += com.z;
+        }
+
+        float num = models.size();
+        return new Vector3f(x / num, y / num, z / num);
     }
 
 }

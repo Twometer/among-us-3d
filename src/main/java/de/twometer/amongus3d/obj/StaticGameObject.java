@@ -1,12 +1,12 @@
 package de.twometer.amongus3d.obj;
 
-import de.twometer.amongus3d.mesh.IRenderable;
+import de.twometer.amongus3d.mesh.Renderable;
 
 public class StaticGameObject extends GameObject {
 
-    private final IRenderable model;
+    private final Renderable model;
 
-    public StaticGameObject(String name, IRenderable model) {
+    public StaticGameObject(String name, Renderable model) {
         super(name);
         this.model = model;
     }

@@ -1,6 +1,6 @@
 package de.twometer.amongus3d.obj;
 
-import de.twometer.amongus3d.mesh.IRenderable;
+import de.twometer.amongus3d.mesh.Renderable;
 import de.twometer.amongus3d.model.Room;
 import de.twometer.amongus3d.model.TaskType;
 
@@ -12,7 +12,7 @@ public class TaskGameObject extends StaticGameObject {
 
     private final String ext;
 
-    public TaskGameObject(String name, IRenderable model, Room room, TaskType taskType, String ext) {
+    public TaskGameObject(String name, Renderable model, Room room, TaskType taskType, String ext) {
         super(name, model);
         this.room = room;
         this.taskType = taskType;
