@@ -6,7 +6,7 @@ import org.joml.Vector3f;
 
 public class Camera {
 
-    private final Vector3f position = new Vector3f(1, 0, 0);
+    private final Vector3f position = new Vector3f(30, 0.6f, -21);
 
     private final Vector2f angle = new Vector2f(0, 0);
 

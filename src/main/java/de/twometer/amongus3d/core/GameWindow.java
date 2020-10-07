@@ -3,6 +3,7 @@ package de.twometer.amongus3d.core;
 import de.twometer.amongus3d.core.ILifecycle;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWFramebufferSizeCallbackI;
 import org.lwjgl.opengl.GL;
 
 import java.util.Objects;
@@ -24,10 +25,20 @@ public class GameWindow implements ILifecycle {
 
     private float scale;
 
+    public SizeCallback sizeCallback;
+
+    public interface SizeCallback {
+        void sizeChanged(int width, int height);
+    }
+
     public GameWindow(String title, int width, int height) {
         this.title = title;
         this.width = width;
         this.height = height;
+    }
+
+    public void setSizeCallback(SizeCallback sizeCallback) {
+        this.sizeCallback = sizeCallback;
     }
 
     @Override
@@ -58,6 +69,13 @@ public class GameWindow implements ILifecycle {
             setSize((int) (width * scale), (int) (height * scale));
 
         GL.createCapabilities();
+
+        glfwSetFramebufferSizeCallback(handle, (window, width, height) -> {
+            if (sizeCallback != null)
+                sizeCallback.sizeChanged(width, height);
+            this.width = width;
+            this.height = height;
+        });
     }
 
     @Override

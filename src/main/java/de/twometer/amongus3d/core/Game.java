@@ -2,6 +2,7 @@ package de.twometer.amongus3d.core;
 
 import de.twometer.amongus3d.io.ModelLoader;
 import de.twometer.amongus3d.obj.GameObject;
+import de.twometer.amongus3d.postproc.SSAOFilter;
 import de.twometer.amongus3d.render.Camera;
 import de.twometer.amongus3d.render.ShaderProvider;
 import de.twometer.amongus3d.render.TextureProvider;
@@ -29,6 +30,7 @@ public class Game {
     private final TextureProvider textureProvider = new TextureProvider();
     private final Camera camera = new Camera();
     private final Fps fps = new Fps();
+    private final SSAOFilter ssao = new SSAOFilter();
 
     private final List<GameObject> gameObjects = new ArrayList<>();
     private Matrix4f viewMatrix;
@@ -54,7 +56,6 @@ public class Game {
     }
 
     private void setup() {
-        glEnable(GL_TEXTURE_2D);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -65,19 +66,33 @@ public class Game {
 
         Log.i("Loaded " + gameObjects.size() + " game objects.");
 
-        projMatrix = new Matrix4f().perspective((float) Math.toRadians(70), (float) window.getWidth() / window.getHeight(), 0.1f, 200.0f);
+        window.setSizeCallback((width, height) -> {
+            glViewport(0, 0, width, height);
+            recalculateMatrix(width, height);
+        });
+        recalculateMatrix(window.getWidth(), window.getHeight());
+
+        ssao.init();
+    }
+
+    private void recalculateMatrix(int w, int h) {
+        projMatrix = new Matrix4f().perspective((float) Math.toRadians(70), (float) w / h, 0.1f, 200.0f);
     }
 
     private void renderFrame() {
+        handleControls();
+
+        //ssao.begin();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        renderScene();
+        //ssao.end();
 
-        viewMatrix = camera.calcViewMatrix();
+        fps.frame();
+    }
 
+    private void renderScene() {
         for (GameObject go : gameObjects)
             go.render();
-
-        handleControls();
-        fps.frame();
     }
 
     private void handleControls() {
@@ -115,6 +130,8 @@ public class Game {
         Vector2f delta = pos.sub(new Vector2f(window.getWidth() / 2.0f, window.getHeight() / 2.0f));
         camera.getAngle().add(new Vector2f(-delta.x * 0.04f, -delta.y * 0.04f));
         window.setCursorPosition(new Vector2f(window.getWidth() / 2.0f, window.getHeight() / 2.0f));
+
+        viewMatrix = camera.calcViewMatrix();
     }
 
     public GameWindow getWindow() {
