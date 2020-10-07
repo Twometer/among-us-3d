@@ -1,21 +1,31 @@
 package de.twometer.amongus3d.render.shaders;
 
+import de.twometer.amongus3d.render.Shader;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 public class ShaderSimple extends Shader {
 
     private int loc_viewMatrix;
     private int loc_projMatrix;
+    private int loc_vertexColor;
+
 
     public ShaderSimple() {
         super("shaders/simple.v.glsl", "shaders/simple.f.glsl");
+    }
+
+    ShaderSimple(String vertex, String fragment) {
+        super(vertex, fragment);
     }
 
     @Override
     public void bindUniforms() {
         loc_viewMatrix = getLocation("viewMatrix");
         loc_projMatrix = getLocation("projMatrix");
+        loc_vertexColor = getLocation("vertexColor");
     }
+
 
     public void setViewMatrix(Matrix4f mat) {
         setMatrix(loc_viewMatrix, mat);
@@ -25,4 +35,7 @@ public class ShaderSimple extends Shader {
         setMatrix(loc_projMatrix, mat);
     }
 
+    public void setVertexColor(Vector3f vertexColor) {
+        setVector3(loc_vertexColor, vertexColor);
+    }
 }

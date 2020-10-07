@@ -1,16 +1,20 @@
 package de.twometer.amongus3d.core;
 
 import de.twometer.amongus3d.io.ModelLoader;
-import de.twometer.amongus3d.mesh.Mesh;
-import de.twometer.amongus3d.mesh.Model;
+import de.twometer.amongus3d.obj.GameObject;
 import de.twometer.amongus3d.render.Camera;
-import de.twometer.amongus3d.render.shaders.ShaderProvider;
+import de.twometer.amongus3d.render.ShaderProvider;
+import de.twometer.amongus3d.render.TextureProvider;
 import de.twometer.amongus3d.render.shaders.ShaderSimple;
 import de.twometer.amongus3d.util.Fps;
+import de.twometer.amongus3d.util.Log;
 import de.twometer.amongus3d.util.Timer;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -19,15 +23,16 @@ public class Game {
 
     private static final Game gameInstance = new Game();
 
-    private final GameWindow window = new GameWindow("Among Us 3D", 800, 600);
+    private final GameWindow window = new GameWindow("Among Us 3D", 1024, 768);
     private final Timer updateTimer = new Timer(90);
     private final ShaderProvider shaderProvider = new ShaderProvider();
+    private final TextureProvider textureProvider = new TextureProvider();
     private final Camera camera = new Camera();
     private final Fps fps = new Fps();
 
-    private Model ship;
+    private final List<GameObject> gameObjects = new ArrayList<>();
+    private Matrix4f viewMatrix;
     private Matrix4f projMatrix;
-    private ShaderSimple shaderSimple;
 
     private Game() {
     }
@@ -56,20 +61,20 @@ public class Game {
 
         glClearColor(0, 0, 0, 0);
 
-        ship = ModelLoader.load("models\\the_skeld.obj");
+        gameObjects.addAll(ModelLoader.loadShip("models\\the_skeld.obj"));
+
+        Log.i("Loaded " + gameObjects.size() + " game objects.");
 
         projMatrix = new Matrix4f().perspective((float) Math.toRadians(70), (float) window.getWidth() / window.getHeight(), 0.1f, 200.0f);
-
-        shaderSimple = shaderProvider.getShader(ShaderSimple.class);
     }
 
     private void renderFrame() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        shaderSimple.bind();
-        shaderSimple.setProjMatrix(projMatrix);
-        shaderSimple.setViewMatrix(camera.calcViewMatrix());
-        ship.draw();
+        viewMatrix = camera.calcViewMatrix();
+
+        for (GameObject go : gameObjects)
+            go.render();
 
         handleControls();
         fps.frame();
@@ -122,5 +127,17 @@ public class Game {
 
     public ShaderProvider getShaderProvider() {
         return shaderProvider;
+    }
+
+    public TextureProvider getTextureProvider() {
+        return textureProvider;
+    }
+
+    public Matrix4f getViewMatrix() {
+        return viewMatrix;
+    }
+
+    public Matrix4f getProjMatrix() {
+        return projMatrix;
     }
 }
