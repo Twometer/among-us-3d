@@ -92,6 +92,11 @@ public class DoorGameObject extends GameObject {
     }
 
     @Override
+    public Vector3f getPosition() {
+        return leftDoor.getCenterOfMass();
+    }
+
+    @Override
     public String toString() {
         return "DOOR." + room;
     }

@@ -1,6 +1,9 @@
 package de.twometer.amongus3d.core;
 
 import de.twometer.amongus3d.io.MapLoader;
+import de.twometer.amongus3d.mesh.shading.DefaultShadingStrategy;
+import de.twometer.amongus3d.mesh.shading.ShadingStrategies;
+import de.twometer.amongus3d.mesh.shading.ShadingStrategy;
 import de.twometer.amongus3d.obj.GameObject;
 import de.twometer.amongus3d.postproc.PostProcessing;
 import de.twometer.amongus3d.postproc.SSAO;
@@ -15,12 +18,16 @@ import de.twometer.amongus3d.util.Timer;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.system.MemoryUtil;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL30.GL_COLOR_ATTACHMENT0;
 
 public class Game {
 
@@ -48,7 +55,11 @@ public class Game {
     private Framebuffer vGaussBuffer;
     private Framebuffer hGaussBuffer;
     private Framebuffer ssaoBuffer;
+    private Framebuffer pickBuffer;
 
+    private final ByteBuffer pickedBytes = BufferUtils.createByteBuffer(3);
+
+    private ShadingStrategy shadingStrategy = ShadingStrategies.DEFAULT;
 
     private Game() {
     }
@@ -95,8 +106,6 @@ public class Game {
         hGaussShader = shaderProvider.getShader(ShaderHGauss.class);
         mulShader = shaderProvider.getShader(ShaderMul.class);
         postProcessing.initialize();
-
-
     }
 
     private void handleSizeChange(int w, int h) {
@@ -109,26 +118,50 @@ public class Game {
             vGaussBuffer.destroy();
             hGaussBuffer.destroy();
             ssaoBuffer.destroy();
+            pickBuffer.destroy();
         }
 
-        sceneBuffer = Framebuffer
-                .create(w, h)
-                .withDepthTexture()
-                .withColorTexture(1);
-
+        sceneBuffer = Framebuffer.create(w, h).withDepthTexture().withColorTexture(1);
         vGaussBuffer = Framebuffer.create(w, h);
         hGaussBuffer = Framebuffer.create(w, h);
         ssaoBuffer = Framebuffer.create(w, h);
+        pickBuffer = Framebuffer.create(w, h).withDepthBuffer();
 
         glDeleteTextures(ssaoNoiseTexture);
 
-        ssaoNoiseTexture = SSAO.createNoiseTexture(512, (int) (512 * aspect));
+        ssaoNoiseTexture = SSAO.createNoiseTexture((int) (1024 * aspect), 1024);
+    }
+
+    private void selectObject(int id) {
+        for (GameObject object : gameObjects)
+            object.setSelected(object.getId() == id);
     }
 
     private void renderFrame() {
         handleControls();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // Picking
+        shadingStrategy = ShadingStrategies.PICK;
+        pickBuffer.bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        for (GameObject go : gameObjects)
+            if (go.canPlayerInteract() /*&& go.getPosition().distance(camera.getPosition()) < 3*/)
+                go.render(RenderLayer.Base);
+
+        pickedBytes.clear();
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glReadPixels(pickBuffer.getWidth() / 2, pickBuffer.getHeight() / 2, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pickedBytes);
+
+        boolean isOver = pickedBytes.get(2) == -1;
+        int reconstructedId = (pickedBytes.get(0) & 0xFF) | ((pickedBytes.get(1) & 0xFF) << 8);
+        if (isOver)
+            selectObject(reconstructedId);
+
+        pickBuffer.unbind();
+
+        // Rendering
+        shadingStrategy = ShadingStrategies.DEFAULT;
         sceneBuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderScene();
@@ -199,11 +232,11 @@ public class Game {
         if (window.isKeyPressed(GLFW_KEY_D))
             camera.getPosition().sub(new Vector3f(dx2, 0.0f, dz2));
 
-        /*if (window.isKeyPressed(GLFW_KEY_SPACE))
+        if (window.isKeyPressed(GLFW_KEY_SPACE))
             camera.getPosition().add(new Vector3f(0f, 0.1f, 0f));
 
         if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT))
-            camera.getPosition().add(new Vector3f(0f, -0.1f, 0f));*/
+            camera.getPosition().add(new Vector3f(0f, -0.1f, 0f));
 
         Vector2f pos = window.getCursorPosition();
         Vector2f delta = pos.sub(new Vector2f(window.getWidth() / 2.0f, window.getHeight() / 2.0f));
@@ -235,5 +268,9 @@ public class Game {
 
     public Matrix4f getProjMatrix() {
         return projMatrix;
+    }
+
+    public ShadingStrategy getShadingStrategy() {
+        return shadingStrategy;
     }
 }

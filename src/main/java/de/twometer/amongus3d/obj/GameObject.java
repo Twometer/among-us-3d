@@ -1,6 +1,7 @@
 package de.twometer.amongus3d.obj;
 
 import de.twometer.amongus3d.render.RenderLayer;
+import org.joml.Vector3f;
 
 public abstract class GameObject {
 
@@ -9,6 +10,8 @@ public abstract class GameObject {
     private final int id;
 
     private final String name;
+
+    private boolean selected;
 
     public GameObject(String name) {
         this.id = newId();
@@ -32,7 +35,16 @@ public abstract class GameObject {
     }
 
     private static int newId() {
-        return idCounter++;
+        return ++idCounter;
     }
 
+    public abstract Vector3f getPosition();
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
 }

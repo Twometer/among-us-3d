@@ -7,6 +7,12 @@ uniform sampler2D depthSampler;
 uniform sampler2D normalSampler;
 uniform sampler2D randomSampler;
 
+float linearizeDepth(float d) {
+    float f= 200.0;
+    float n = 0.1;
+    float z = (2 * n) / (f + n - d * (f - n));
+    return z;
+}
 
 float saturate(float f) {
     if (f > 1) f = 1;
@@ -43,15 +49,15 @@ float ssao_fast()
 
 
     // Randomly chosen by fair dice roll
-    // texture(randomSampler, textureCoords * 4.0).rgb
-    vec3 random = normalize(vec3(0.25,0.25,0.25));
+    // normalize(texture(randomSampler, textureCoords * 4.0).rgb)
+    vec3 random = normalize(vec3(1, 1, 1));
 
     float depth = texture(depthSampler, textureCoords).r;
 
     vec3 position = vec3(textureCoords, depth);
     vec3 normal = normalize(texture(normalSampler, textureCoords).xyz);
 
-    float radius_depth = radius/depth;
+    float radius_depth = radius / depth;
     float occlusion = 0.0;
     for (int i=0; i < samples; i++) {
 
@@ -77,12 +83,7 @@ const float rad = 0.0005;
 #define SAMPLES 10// 10 is good
 const float invSamples = -1.38/10.0;
 
-float linearizeDepth(float d) {
-    float f= 200.0;
-    float n = 0.1;
-    float z = (2 * n) / (f + n - d * (f - n));
-    return z;
-}
+
 
 float ssao() {
     vec2 uv = textureCoords;
@@ -133,8 +134,8 @@ float ssao() {
 
 
 void main(void){
-    float ssao = ssao_fast(); // linearizeDepth(texture2D(depthSampler, textureCoords).x);
+    float ssao = ssao_fast();// linearizeDepth(texture2D(depthSampler, textureCoords).x);
 
     //out_Colour = vec4(texture(colorSampler, textureCoords).rgb * ssao, 1.0f);
-     out_Colour = vec4(ssao, 0.0f, 0.0f, 1.0f);
+    out_Colour = vec4(ssao, 0.0f, 0.0f, 1.0f);
 }

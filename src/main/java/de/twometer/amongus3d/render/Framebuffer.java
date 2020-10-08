@@ -28,7 +28,7 @@ public class Framebuffer {
     }
 
     public void bind() {
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         glViewport(0, 0, width, height);
     }
 

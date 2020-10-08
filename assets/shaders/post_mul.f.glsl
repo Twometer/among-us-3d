@@ -9,5 +9,5 @@ void main(void){
     vec4 A = texture(aSampler, textureCoords);
     vec4 B = texture(bSampler, textureCoords);
 
-    out_Colour = B.r * A;
+    out_Colour = max(B.r, 0.50) * A;
 }

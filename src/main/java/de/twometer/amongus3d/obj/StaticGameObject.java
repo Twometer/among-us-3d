@@ -2,6 +2,7 @@ package de.twometer.amongus3d.obj;
 
 import de.twometer.amongus3d.mesh.Renderable;
 import de.twometer.amongus3d.render.RenderLayer;
+import org.joml.Vector3f;
 
 public class StaticGameObject extends GameObject {
 
@@ -10,6 +11,12 @@ public class StaticGameObject extends GameObject {
     public StaticGameObject(String name, Renderable model) {
         super(name);
         this.model = model;
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        model.setModelId(getId());
     }
 
     @Override
@@ -22,6 +29,11 @@ public class StaticGameObject extends GameObject {
     @Override
     public boolean canPlayerInteract() {
         return false;
+    }
+
+    @Override
+    public Vector3f getPosition() {
+        return model.getCenterOfMass();
     }
 
 

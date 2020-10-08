@@ -21,6 +21,7 @@ public class StaticAnimGameObject extends StaticGameObject {
 
     @Override
     public void init() {
+        super.init();
         centerOfMass = model.getCenterOfMass();
     }
 

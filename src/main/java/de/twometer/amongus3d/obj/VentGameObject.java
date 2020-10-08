@@ -7,19 +7,21 @@ public class VentGameObject extends StaticGameObject {
 
     private final Room location;
 
-    private final int id;
+    private final int ventIdx;
 
-    public VentGameObject(String name, Renderable model, Room location, int id) {
+    public VentGameObject(String name, Renderable model, Room location, int ventIdx) {
         super(name, model);
         this.location = location;
-        this.id = id;
+        this.ventIdx = ventIdx;
     }
 
     @Override
     public String toString() {
-        return String.format("VENT.%s.%d", location, id);
+        return String.format("VENT.%s.%d", location, ventIdx);
     }
 
-
-
+    @Override
+    public boolean canPlayerInteract() {
+        return true;
+    }
 }

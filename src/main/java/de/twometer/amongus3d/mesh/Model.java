@@ -1,8 +1,5 @@
 package de.twometer.amongus3d.mesh;
 
-import de.twometer.amongus3d.core.Game;
-import de.twometer.amongus3d.render.shaders.ShaderSimple;
-import de.twometer.amongus3d.render.shaders.ShaderTextured;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -124,26 +121,7 @@ public class Model extends Renderable {
 
     @Override
     public void render(Matrix4f mat) {
-        ShaderSimple shader;
-        Game game = Game.instance();
-
-        if (material == null || material.getTexture().length() == 0) {
-            shader = game.getShaderProvider().getShader(ShaderSimple.class);
-            if (material != null)
-                shader.setVertexColor(material.getDiffuseColor());
-        } else {
-            glActiveTexture(0);
-            game.getTextureProvider().getTexture(material.getTexture()).bind();
-            ShaderTextured tex = Game.instance().getShaderProvider().getShader(ShaderTextured.class);
-            tex.setTexSampler(0);
-            tex.setVertexColor(material.getDiffuseColor());
-            shader = tex;
-        }
-
-        shader.bind();
-        shader.setProjMatrix(game.getProjMatrix());
-        shader.setViewMatrix(game.getViewMatrix());
-        shader.setModelMatrix(mat);
+        getShadingStrategy().configureShaders(this, mat);
 
         boolean hasColors = colorBuffer != -1;
         boolean hasNormals = normalBuffer != -1;
@@ -178,4 +156,5 @@ public class Model extends Renderable {
     public void setMaterial(Material material) {
         this.material = material;
     }
+
 }

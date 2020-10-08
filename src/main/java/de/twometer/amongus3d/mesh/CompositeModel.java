@@ -21,6 +21,13 @@ public class CompositeModel extends Renderable {
     }
 
     @Override
+    public void setModelId(int modelId) {
+        super.setModelId(modelId);
+        for (Model model : models)
+            model.setModelId(getModelId());
+    }
+
+    @Override
     public Vector3f getCenterOfMass() {
         float x = 0;
         float y = 0;
