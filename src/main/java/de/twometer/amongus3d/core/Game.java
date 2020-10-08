@@ -274,13 +274,15 @@ public class Game {
             return;
         updateTimer.reset();
 
+        float speed = 0.04f;
+
         float yaw = (float) Math.toRadians(camera.getAngle().x);
 
-        float dx = (float) Math.sin(yaw) * 0.1f;
-        float dz = (float) Math.cos(yaw) * 0.1f;
+        float dx = (float) Math.sin(yaw) * speed;
+        float dz = (float) Math.cos(yaw) * speed;
 
-        float dx2 = (float) Math.sin(yaw + Math.PI / 2) * 0.1f;
-        float dz2 = (float) Math.cos(yaw + Math.PI / 2) * 0.1f;
+        float dx2 = (float) Math.sin(yaw + Math.PI / 2) * speed;
+        float dz2 = (float) Math.cos(yaw + Math.PI / 2) * speed;
 
         if (window.isKeyPressed(GLFW_KEY_W))
             camera.getPosition().add(new Vector3f(dx, 0.0f, dz));
@@ -294,16 +296,19 @@ public class Game {
         if (window.isKeyPressed(GLFW_KEY_D))
             camera.getPosition().sub(new Vector3f(dx2, 0.0f, dz2));
 
-        if (window.isKeyPressed(GLFW_KEY_SPACE))
-            camera.getPosition().add(new Vector3f(0f, 0.1f, 0f));
+        /*if (window.isKeyPressed(GLFW_KEY_SPACE))
+            camera.getPosition().add(new Vector3f(0f, speed, 0f));
 
         if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT))
-            camera.getPosition().add(new Vector3f(0f, -0.1f, 0f));
+            camera.getPosition().add(new Vector3f(0f, -speed, 0f));*/
 
         Vector2f pos = window.getCursorPosition();
         Vector2f delta = pos.sub(new Vector2f(window.getWidth() / 2.0f, window.getHeight() / 2.0f));
         camera.getAngle().add(new Vector2f(-delta.x * 0.04f, -delta.y * 0.04f));
         window.setCursorPosition(new Vector2f(window.getWidth() / 2.0f, window.getHeight() / 2.0f));
+
+        if (camera.getAngle().y > 90) camera.getAngle().y = (float) 90;
+        if (camera.getAngle().y < -90) camera.getAngle().y = (float) -90;
 
         viewMatrix = camera.calcViewMatrix();
     }

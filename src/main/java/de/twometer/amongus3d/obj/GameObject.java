@@ -47,4 +47,8 @@ public abstract class GameObject {
     public void setSelected(boolean selected) {
         this.selected = selected;
     }
+
+    public void onClicked() {
+
+    }
 }
