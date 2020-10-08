@@ -6,9 +6,9 @@ import de.twometer.amongus3d.render.shaders.ShaderSimple;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-public class HighlightShadingStrategy implements ShadingStrategy {
+public class FlatShadingStrategy implements ShadingStrategy {
 
-    private Vector3f highlightColor = new Vector3f(0, 1, 0);
+    private Vector3f color = new Vector3f(0, 1, 0);
 
     @Override
     public void configureShaders(Model model, Matrix4f modelMatrix) {
@@ -17,11 +17,11 @@ public class HighlightShadingStrategy implements ShadingStrategy {
         shader.bind();
         shader.setProjMatrix(game.getProjMatrix());
         shader.setViewMatrix(game.getViewMatrix());
-        shader.setVertexColor(highlightColor);
+        shader.setVertexColor(color);
         shader.setModelMatrix(modelMatrix);
     }
 
-    public void setHighlightColor(Vector3f highlightColor) {
-        this.highlightColor = highlightColor;
+    public void setColor(Vector3f color) {
+        this.color = color;
     }
 }

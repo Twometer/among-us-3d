@@ -162,17 +162,17 @@ public class Game {
     }
 
     private void renderHighlight() {
-        shadingStrategy = ShadingStrategies.HIGHLIGHT;
+        shadingStrategy = ShadingStrategies.FLAT;
 
         // Stencil
         pickBuffer.bind();
-        ShadingStrategies.HIGHLIGHT.setHighlightColor(new Vector3f(1, 0, 0));
+        ShadingStrategies.FLAT.setColor(new Vector3f(1, 0, 0));
         renderSelectedObjects();
         pickBuffer.unbind();
 
         // Highlight
         highlightBuffer.bind();
-        ShadingStrategies.HIGHLIGHT.setHighlightColor(new Vector3f(1.0f, 1.0f, 0));
+        ShadingStrategies.FLAT.setColor(new Vector3f(1.0f, 1.0f, 0));
         renderSelectedObjects();
         highlightBuffer.unbind();
 
@@ -209,12 +209,18 @@ public class Game {
     }
 
     private void handlePicking() {
-        shadingStrategy = ShadingStrategies.PICK;
+        ShadingStrategies.FLAT.setColor(new Vector3f(0, 0, 0));
         pickBuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         for (GameObject go : gameObjects)
-            if (go.canPlayerInteract() /*&& go.getPosition().distance(camera.getPosition()) < 3*/)
+            if (go.canPlayerInteract() /*&& go.getPosition().distance(camera.getPosition()) < 3*/) {
+                shadingStrategy = ShadingStrategies.PICK;
                 go.render(RenderLayer.Base);
+            } else {
+                shadingStrategy = ShadingStrategies.FLAT;
+                go.render(RenderLayer.Base);
+            }
+
 
         pickedBytes.clear();
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -231,8 +237,8 @@ public class Game {
         sceneBuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderScene();
-        shadingStrategy = ShadingStrategies.HIGHLIGHT;
-       // shipCollider.renderDebug();
+        // shadingStrategy = ShadingStrategies.FLAT;
+        // shipCollider.renderDebug();
         sceneBuffer.unbind();
 
         postProcessing.begin();
@@ -306,7 +312,6 @@ public class Game {
         Vector2f delta = pos.sub(new Vector2f(window.getWidth() / 2.0f, window.getHeight() / 2.0f));
         camera.getAngle().add(new Vector2f(-delta.x * 0.04f, -delta.y * 0.04f));
         window.setCursorPosition(new Vector2f(window.getWidth() / 2.0f, window.getHeight() / 2.0f));
-
 
 
         if (camera.getAngle().y > 90) camera.getAngle().y = (float) 90;

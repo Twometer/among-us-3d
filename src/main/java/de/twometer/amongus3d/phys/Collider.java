@@ -46,8 +46,6 @@ public class Collider {
                 Vector3f pushVector = new Vector3f(player2d.x - closestPoint.x, 0, player2d.z - closestPoint.z);
                 pushVector = pushVector.normalize(PLAYER_RADIUS - dist);
 
-                System.out.println(dist);
-
                 player.x += pushVector.x;
                 player.z += pushVector.z;
             }
