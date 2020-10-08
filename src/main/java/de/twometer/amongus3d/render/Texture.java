@@ -17,6 +17,10 @@ public class Texture {
         this.height = height;
     }
 
+    public int getTextureId() {
+        return textureId;
+    }
+
     public void bind() {
         glBindTexture(GL_TEXTURE_2D, textureId);
     }

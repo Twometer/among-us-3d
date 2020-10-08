@@ -17,5 +17,8 @@ public class ShaderSSAO extends Shader {
     public void bindUniforms() {
         glUniform1i(glGetUniformLocation(id, "colorSampler"), 0);
         glUniform1i(glGetUniformLocation(id, "depthSampler"), 1);
+        glUniform1i(glGetUniformLocation(id, "normalSampler"), 2);
+        glUniform1i(glGetUniformLocation(id, "randomSampler"), 3);
     }
 }
+

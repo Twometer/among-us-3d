@@ -29,16 +29,16 @@ public class PostProcessing {
         glEnableVertexAttribArray(0);
     }
 
-    public void copyFbo(Framebuffer src, Framebuffer target) {
+    public void bindTexture(int unit, int tex) {
+        glActiveTexture(GL_TEXTURE0 + unit);
+        glBindTexture(GL_TEXTURE_2D, tex);
+    }
+
+    public void copyTo(Framebuffer target) {
         if (target != null) target.bind();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, src.getColorTexture());
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, src.getDepthTexture());
         glClear(GL_COLOR_BUFFER_BIT);
         fullscreenQuad();
         if (target != null) target.unbind();
-        glActiveTexture(GL_TEXTURE0);
     }
 
     public void fullscreenQuad() {
@@ -48,6 +48,8 @@ public class PostProcessing {
     public void end() {
         glDisableVertexAttribArray(0);
         glBindVertexArray(0);
+
+        glActiveTexture(GL_TEXTURE0);
     }
 
 }

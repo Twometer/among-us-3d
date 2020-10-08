@@ -3,8 +3,12 @@ package de.twometer.amongus3d.core;
 import de.twometer.amongus3d.io.MapLoader;
 import de.twometer.amongus3d.obj.GameObject;
 import de.twometer.amongus3d.postproc.PostProcessing;
+import de.twometer.amongus3d.postproc.SSAO;
 import de.twometer.amongus3d.render.*;
+import de.twometer.amongus3d.render.shaders.ShaderHGauss;
+import de.twometer.amongus3d.render.shaders.ShaderMul;
 import de.twometer.amongus3d.render.shaders.ShaderSSAO;
+import de.twometer.amongus3d.render.shaders.ShaderVGauss;
 import de.twometer.amongus3d.util.Fps;
 import de.twometer.amongus3d.util.Log;
 import de.twometer.amongus3d.util.Timer;
@@ -35,9 +39,15 @@ public class Game {
     private Matrix4f guiMatrix;
 
     private final PostProcessing postProcessing = new PostProcessing();
-    private ShaderSSAO postCopyShader;
+    private int ssaoNoiseTexture;
+    private ShaderSSAO ssaoShader;
+    private ShaderVGauss vGaussShader;
+    private ShaderHGauss hGaussShader;
+    private ShaderMul mulShader;
     private Framebuffer sceneBuffer;
-
+    private Framebuffer vGaussBuffer;
+    private Framebuffer hGaussBuffer;
+    private Framebuffer ssaoBuffer;
 
 
     private Game() {
@@ -80,18 +90,39 @@ public class Game {
         for (GameObject object : gameObjects)
             object.init();
 
-
-        postCopyShader = shaderProvider.getShader(ShaderSSAO.class);
+        ssaoShader = shaderProvider.getShader(ShaderSSAO.class);
+        vGaussShader = shaderProvider.getShader(ShaderVGauss.class);
+        hGaussShader = shaderProvider.getShader(ShaderHGauss.class);
+        mulShader = shaderProvider.getShader(ShaderMul.class);
         postProcessing.initialize();
+
+
     }
 
     private void handleSizeChange(int w, int h) {
-        projMatrix = new Matrix4f().perspective((float) Math.toRadians(70), (float) w / h, 0.1f, 200.0f);
+        float aspect = (float) w / h;
+        projMatrix = new Matrix4f().perspective((float) Math.toRadians(70), aspect, 0.1f, 200.0f);
         guiMatrix = new Matrix4f().ortho2D(0, w, h, 0);
 
-        if (sceneBuffer != null)
+        if (sceneBuffer != null) {
             sceneBuffer.destroy();
-        sceneBuffer = Framebuffer.create(w, h).withDepthTexture();
+            vGaussBuffer.destroy();
+            hGaussBuffer.destroy();
+            ssaoBuffer.destroy();
+        }
+
+        sceneBuffer = Framebuffer
+                .create(w, h)
+                .withDepthTexture()
+                .withColorTexture(1);
+
+        vGaussBuffer = Framebuffer.create(w, h);
+        hGaussBuffer = Framebuffer.create(w, h);
+        ssaoBuffer = Framebuffer.create(w, h);
+
+        glDeleteTextures(ssaoNoiseTexture);
+
+        ssaoNoiseTexture = SSAO.createNoiseTexture(512, (int) (512 * aspect));
     }
 
     private void renderFrame() {
@@ -103,9 +134,30 @@ public class Game {
         renderScene();
         sceneBuffer.unbind();
 
-        postCopyShader.bind();
         postProcessing.begin();
-        postProcessing.copyFbo(sceneBuffer, null);
+
+        ssaoShader.bind();
+        postProcessing.bindTexture(0, sceneBuffer.getColorTexture(0)); // Color
+        postProcessing.bindTexture(1, sceneBuffer.getDepthTexture()); // Depth
+        postProcessing.bindTexture(2, sceneBuffer.getColorTexture(1)); // Normals
+        postProcessing.bindTexture(3, ssaoNoiseTexture); // Noise
+        postProcessing.copyTo(vGaussBuffer);
+
+        vGaussShader.bind();
+        vGaussShader.setTargetHeight(vGaussBuffer.getHeight());
+        postProcessing.bindTexture(0, vGaussBuffer.getColorTexture(0));
+        postProcessing.copyTo(hGaussBuffer);
+
+        hGaussShader.bind();
+        hGaussShader.setTargetWidth(hGaussBuffer.getWidth());
+        postProcessing.bindTexture(0, hGaussBuffer.getColorTexture(0));
+        postProcessing.copyTo(ssaoBuffer);
+
+        mulShader.bind();
+        postProcessing.bindTexture(0, sceneBuffer.getColorTexture(0));
+        postProcessing.bindTexture(1, hGaussBuffer.getColorTexture(0));
+        postProcessing.copyTo(null);
+
         postProcessing.end();
 
         fps.frame();

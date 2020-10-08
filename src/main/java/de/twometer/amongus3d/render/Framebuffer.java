@@ -2,6 +2,9 @@ package de.twometer.amongus3d.render;
 
 import de.twometer.amongus3d.core.Game;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -13,7 +16,10 @@ public class Framebuffer {
     private final int framebuffer;
     private int depthBuffer;
     private int depthTexture;
-    private int colorTexture;
+
+    private final List<Integer> colorTextures = new ArrayList<>();
+    private final List<Integer> colorAttachments = new ArrayList<>();
+    private int[] colorAttachmentsArray;
 
     public Framebuffer(int width, int height, int framebuffer) {
         this.width = width;
@@ -39,26 +45,34 @@ public class Framebuffer {
         return depthTexture;
     }
 
-    public int getColorTexture() {
-        return colorTexture;
+    public int getColorTexture(int i) {
+        return colorTextures.get(i);
     }
 
     public static Framebuffer create(int width, int height) {
         int fbo = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        glDrawBuffer(GL_COLOR_ATTACHMENT0);
-        return new Framebuffer(width, height, fbo).withColorTexture();
+        return new Framebuffer(width, height, fbo).withColorTexture(0);
     }
 
-    private Framebuffer withColorTexture() {
-        colorTexture = glGenTextures();
-        glBindTexture(GL_TEXTURE_2D, colorTexture);
+    public Framebuffer withColorTexture(int attachmentNum) {
+        int tex = glGenTextures();
+        int attachment = GL_COLOR_ATTACHMENT0 + attachmentNum;
+        colorAttachments.add(attachment);
+        colorTextures.add(tex);
+
+        glBindTexture(GL_TEXTURE_2D, tex);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, tex, 0);
+
+
+        colorAttachmentsArray = colorAttachments.stream().mapToInt(Integer::intValue).toArray();
+        glDrawBuffers(colorAttachmentsArray);
+
         return this;
     }
 
@@ -82,9 +96,17 @@ public class Framebuffer {
 
     public void destroy() {
         glDeleteFramebuffers(framebuffer);
-        glDeleteTextures(colorTexture);
+        for (int t : colorTextures)
+            glDeleteTextures(t);
         glDeleteTextures(depthTexture);
         glDeleteRenderbuffers(depthBuffer);
     }
 
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
 }

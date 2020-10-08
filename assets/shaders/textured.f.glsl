@@ -3,8 +3,10 @@
 in vec3 fragmentColor;
 in vec3 fragmentNormal;
 in vec2 fragmentTexture;
+in vec3 fragmentAONormal;
 
-out vec4 color;
+layout(location = 0) out vec4 color;
+layout(location = 1) out vec4 normal;
 
 uniform sampler2D texSampler;
 
@@ -15,4 +17,5 @@ void main(void) {
     float diff = max(dot(norm, lightDir), 0.65);
 
     color =  vec4(diff * fragmentColor, 1.0) * texture(texSampler, fragmentTexture);
+    normal = vec4(fragmentAONormal, 1.0);
 }
