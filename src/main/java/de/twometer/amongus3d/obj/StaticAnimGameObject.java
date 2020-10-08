@@ -37,7 +37,7 @@ public class StaticAnimGameObject extends StaticGameObject {
 
         model.render(mat);
 
-        angle += type == AnimationType.Spin ? 0.5 : 0.01;
+        angle += type == AnimationType.Spin ? 0.1 : 0.01;
     }
 
     @Override

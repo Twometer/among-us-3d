@@ -5,6 +5,7 @@ import de.twometer.amongus3d.mesh.*;
 import de.twometer.amongus3d.model.AnimationType;
 import de.twometer.amongus3d.model.Room;
 import de.twometer.amongus3d.model.TaskType;
+import de.twometer.amongus3d.model.ToolType;
 import de.twometer.amongus3d.obj.*;
 import de.twometer.amongus3d.util.Log;
 import org.joml.Vector3f;
@@ -51,6 +52,8 @@ public class MapLoader {
 
                 return new TaskGameObject(name, model, Room.parse(args[1]), TaskType.parse(args[2]));
             }
+            case "TOOL":
+                return new ToolGameObject(name, model, Room.parse(args[1]), Enum.valueOf(ToolType.class, args[2]));
             case "VENT":
                 try {
                     int id = Integer.parseInt(args[2]);

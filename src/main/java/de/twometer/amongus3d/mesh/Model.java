@@ -1,5 +1,6 @@
 package de.twometer.amongus3d.mesh;
 
+import de.twometer.amongus3d.core.Game;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -107,6 +108,8 @@ public class Model extends Renderable {
         com.x = (min.x + max.x) / 2;
         com.y = (min.y + max.y) / 2;
         com.z = (min.z + max.z) / 2;
+
+        Game.instance().getDebug().addDebugPos(com);
 
         return new Model(vao, vertexBuffer, colorBuffer, normalBuffer, texCoordBuffer, mesh.getVertexCount(), primitiveType, min, max, com);
     }

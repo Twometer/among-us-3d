@@ -1,5 +1,6 @@
 package de.twometer.amongus3d.phys;
 
+import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.mesh.Mesh;
 import de.twometer.amongus3d.mesh.Model;
 import org.joml.Vector3f;
@@ -14,9 +15,7 @@ public class Collider {
     private static final float PLAYER_RADIUS = 0.2f;
     private static final float PLAYER_RADIUS_SQ = PLAYER_RADIUS * PLAYER_RADIUS;
 
-    private List<Line> lines = new ArrayList<>();
-
-    private Model model;
+    private final List<Line> lines = new ArrayList<>();
 
     public void prepareDebugRender() {
         Mesh mesh = Mesh.create(lines.size() * 2, 3);
@@ -24,11 +23,8 @@ public class Collider {
             mesh.putVertex(line.getA().x, 0.35f, line.getA().z);
             mesh.putVertex(line.getB().x, 0.35f, line.getB().z);
         }
-        model = mesh.bake(GL_LINES);
-    }
-
-    public void renderDebug() {
-        model.render();
+        Model model = mesh.bake(GL_LINES);
+        Game.instance().getDebug().addDebugModel(model);
     }
 
     public void addLine(Line line) {

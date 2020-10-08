@@ -10,6 +10,7 @@ import de.twometer.amongus3d.postproc.PostProcessing;
 import de.twometer.amongus3d.postproc.SSAO;
 import de.twometer.amongus3d.render.*;
 import de.twometer.amongus3d.render.shaders.*;
+import de.twometer.amongus3d.util.Debug;
 import de.twometer.amongus3d.util.Fps;
 import de.twometer.amongus3d.util.Log;
 import de.twometer.amongus3d.util.Timer;
@@ -35,6 +36,7 @@ public class Game {
     private final TextureProvider textureProvider = new TextureProvider();
     private final Camera camera = new Camera();
     private final Fps fps = new Fps();
+    private final Debug debug = new Debug();
 
     private Collider shipCollider;
     private final List<GameObject> gameObjects = new ArrayList<>();
@@ -112,6 +114,9 @@ public class Game {
         mulShader = shaderProvider.getShader(ShaderMul.class);
         copyShader = shaderProvider.getShader(ShaderCopy.class);
         postProcessing.initialize();
+        debug.init();
+        debug.addDebugPos(new Vector3f());
+        debug.setActive(false);
     }
 
     private void handleSizeChange(int w, int h) {
@@ -237,8 +242,9 @@ public class Game {
         sceneBuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderScene();
-        // shadingStrategy = ShadingStrategies.FLAT;
-        // shipCollider.renderDebug();
+        shadingStrategy = ShadingStrategies.FLAT;
+        ShadingStrategies.FLAT.setColor(new Vector3f(1.0f, 1.0f, 0));
+        debug.render();
         sceneBuffer.unbind();
 
         postProcessing.begin();
@@ -346,5 +352,9 @@ public class Game {
 
     public ShadingStrategy getShadingStrategy() {
         return shadingStrategy;
+    }
+
+    public Debug getDebug() {
+        return debug;
     }
 }
