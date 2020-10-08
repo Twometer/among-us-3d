@@ -1,10 +1,11 @@
 package de.twometer.amongus3d.core;
 
+import de.twometer.amongus3d.io.ColliderLoader;
 import de.twometer.amongus3d.io.MapLoader;
-import de.twometer.amongus3d.mesh.shading.DefaultShadingStrategy;
 import de.twometer.amongus3d.mesh.shading.ShadingStrategies;
 import de.twometer.amongus3d.mesh.shading.ShadingStrategy;
 import de.twometer.amongus3d.obj.GameObject;
+import de.twometer.amongus3d.phys.Collider;
 import de.twometer.amongus3d.postproc.PostProcessing;
 import de.twometer.amongus3d.postproc.SSAO;
 import de.twometer.amongus3d.render.*;
@@ -16,7 +17,6 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -24,7 +24,6 @@ import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL30.GL_COLOR_ATTACHMENT0;
 
 public class Game {
 
@@ -37,6 +36,7 @@ public class Game {
     private final Camera camera = new Camera();
     private final Fps fps = new Fps();
 
+    private Collider shipCollider;
     private final List<GameObject> gameObjects = new ArrayList<>();
     private Matrix4f viewMatrix;
     private Matrix4f projMatrix;
@@ -89,7 +89,9 @@ public class Game {
 
         glClearColor(0, 0, 0, 0);
 
-        gameObjects.addAll(MapLoader.loadMap("models\\the_skeld.obj"));
+        gameObjects.addAll(MapLoader.loadMap("models/the_skeld.obj"));
+        shipCollider = ColliderLoader.loadCollider("models/collider.obj");
+        shipCollider.prepareDebugRender();
 
         Log.i("Loaded " + gameObjects.size() + " game objects.");
 
@@ -229,6 +231,8 @@ public class Game {
         sceneBuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderScene();
+        shadingStrategy = ShadingStrategies.HIGHLIGHT;
+       // shipCollider.renderDebug();
         sceneBuffer.unbind();
 
         postProcessing.begin();
@@ -296,16 +300,14 @@ public class Game {
         if (window.isKeyPressed(GLFW_KEY_D))
             camera.getPosition().sub(new Vector3f(dx2, 0.0f, dz2));
 
-        /*if (window.isKeyPressed(GLFW_KEY_SPACE))
-            camera.getPosition().add(new Vector3f(0f, speed, 0f));
-
-        if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT))
-            camera.getPosition().add(new Vector3f(0f, -speed, 0f));*/
+        shipCollider.updatePlayerLocation(camera.getPosition());
 
         Vector2f pos = window.getCursorPosition();
         Vector2f delta = pos.sub(new Vector2f(window.getWidth() / 2.0f, window.getHeight() / 2.0f));
         camera.getAngle().add(new Vector2f(-delta.x * 0.04f, -delta.y * 0.04f));
         window.setCursorPosition(new Vector2f(window.getWidth() / 2.0f, window.getHeight() / 2.0f));
+
+
 
         if (camera.getAngle().y > 90) camera.getAngle().y = (float) 90;
         if (camera.getAngle().y < -90) camera.getAngle().y = (float) -90;

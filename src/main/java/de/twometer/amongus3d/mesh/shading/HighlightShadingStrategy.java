@@ -8,7 +8,7 @@ import org.joml.Vector3f;
 
 public class HighlightShadingStrategy implements ShadingStrategy {
 
-    private Vector3f highlightColor;
+    private Vector3f highlightColor = new Vector3f(0, 1, 0);
 
     @Override
     public void configureShaders(Model model, Matrix4f modelMatrix) {
