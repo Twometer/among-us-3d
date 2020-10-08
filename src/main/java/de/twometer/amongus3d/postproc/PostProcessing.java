@@ -41,6 +41,12 @@ public class PostProcessing {
         if (target != null) target.unbind();
     }
 
+    public void renderTo(Framebuffer target) {
+        if (target != null) target.bind();
+        fullscreenQuad();
+        if (target != null) target.unbind();
+    }
+
     public void fullscreenQuad() {
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }

@@ -8,10 +8,7 @@ import de.twometer.amongus3d.obj.GameObject;
 import de.twometer.amongus3d.postproc.PostProcessing;
 import de.twometer.amongus3d.postproc.SSAO;
 import de.twometer.amongus3d.render.*;
-import de.twometer.amongus3d.render.shaders.ShaderHGauss;
-import de.twometer.amongus3d.render.shaders.ShaderMul;
-import de.twometer.amongus3d.render.shaders.ShaderSSAO;
-import de.twometer.amongus3d.render.shaders.ShaderVGauss;
+import de.twometer.amongus3d.render.shaders.*;
 import de.twometer.amongus3d.util.Fps;
 import de.twometer.amongus3d.util.Log;
 import de.twometer.amongus3d.util.Timer;
@@ -50,12 +47,16 @@ public class Game {
     private ShaderSSAO ssaoShader;
     private ShaderVGauss vGaussShader;
     private ShaderHGauss hGaussShader;
+    private ShaderVAvgBlur vAvgBlurShader;
+    private ShaderHAvgBlur hAvgBlurShader;
     private ShaderMul mulShader;
+    private ShaderCopy copyShader;
     private Framebuffer sceneBuffer;
     private Framebuffer vGaussBuffer;
     private Framebuffer hGaussBuffer;
     private Framebuffer ssaoBuffer;
     private Framebuffer pickBuffer;
+    private Framebuffer highlightBuffer;
 
     private final ByteBuffer pickedBytes = BufferUtils.createByteBuffer(3);
 
@@ -104,7 +105,10 @@ public class Game {
         ssaoShader = shaderProvider.getShader(ShaderSSAO.class);
         vGaussShader = shaderProvider.getShader(ShaderVGauss.class);
         hGaussShader = shaderProvider.getShader(ShaderHGauss.class);
+        vAvgBlurShader = shaderProvider.getShader(ShaderVAvgBlur.class);
+        hAvgBlurShader = shaderProvider.getShader(ShaderHAvgBlur.class);
         mulShader = shaderProvider.getShader(ShaderMul.class);
+        copyShader = shaderProvider.getShader(ShaderCopy.class);
         postProcessing.initialize();
     }
 
@@ -119,6 +123,7 @@ public class Game {
             hGaussBuffer.destroy();
             ssaoBuffer.destroy();
             pickBuffer.destroy();
+            highlightBuffer.destroy();
         }
 
         sceneBuffer = Framebuffer.create(w, h).withDepthTexture().withColorTexture(1);
@@ -126,6 +131,7 @@ public class Game {
         hGaussBuffer = Framebuffer.create(w, h);
         ssaoBuffer = Framebuffer.create(w, h);
         pickBuffer = Framebuffer.create(w, h).withDepthBuffer();
+        highlightBuffer = Framebuffer.create(w, h).withDepthBuffer();
 
         glDeleteTextures(ssaoNoiseTexture);
 
@@ -133,8 +139,9 @@ public class Game {
     }
 
     private void selectObject(int id) {
-        for (GameObject object : gameObjects)
+        for (GameObject object : gameObjects) {
             object.setSelected(object.getId() == id);
+        }
     }
 
     private void renderFrame() {
@@ -142,6 +149,64 @@ public class Game {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Picking
+        handlePicking();
+
+        // Rendering
+        renderSceneWithSSAO();
+        glClear(GL_DEPTH_BUFFER_BIT);
+        renderHighlight();
+
+        fps.frame();
+    }
+
+    private void renderHighlight() {
+        shadingStrategy = ShadingStrategies.HIGHLIGHT;
+
+        // Stencil
+        pickBuffer.bind();
+        ShadingStrategies.HIGHLIGHT.setHighlightColor(new Vector3f(1, 0, 0));
+        renderSelectedObjects();
+        pickBuffer.unbind();
+
+        // Highlight
+        highlightBuffer.bind();
+        ShadingStrategies.HIGHLIGHT.setHighlightColor(new Vector3f(1.0f, 1.0f, 0));
+        renderSelectedObjects();
+        highlightBuffer.unbind();
+
+        postProcessing.begin();
+
+
+        // Blur the highlight
+        vAvgBlurShader.bind();
+        vAvgBlurShader.setTargetHeight(vGaussBuffer.getHeight());
+        postProcessing.bindTexture(0, highlightBuffer.getColorTexture(0));
+        postProcessing.copyTo(hGaussBuffer);
+
+        hAvgBlurShader.bind();
+        hAvgBlurShader.setTargetWidth(hGaussBuffer.getWidth());
+        postProcessing.bindTexture(0, hGaussBuffer.getColorTexture(0));
+        postProcessing.copyTo(highlightBuffer);
+
+        // Now, copy highlight to screen
+        copyShader.bind();
+        postProcessing.bindTexture(0, highlightBuffer.getColorTexture(0));
+        postProcessing.bindTexture(1, pickBuffer.getColorTexture(0));
+        postProcessing.renderTo(null);
+
+        postProcessing.end();
+    }
+
+    private void renderSelectedObjects() {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        for (GameObject o : gameObjects)
+            if (o.isSelected()) {
+                o.render(RenderLayer.Base);
+                o.render(RenderLayer.Transparency);
+            }
+    }
+
+    private void handlePicking() {
         shadingStrategy = ShadingStrategies.PICK;
         pickBuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -153,14 +218,13 @@ public class Game {
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glReadPixels(pickBuffer.getWidth() / 2, pickBuffer.getHeight() / 2, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pickedBytes);
 
-        boolean isOver = pickedBytes.get(2) == -1;
         int reconstructedId = (pickedBytes.get(0) & 0xFF) | ((pickedBytes.get(1) & 0xFF) << 8);
-        if (isOver)
-            selectObject(reconstructedId);
+        selectObject(reconstructedId);
 
         pickBuffer.unbind();
+    }
 
-        // Rendering
+    private void renderSceneWithSSAO() {
         shadingStrategy = ShadingStrategies.DEFAULT;
         sceneBuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -192,8 +256,6 @@ public class Game {
         postProcessing.copyTo(null);
 
         postProcessing.end();
-
-        fps.frame();
     }
 
     private void renderScene() {

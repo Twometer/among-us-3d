@@ -6,4 +6,6 @@ public final class ShadingStrategies {
 
     public static final ShadingStrategy PICK = new PickShadingStrategy();
 
+    public static final HighlightShadingStrategy HIGHLIGHT = new HighlightShadingStrategy();
+
 }
