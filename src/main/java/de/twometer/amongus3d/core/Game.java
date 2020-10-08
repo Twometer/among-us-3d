@@ -1,12 +1,10 @@
 package de.twometer.amongus3d.core;
 
 import de.twometer.amongus3d.io.MapLoader;
-import de.twometer.amongus3d.mesh.Renderable;
 import de.twometer.amongus3d.obj.GameObject;
-import de.twometer.amongus3d.render.Camera;
-import de.twometer.amongus3d.render.RenderLayer;
-import de.twometer.amongus3d.render.ShaderProvider;
-import de.twometer.amongus3d.render.TextureProvider;
+import de.twometer.amongus3d.postproc.PostProcessing;
+import de.twometer.amongus3d.render.*;
+import de.twometer.amongus3d.render.shaders.ShaderSSAO;
 import de.twometer.amongus3d.util.Fps;
 import de.twometer.amongus3d.util.Log;
 import de.twometer.amongus3d.util.Timer;
@@ -35,6 +33,12 @@ public class Game {
     private Matrix4f viewMatrix;
     private Matrix4f projMatrix;
     private Matrix4f guiMatrix;
+
+    private final PostProcessing postProcessing = new PostProcessing();
+    private ShaderSSAO postCopyShader;
+    private Framebuffer sceneBuffer;
+
+
 
     private Game() {
     }
@@ -69,23 +73,41 @@ public class Game {
 
         window.setSizeCallback((width, height) -> {
             glViewport(0, 0, width, height);
-            recalculateMatrix(width, height);
+            handleSizeChange(width, height);
         });
-        recalculateMatrix(window.getWidth(), window.getHeight());
+        handleSizeChange(window.getWidth(), window.getHeight());
 
         for (GameObject object : gameObjects)
             object.init();
+
+
+        postCopyShader = shaderProvider.getShader(ShaderSSAO.class);
+        postProcessing.initialize();
     }
 
-    private void recalculateMatrix(int w, int h) {
+    private void handleSizeChange(int w, int h) {
         projMatrix = new Matrix4f().perspective((float) Math.toRadians(70), (float) w / h, 0.1f, 200.0f);
         guiMatrix = new Matrix4f().ortho2D(0, w, h, 0);
+
+        if (sceneBuffer != null)
+            sceneBuffer.destroy();
+        sceneBuffer = Framebuffer.create(w, h).withDepthTexture();
     }
 
     private void renderFrame() {
         handleControls();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        sceneBuffer.bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderScene();
+        sceneBuffer.unbind();
+
+        postCopyShader.bind();
+        postProcessing.begin();
+        postProcessing.copyFbo(sceneBuffer, null);
+        postProcessing.end();
+
         fps.frame();
     }
 

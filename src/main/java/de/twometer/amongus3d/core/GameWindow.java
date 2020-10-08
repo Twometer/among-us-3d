@@ -1,9 +1,7 @@
 package de.twometer.amongus3d.core;
 
-import de.twometer.amongus3d.core.ILifecycle;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWFramebufferSizeCallbackI;
 import org.lwjgl.opengl.GL;
 
 import java.util.Objects;
