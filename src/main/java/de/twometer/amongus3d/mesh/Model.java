@@ -86,8 +86,8 @@ public class Model extends Renderable {
         glBindVertexArray(0);
 
 
-        Vector3f min = new Vector3f(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
-        Vector3f max = new Vector3f(Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE);
+        Vector3f min = new Vector3f(9999999, 9999999, 9999999);
+        Vector3f max = new Vector3f(-9999999,-9999999, -9999999);
         Vector3f com = new Vector3f();
 
         if (dimensions == 3) {
@@ -96,6 +96,7 @@ public class Model extends Renderable {
                 float x = mesh.getVertices().get(bi);
                 float y = mesh.getVertices().get(bi + 1);
                 float z = mesh.getVertices().get(bi + 2);
+
                 if (x < min.x) min.x = x;
                 if (y < min.y) min.y = y;
                 if (z < min.z) min.z = z;
@@ -105,11 +106,11 @@ public class Model extends Renderable {
                 if (z > max.z) max.z = z;
             }
 
+
             com.x = (min.x + max.x) / 2;
             com.y = (min.y + max.y) / 2;
             com.z = (min.z + max.z) / 2;
 
-            Game.instance().getDebug().addDebugPos(com);
         }
 
         return new Model(vao, vertexBuffer, colorBuffer, normalBuffer, texCoordBuffer, mesh.getVertexCount(), primitiveType, min, max, com);

@@ -9,7 +9,7 @@ import org.joml.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.lwjgl.opengl.GL11.GL_LINES;
+import static org.lwjgl.opengl.GL11.*;
 
 public class Debug {
 
@@ -45,10 +45,12 @@ public class Debug {
         if (!isActive)
             return;
 
+        glDisable(GL_DEPTH_TEST);
         for (Model model : debugModels)
             model.render(new Matrix4f());
         for (Vector3f v : debugPositions)
             crossModel.render(new Matrix4f().translation(v));
+        glEnable(GL_DEPTH_TEST);
     }
 
     public boolean isActive() {

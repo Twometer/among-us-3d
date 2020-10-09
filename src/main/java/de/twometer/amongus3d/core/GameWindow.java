@@ -2,6 +2,7 @@ package de.twometer.amongus3d.core;
 
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWMouseButtonCallbackI;
 import org.lwjgl.opengl.GL;
 
 import java.util.Objects;
@@ -23,10 +24,16 @@ public class GameWindow implements ILifecycle {
 
     private float scale;
 
-    public SizeCallback sizeCallback;
+    private SizeCallback sizeCallback;
+
+    private ClickCallback clickCallback;
 
     public interface SizeCallback {
         void sizeChanged(int width, int height);
+    }
+
+    public interface ClickCallback {
+        void onClick(int button);
     }
 
     public GameWindow(String title, int width, int height) {
@@ -37,6 +44,10 @@ public class GameWindow implements ILifecycle {
 
     public void setSizeCallback(SizeCallback sizeCallback) {
         this.sizeCallback = sizeCallback;
+    }
+
+    public void setClickCallback(ClickCallback clickCallback) {
+        this.clickCallback = clickCallback;
     }
 
     public void setCursorVisible(boolean visible) {
@@ -77,6 +88,11 @@ public class GameWindow implements ILifecycle {
                 sizeCallback.sizeChanged(width, height);
             this.width = width;
             this.height = height;
+        });
+
+        glfwSetMouseButtonCallback(handle, (window, button, action, mods) -> {
+            if (action == GLFW_RELEASE)
+                clickCallback.onClick(button);
         });
     }
 

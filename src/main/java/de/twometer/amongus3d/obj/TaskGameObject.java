@@ -4,6 +4,7 @@ import de.twometer.amongus3d.mesh.Renderable;
 import de.twometer.amongus3d.model.Room;
 import de.twometer.amongus3d.model.TaskType;
 import de.twometer.amongus3d.render.RenderLayer;
+import de.twometer.amongus3d.util.Log;
 
 public class TaskGameObject extends StaticGameObject {
 
@@ -51,5 +52,12 @@ public class TaskGameObject extends StaticGameObject {
     @Override
     public boolean canPlayerInteract() {
         return true;
+    }
+
+    @Override
+    public void onClicked() {
+        super.onClicked();
+        Log.d("Clicked on " + toString());
+
     }
 }

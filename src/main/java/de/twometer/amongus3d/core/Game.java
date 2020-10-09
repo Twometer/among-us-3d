@@ -102,6 +102,11 @@ public class Game {
             glViewport(0, 0, width, height);
             handleSizeChange(width, height);
         });
+        window.setClickCallback(button -> {
+            for (GameObject object : gameObjects)
+                if (object.isSelected())
+                    object.onClicked();
+        });
         handleSizeChange(window.getWidth(), window.getHeight());
 
         for (GameObject object : gameObjects)
@@ -118,7 +123,7 @@ public class Game {
         guiRenderer.init();
         debug.init();
         debug.addDebugPos(new Vector3f());
-        debug.setActive(false);
+        // debug.setActive(true);
     }
 
     private void handleSizeChange(int w, int h) {
@@ -222,7 +227,7 @@ public class Game {
         pickBuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         for (GameObject go : gameObjects)
-            if (go.canPlayerInteract() /*&& go.getPosition().distance(camera.getPosition()) < 3*/) {
+            if (go.canPlayerInteract() && go.getPosition().distance(camera.getPosition()) < 2) {
                 shadingStrategy = ShadingStrategies.PICK;
                 go.render(RenderLayer.Base);
             } else {

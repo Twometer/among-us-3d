@@ -1,5 +1,6 @@
 package de.twometer.amongus3d.obj;
 
+import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.mesh.Renderable;
 import de.twometer.amongus3d.render.RenderLayer;
 import org.joml.Vector3f;
@@ -17,6 +18,7 @@ public class StaticGameObject extends GameObject {
     public void init() {
         super.init();
         model.setModelId(getId());
+        Game.instance().getDebug().addDebugPos(model.getCenterOfMass());
     }
 
     @Override
@@ -35,7 +37,6 @@ public class StaticGameObject extends GameObject {
     public Vector3f getPosition() {
         return model.getCenterOfMass();
     }
-
 
     @Override
     public String toString() {
