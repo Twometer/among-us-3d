@@ -2,10 +2,10 @@ package de.twometer.amongus3d.io;
 
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.mesh.*;
-import de.twometer.amongus3d.model.AnimationType;
-import de.twometer.amongus3d.model.Room;
-import de.twometer.amongus3d.model.TaskType;
-import de.twometer.amongus3d.model.ToolType;
+import de.twometer.amongus3d.model.world.AnimationType;
+import de.twometer.amongus3d.model.world.Room;
+import de.twometer.amongus3d.model.world.TaskType;
+import de.twometer.amongus3d.model.world.ToolType;
 import de.twometer.amongus3d.obj.*;
 import de.twometer.amongus3d.util.Log;
 import org.joml.Vector3f;

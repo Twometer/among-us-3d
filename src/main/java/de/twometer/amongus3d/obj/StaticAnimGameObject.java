@@ -1,7 +1,7 @@
 package de.twometer.amongus3d.obj;
 
 import de.twometer.amongus3d.mesh.Renderable;
-import de.twometer.amongus3d.model.AnimationType;
+import de.twometer.amongus3d.model.world.AnimationType;
 import de.twometer.amongus3d.render.RenderLayer;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;

@@ -5,10 +5,11 @@ import de.twometer.amongus3d.io.ColliderLoader;
 import de.twometer.amongus3d.io.MapLoader;
 import de.twometer.amongus3d.mesh.shading.ShadingStrategies;
 import de.twometer.amongus3d.mesh.shading.ShadingStrategy;
-import de.twometer.amongus3d.model.Player;
-import de.twometer.amongus3d.model.Role;
-import de.twometer.amongus3d.model.Room;
-import de.twometer.amongus3d.model.TaskType;
+import de.twometer.amongus3d.model.player.Player;
+import de.twometer.amongus3d.model.player.PlayerColor;
+import de.twometer.amongus3d.model.player.Role;
+import de.twometer.amongus3d.model.world.Room;
+import de.twometer.amongus3d.model.world.TaskType;
 import de.twometer.amongus3d.obj.GameObject;
 import de.twometer.amongus3d.obj.TaskGameObject;
 import de.twometer.amongus3d.phys.Collider;
@@ -122,14 +123,14 @@ public class Game {
                 if (object.isSelected())
                     object.onClicked();
 
-            guiRenderer.onClick((int)window.getCursorPosition().x, (int) window.getCursorPosition().y);
+            guiRenderer.onClick((int) window.getCursorPosition().x, (int) window.getCursorPosition().y);
         });
         window.setCharTypedCallback(guiRenderer::onCharTyped);
         handleSizeChange(window.getWidth(), window.getHeight());
 
         //// PRE-INIT ////
         gameState.setCurrentState(GameState.State.Loading);
-        self = new Player("Debug", camera.getPosition(), Role.Crewmate);
+        self = new Player("Debug", camera.getPosition(), Role.Crewmate, PlayerColor.Blue);
 
         //// LOADING SCREEN ////
         glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -2,12 +2,11 @@ package de.twometer.amongus3d.obj;
 
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.mesh.Renderable;
-import de.twometer.amongus3d.model.Role;
-import de.twometer.amongus3d.model.Room;
+import de.twometer.amongus3d.model.player.Role;
+import de.twometer.amongus3d.model.world.Room;
 import de.twometer.amongus3d.render.RenderLayer;
 import de.twometer.amongus3d.util.Log;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 
 public class VentGameObject extends StaticGameObject {
 

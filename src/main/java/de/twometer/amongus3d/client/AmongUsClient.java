@@ -3,6 +3,7 @@ package de.twometer.amongus3d.client;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
+import de.twometer.amongus3d.model.NetMessage;
 import de.twometer.amongus3d.server.ServerMain;
 import de.twometer.amongus3d.util.Log;
 import org.greenrobot.eventbus.EventBus;
@@ -19,17 +20,24 @@ public class AmongUsClient {
 
     private List<CallbackItem> callbackItems = new CopyOnWriteArrayList<>();
 
+    public List<String> users = new ArrayList<>();
 
     private static class CallbackItem {
         private Class<?> clazz;
         private Consumer consumer;
     }
 
+    private void handle(Object o) {
+        if (o instanceof NetMessage.PlayerJoined) {
+            users.add(((NetMessage.PlayerJoined) o).username);
+        } else if (o instanceof NetMessage.EmergencyReport) {
+            Log.i("Emergency meeting");
+        }
+    }
 
     public void connect() {
-
         client = new Client();
-        ServerMain.registerClasses(client.getKryo());
+        NetMessage.registerAll(client.getKryo());
 
         Log.i("Connected.");
         client.addListener(new Listener() {
@@ -45,7 +53,7 @@ public class AmongUsClient {
                     }
                 }
                 callbackItems.removeAll(remove);
-
+                handle(o);
                 EventBus.getDefault().post(o);
             }
 

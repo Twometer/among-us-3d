@@ -2,9 +2,8 @@ package de.twometer.amongus3d.ui;
 
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.core.GameState;
-import de.twometer.amongus3d.net.*;
+import de.twometer.amongus3d.model.NetMessage;
 import de.twometer.amongus3d.util.Log;
-import org.greenrobot.eventbus.Subscribe;
 
 public class MainMenuScreen extends GuiScreen {
 
@@ -31,27 +30,27 @@ public class MainMenuScreen extends GuiScreen {
         addComponent(createGame = new ButtonComponent(200, 40, "Create game"));
 
         joinGame.setClickListener(() -> {
-            Game.instance().getClient().sendMessage(new JoinGameMessage(gameCodeBox.getText(), usernameBox.getText()));
+            Game.instance().getClient().sendMessage(new NetMessage.JoinGame(gameCodeBox.getText(), usernameBox.getText()));
         });
         createGame.setClickListener(() -> {
             if (usernameBox.getText().trim().length() == 0)
                 return;
-            Game.instance().getClient().sendMessage(new CreateGameMessage())
-                    .awaitReply(CreateGameMessageReply.class, r -> {
-                        Log.i("Game code: " + r.gameCode);
+            Game.instance().getClient().sendMessage(new NetMessage.CreateGame())
+                    .awaitReply(NetMessage.GameCreated.class, r -> {
+                        Log.d("Game code: " + r.gameId);
 
-                        Game.instance().getClient().sendMessage(new JoinGameMessage(r.gameCode, usernameBox.getText()))
-                                .awaitReply(JoinGameMessageReply.class, r2 -> {
-                                    Log.d("Joining");
+                        Game.instance().getClient().sendMessage(new NetMessage.JoinGame(usernameBox.getText(), r.gameId))
+                                .awaitReply(NetMessage.GameJoined.class, r2 -> {
+                                    Log.d("Joining...");
                                     if (r2.ok) {
+                                        Log.d("Join OK");
                                         Game.instance().getGameState().setCurrentState(GameState.State.Lobby);
-                                        Game.instance().getGuiRenderer().setCurrentScreen(new LobbyScreen(r.gameCode));
+                                        Game.instance().getGuiRenderer().setCurrentScreen(new LobbyScreen(r.gameId, r2.host));
                                     }
                                 });
                     });
         });
     }
-
 
 
 }

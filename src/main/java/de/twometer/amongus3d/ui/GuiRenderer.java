@@ -121,6 +121,7 @@ public class GuiRenderer {
     }
 
     public void onCharTyped(char c) {
+        if (currentScreen != null)
         currentScreen.onCharTyped(c);
     }
 

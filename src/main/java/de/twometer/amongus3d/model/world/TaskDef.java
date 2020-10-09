@@ -1,14 +1,14 @@
-package de.twometer.amongus3d.model;
+package de.twometer.amongus3d.model.world;
 
 import java.util.Objects;
 
-public class Task {
+public class TaskDef {
 
     private final Room room;
 
     private final TaskType taskType;
 
-    public Task(Room room, TaskType taskType) {
+    public TaskDef(Room room, TaskType taskType) {
         this.room = room;
         this.taskType = taskType;
     }
@@ -25,7 +25,7 @@ public class Task {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Task task = (Task) o;
+        TaskDef task = (TaskDef) o;
         return room == task.room &&
                 taskType == task.taskType;
     }

@@ -1,8 +1,10 @@
 package de.twometer.amongus3d.obj;
 
+import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.mesh.Renderable;
-import de.twometer.amongus3d.model.Room;
-import de.twometer.amongus3d.model.ToolType;
+import de.twometer.amongus3d.model.NetMessage;
+import de.twometer.amongus3d.model.world.Room;
+import de.twometer.amongus3d.model.world.ToolType;
 import de.twometer.amongus3d.util.Log;
 
 public class ToolGameObject extends StaticGameObject {
@@ -31,6 +33,7 @@ public class ToolGameObject extends StaticGameObject {
     public void onClicked() {
         super.onClicked();
         Log.d("Clicked on " + toString());
-
+        if (toolType == ToolType.Emergency)
+            Game.instance().getClient().sendMessage(new NetMessage.EmergencyReport());
     }
 }

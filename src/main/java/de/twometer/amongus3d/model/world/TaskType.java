@@ -1,4 +1,4 @@
-package de.twometer.amongus3d.model;
+package de.twometer.amongus3d.model.world;
 
 public enum TaskType {
     // General
