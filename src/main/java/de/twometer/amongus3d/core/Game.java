@@ -142,7 +142,7 @@ public class Game {
 
         glDeleteTextures(ssaoNoiseTexture);
 
-        ssaoNoiseTexture = SSAO.createNoiseTexture((int) (1024 * aspect), 1024);
+        ssaoNoiseTexture = SSAO.createNoiseTexture(10, 10);
     }
 
     private void selectObject(int id) {
@@ -250,6 +250,7 @@ public class Game {
         postProcessing.begin();
 
         ssaoShader.bind();
+        ssaoShader.setNoiseScale(window.getWidth() / 10f);
         postProcessing.bindTexture(0, sceneBuffer.getColorTexture(0)); // Color
         postProcessing.bindTexture(1, sceneBuffer.getDepthTexture()); // Depth
         postProcessing.bindTexture(2, sceneBuffer.getColorTexture(1)); // Normals
@@ -268,7 +269,7 @@ public class Game {
 
         mulShader.bind();
         postProcessing.bindTexture(0, sceneBuffer.getColorTexture(0));
-        postProcessing.bindTexture(1, hGaussBuffer.getColorTexture(0));
+        postProcessing.bindTexture(1, ssaoBuffer.getColorTexture(0));
         postProcessing.copyTo(null);
 
         postProcessing.end();

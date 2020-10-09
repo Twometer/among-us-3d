@@ -2,10 +2,13 @@
 
 in vec2 textureCoords;
 out vec4 out_Colour;
+uniform mat4 projMatrix;
 uniform sampler2D colorSampler;
 uniform sampler2D depthSampler;
 uniform sampler2D normalSampler;
 uniform sampler2D randomSampler;
+
+uniform float noiseScale;
 
 float linearizeDepth(float d) {
     float f= 200.0;
@@ -26,6 +29,7 @@ vec2 saturate(vec2  v) {
 
 float ssao_fast()
 {
+    // thank u <3    http://theorangeduck.com/page/pure-depth-ssao
 
     const float total_strength = 1.0;
     const float base = 0.2;
@@ -49,8 +53,8 @@ float ssao_fast()
 
 
     // Randomly chosen by fair dice roll
-    // normalize(texture(randomSampler, textureCoords * 4.0).rgb)
-    vec3 random = normalize(vec3(1, 1, 1));
+    // normalize(normalize(texture(randomSampler, textureCoords * noiseScale).rgb))
+    vec3 random = vec3(1, 1, 0);
 
     float depth = texture(depthSampler, textureCoords).r;
 
@@ -74,7 +78,7 @@ float ssao_fast()
     return saturate(ao + base);
 }
 
-
+/*
 const float totStrength = 1.0;
 const float strength = 0.2;
 const float offset = 17.0;
@@ -132,6 +136,52 @@ float ssao() {
     return 1.0+bl*invSamples;
 }
 
+vec3 getViewRay() {
+    vec2 ndc = textureCoords * 2.0 - 1.0;
+    //float thfov = tan(fov / 2.0);// can do this on the CPU
+    return vec3(
+        ndc.x * camThFov * camAspect,
+        ndc.y * camThFov,
+        1.0
+    );
+}
+
+float ssao_2() {
+    const vec2 noise_scale = vec2(256.0f, 192.0f);
+    const float radius = 1.0f;
+
+    vec3 origin = getViewRay() * linearizeDepth(texture2D(depthSampler, textureCoords).r);
+    vec3 normal = texture(normalSampler, textureCoords).xyz * 2.0 - 1.0;
+    normal = normalize(normal);
+
+    vec3 rvec = texture2D(randomSampler, textureCoords * noise_scale).xyz * 2.0 - 1.0;
+    vec3 tangent = normalize(rvec - normal * dot(rvec, normal));
+    vec3 bitangent = cross(normal, tangent);
+    mat3 tbn = mat3(tangent, bitangent, normal);
+
+    float occlusion = 0.0;
+    for (int i = 0; i < _kernelSize; ++i) {
+        // get sample position:
+        vec3 s = tbn * _kernel[i];
+        s = s * radius + origin;
+
+        // project sample position:
+        vec4 offset = vec4(s, 1.0);
+        offset = projMatrix * offset;
+        offset.xy /= offset.w;
+        offset.xy = offset.xy * 0.5 + 0.5;
+
+        // get sample depth:
+        float sampleDepth = linearizeDepth(texture(depthSampler, offset.xy).r);
+
+        // range check & accumulate:
+        float rangeCheck= abs(origin.z - sampleDepth) < radius ? 1.0 : 0.0;
+        occlusion += (sampleDepth <= s.z ? 1.0 : 0.0) * rangeCheck;
+    }
+
+    return 1.0 - (occlusion / _kernelSize);
+}
+*/
 
 void main(void){
     float ssao = ssao_fast();// linearizeDepth(texture2D(depthSampler, textureCoords).x);
