@@ -4,18 +4,18 @@ import de.twometer.amongus3d.render.Shader;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-public class ShaderSimple extends Shader {
+public class ShaderFlat extends Shader {
 
     private int loc_viewMatrix;
     private int loc_projMatrix;
     private int loc_modelMatrix;
     private int loc_vertexColor;
 
-    public ShaderSimple() {
-        super("shaders/simple.v.glsl", "shaders/simple.f.glsl");
+    public ShaderFlat() {
+        super("shaders/base.v.glsl", "shaders/base_flat.f.glsl");
     }
 
-    ShaderSimple(String vertex, String fragment) {
+    ShaderFlat(String vertex, String fragment) {
         super(vertex, fragment);
     }
 

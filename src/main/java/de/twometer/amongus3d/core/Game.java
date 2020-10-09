@@ -10,6 +10,7 @@ import de.twometer.amongus3d.postproc.PostProcessing;
 import de.twometer.amongus3d.postproc.SSAO;
 import de.twometer.amongus3d.render.*;
 import de.twometer.amongus3d.render.shaders.*;
+import de.twometer.amongus3d.ui.GuiRenderer;
 import de.twometer.amongus3d.util.Debug;
 import de.twometer.amongus3d.util.Fps;
 import de.twometer.amongus3d.util.Log;
@@ -42,7 +43,6 @@ public class Game {
     private final List<GameObject> gameObjects = new ArrayList<>();
     private Matrix4f viewMatrix;
     private Matrix4f projMatrix;
-    private Matrix4f guiMatrix;
 
     private final PostProcessing postProcessing = new PostProcessing();
     private int ssaoNoiseTexture;
@@ -60,6 +60,7 @@ public class Game {
     private Framebuffer pickBuffer;
     private Framebuffer highlightBuffer;
 
+    private final GuiRenderer guiRenderer = new GuiRenderer();
     private final ByteBuffer pickedBytes = BufferUtils.createByteBuffer(3);
 
     private ShadingStrategy shadingStrategy = ShadingStrategies.DEFAULT;
@@ -114,6 +115,7 @@ public class Game {
         mulShader = shaderProvider.getShader(ShaderMul.class);
         copyShader = shaderProvider.getShader(ShaderCopy.class);
         postProcessing.initialize();
+        guiRenderer.init();
         debug.init();
         debug.addDebugPos(new Vector3f());
         debug.setActive(false);
@@ -122,8 +124,8 @@ public class Game {
     private void handleSizeChange(int w, int h) {
         float aspect = (float) w / h;
         projMatrix = new Matrix4f().perspective((float) Math.toRadians(70), aspect, 0.1f, 200.0f);
-        guiMatrix = new Matrix4f().ortho2D(0, w, h, 0);
-
+        Matrix4f guiMatrix = new Matrix4f().ortho2D(0, w, h, 0);
+        guiRenderer.onSizeChange(guiMatrix);
         if (sceneBuffer != null) {
             sceneBuffer.destroy();
             vGaussBuffer.destroy();
@@ -162,6 +164,8 @@ public class Game {
         renderSceneWithSSAO();
         glClear(GL_DEPTH_BUFFER_BIT);
         renderHighlight();
+        glClear(GL_DEPTH_BUFFER_BIT);
+        guiRenderer.render();
 
         fps.frame();
     }
@@ -357,5 +361,9 @@ public class Game {
 
     public Debug getDebug() {
         return debug;
+    }
+
+    public void setShadingStrategy(ShadingStrategy shadingStrategy) {
+        this.shadingStrategy = shadingStrategy;
     }
 }

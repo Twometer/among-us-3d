@@ -1,11 +1,11 @@
 package de.twometer.amongus3d.render.shaders;
 
-public class ShaderTextured extends ShaderSimple {
+public class ShaderTextured extends ShaderFlat {
 
     private int loc_texSampler;
 
     public ShaderTextured() {
-        super("shaders/simple.v.glsl", "shaders/textured.f.glsl");
+        super("shaders/base.v.glsl", "shaders/base_tex.f.glsl");
     }
 
     @Override

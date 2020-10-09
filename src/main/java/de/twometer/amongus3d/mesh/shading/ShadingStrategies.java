@@ -6,6 +6,8 @@ public final class ShadingStrategies {
 
     public static final ShadingStrategy PICK = new PickShadingStrategy();
 
+    public static final ShadingStrategy NOP = new NopShadingStrategy();
+
     public static final FlatShadingStrategy FLAT = new FlatShadingStrategy();
 
 }

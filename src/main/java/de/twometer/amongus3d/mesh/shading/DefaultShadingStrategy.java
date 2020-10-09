@@ -3,7 +3,7 @@ package de.twometer.amongus3d.mesh.shading;
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.mesh.Material;
 import de.twometer.amongus3d.mesh.Model;
-import de.twometer.amongus3d.render.shaders.ShaderSimple;
+import de.twometer.amongus3d.render.shaders.ShaderFlat;
 import de.twometer.amongus3d.render.shaders.ShaderTextured;
 import org.joml.Matrix4f;
 
@@ -13,13 +13,13 @@ public class DefaultShadingStrategy implements ShadingStrategy {
 
     @Override
     public void configureShaders(Model model, Matrix4f modelMatrix) {
-        ShaderSimple shader;
+        ShaderFlat shader;
         Game game = Game.instance();
 
         Material material = model.getMaterial();
 
         if (material == null || material.getTexture().length() == 0) {
-            shader = game.getShaderProvider().getShader(ShaderSimple.class);
+            shader = game.getShaderProvider().getShader(ShaderFlat.class);
             if (material != null)
                 shader.setVertexColor(material.getDiffuseColor());
         } else {

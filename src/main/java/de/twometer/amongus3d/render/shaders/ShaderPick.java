@@ -12,7 +12,7 @@ public class ShaderPick extends Shader {
     private int loc_modelId;
 
     public ShaderPick() {
-        super("shaders/simple.v.glsl", "shaders/pick.f.glsl");
+        super("shaders/base.v.glsl", "shaders/pick.f.glsl");
     }
 
     @Override
