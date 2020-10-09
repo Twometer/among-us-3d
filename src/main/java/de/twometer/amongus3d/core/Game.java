@@ -4,6 +4,8 @@ import de.twometer.amongus3d.io.ColliderLoader;
 import de.twometer.amongus3d.io.MapLoader;
 import de.twometer.amongus3d.mesh.shading.ShadingStrategies;
 import de.twometer.amongus3d.mesh.shading.ShadingStrategy;
+import de.twometer.amongus3d.model.Player;
+import de.twometer.amongus3d.model.Role;
 import de.twometer.amongus3d.model.Room;
 import de.twometer.amongus3d.model.TaskType;
 import de.twometer.amongus3d.obj.GameObject;
@@ -18,6 +20,7 @@ import de.twometer.amongus3d.util.Debug;
 import de.twometer.amongus3d.util.Fps;
 import de.twometer.amongus3d.util.Log;
 import de.twometer.amongus3d.util.Timer;
+import javafx.print.PageLayout;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -69,6 +72,8 @@ public class Game {
     private final ByteBuffer pickedBytes = BufferUtils.createByteBuffer(3);
 
     private ShadingStrategy shadingStrategy = ShadingStrategies.DEFAULT;
+
+    private Player self;
 
     private Game() {
     }
@@ -129,6 +134,9 @@ public class Game {
         debug.init();
         debug.addDebugPos(new Vector3f());
         debug.setActive(DEBUG_MODE);
+
+        // TODO Configurable!
+        self = new Player("Debug", camera.getPosition(), Role.Crewmate);
     }
 
     private void handleSizeChange(int w, int h) {
@@ -405,5 +413,9 @@ public class Game {
             }
         }
         return null;
+    }
+
+    public Player getSelf() {
+        return self;
     }
 }

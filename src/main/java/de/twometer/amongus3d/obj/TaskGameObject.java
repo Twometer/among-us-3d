@@ -1,29 +1,29 @@
 package de.twometer.amongus3d.obj;
 
+import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.mesh.Renderable;
+import de.twometer.amongus3d.model.Player;
 import de.twometer.amongus3d.model.Room;
+import de.twometer.amongus3d.model.Task;
 import de.twometer.amongus3d.model.TaskType;
 import de.twometer.amongus3d.render.RenderLayer;
 import de.twometer.amongus3d.util.Log;
 
 public class TaskGameObject extends StaticGameObject {
 
-    private final Room room;
-
-    private final TaskType taskType;
+    private final Task task;
 
     private Renderable fxModel;
 
     public TaskGameObject(String name, Renderable model, Room room, TaskType taskType) {
         super(name, model);
-        this.room = room;
-        this.taskType = taskType;
+        this.task = new Task(room, taskType);
     }
 
     @Override
     public void render(RenderLayer layer) {
         super.render(layer);
-        if (taskType != TaskType.Scan)
+        if (task.getTaskType() != TaskType.Scan)
             renderFx(layer);
     }
 
@@ -33,11 +33,15 @@ public class TaskGameObject extends StaticGameObject {
     }
 
     public Room getRoom() {
-        return room;
+        return task.getRoom();
     }
 
     public TaskType getTaskType() {
-        return taskType;
+        return task.getTaskType();
+    }
+
+    public Task getTask() {
+        return task;
     }
 
     public void setFxModel(Renderable fxModel) {
@@ -46,12 +50,17 @@ public class TaskGameObject extends StaticGameObject {
 
     @Override
     public String toString() {
-        return String.format("TASK.%s.%s", room, taskType);
+        return String.format("TASK.%s.%s", getRoom(), getTaskType());
     }
 
     @Override
     public boolean canPlayerInteract() {
-        return true;
+        return isHighlighted();
+    }
+
+    @Override
+    public boolean isHighlighted() {
+        return Game.instance().getSelf().canDoTask(task);
     }
 
     @Override

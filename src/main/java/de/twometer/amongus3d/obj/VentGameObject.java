@@ -1,6 +1,8 @@
 package de.twometer.amongus3d.obj;
 
+import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.mesh.Renderable;
+import de.twometer.amongus3d.model.Role;
 import de.twometer.amongus3d.model.Room;
 import de.twometer.amongus3d.render.RenderLayer;
 import de.twometer.amongus3d.util.Log;
@@ -28,7 +30,7 @@ public class VentGameObject extends StaticGameObject {
 
     @Override
     public boolean canPlayerInteract() {
-        return true;
+        return Game.instance().getSelf().getRole() == Role.Impostor;
     }
 
     @Override
@@ -37,7 +39,6 @@ public class VentGameObject extends StaticGameObject {
             Matrix4f mat = new Matrix4f();
             mat.translate(0,0,0.35f);
             model.render(mat);
-
         } else super.render(layer);
     }
 
