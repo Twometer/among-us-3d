@@ -16,5 +16,5 @@ void main(void){
     if (out_colour.g > 0) out_colour.g = 1; else out_colour.g = 0;
     if (out_colour.b > 0) out_colour.b = 1; else out_colour.b = 0;
     if (out_colour.a > 0)
-        out_colour.a = 0.9;
+        out_colour.a = 0.8;
 }

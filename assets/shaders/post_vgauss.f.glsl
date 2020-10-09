@@ -17,5 +17,5 @@ void main(void){
     out_colour += texture(originalTexture, blurTextureCoords[8]) * 0.065984;
     out_colour += texture(originalTexture, blurTextureCoords[9]) * 0.028002;
     out_colour += texture(originalTexture, blurTextureCoords[10]) * 0.0093;
-    out_colour.a = 1.0;
+    //out_colour.a = 1.0;
 }

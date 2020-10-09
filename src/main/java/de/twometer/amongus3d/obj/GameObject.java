@@ -11,6 +11,8 @@ public abstract class GameObject {
 
     private final String name;
 
+    private boolean highlighted;
+
     private boolean selected;
 
     public GameObject(String name) {
@@ -40,12 +42,20 @@ public abstract class GameObject {
 
     public abstract Vector3f getPosition();
 
+    public boolean isHighlighted() {
+        return highlighted;
+    }
+
     public boolean isSelected() {
         return selected;
     }
 
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    public void setHighlighted(boolean highlighted) {
+        this.highlighted = highlighted;
     }
 
     public void onClicked() {

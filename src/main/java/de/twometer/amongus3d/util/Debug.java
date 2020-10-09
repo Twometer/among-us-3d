@@ -1,6 +1,5 @@
 package de.twometer.amongus3d.util;
 
-import com.sun.org.apache.xpath.internal.operations.Mod;
 import de.twometer.amongus3d.mesh.Mesh;
 import de.twometer.amongus3d.mesh.Model;
 import org.joml.Matrix4f;

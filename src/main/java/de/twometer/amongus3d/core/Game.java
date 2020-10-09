@@ -4,7 +4,10 @@ import de.twometer.amongus3d.io.ColliderLoader;
 import de.twometer.amongus3d.io.MapLoader;
 import de.twometer.amongus3d.mesh.shading.ShadingStrategies;
 import de.twometer.amongus3d.mesh.shading.ShadingStrategy;
+import de.twometer.amongus3d.model.Room;
+import de.twometer.amongus3d.model.TaskType;
 import de.twometer.amongus3d.obj.GameObject;
+import de.twometer.amongus3d.obj.TaskGameObject;
 import de.twometer.amongus3d.phys.Collider;
 import de.twometer.amongus3d.postproc.PostProcessing;
 import de.twometer.amongus3d.postproc.SSAO;
@@ -31,7 +34,9 @@ public class Game {
 
     private static final Game gameInstance = new Game();
 
-    private final GameWindow window = new GameWindow("Among Us 3D", 1024, 768);
+    private static final boolean DEBUG_MODE = false;
+
+    private final GameWindow window = new GameWindow("Among Us 3D" + (DEBUG_MODE ? " [Debug]" : ""), 1024, 768);
     private final Timer updateTimer = new Timer(90);
     private final ShaderProvider shaderProvider = new ShaderProvider();
     private final TextureProvider textureProvider = new TextureProvider();
@@ -123,7 +128,7 @@ public class Game {
         guiRenderer.init();
         debug.init();
         debug.addDebugPos(new Vector3f());
-        // debug.setActive(true);
+        debug.setActive(DEBUG_MODE);
     }
 
     private void handleSizeChange(int w, int h) {
@@ -168,39 +173,43 @@ public class Game {
         // Rendering
         renderSceneWithSSAO();
         glClear(GL_DEPTH_BUFFER_BIT);
-        renderHighlight();
+        renderOutlines();
         glClear(GL_DEPTH_BUFFER_BIT);
         guiRenderer.render();
 
         fps.frame();
     }
 
-    private void renderHighlight() {
+    private void renderOutlines() {
         shadingStrategy = ShadingStrategies.FLAT;
 
         // Stencil
         pickBuffer.bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         ShadingStrategies.FLAT.setColor(new Vector3f(1, 0, 0));
         renderSelectedObjects();
+        renderHighlightedObjects();
         pickBuffer.unbind();
 
         // Highlight
         highlightBuffer.bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         ShadingStrategies.FLAT.setColor(new Vector3f(1.0f, 1.0f, 0));
         renderSelectedObjects();
+        ShadingStrategies.FLAT.setColor(new Vector3f(1.0f, 1.0f, 1.0f));
+        renderHighlightedObjects();
         highlightBuffer.unbind();
 
         postProcessing.begin();
 
-
         // Blur the highlight
         vAvgBlurShader.bind();
-        vAvgBlurShader.setTargetHeight(vGaussBuffer.getHeight());
+        vAvgBlurShader.setTargetHeight(hGaussBuffer.getHeight());
         postProcessing.bindTexture(0, highlightBuffer.getColorTexture(0));
         postProcessing.copyTo(hGaussBuffer);
 
         hAvgBlurShader.bind();
-        hAvgBlurShader.setTargetWidth(hGaussBuffer.getWidth());
+        hAvgBlurShader.setTargetWidth(highlightBuffer.getWidth());
         postProcessing.bindTexture(0, hGaussBuffer.getColorTexture(0));
         postProcessing.copyTo(highlightBuffer);
 
@@ -214,9 +223,17 @@ public class Game {
     }
 
     private void renderSelectedObjects() {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         for (GameObject o : gameObjects)
             if (o.isSelected()) {
+                o.render(RenderLayer.Base);
+                o.render(RenderLayer.Transparency);
+            }
+    }
+
+    private void renderHighlightedObjects() {
+        for (GameObject o : gameObjects)
+            if (o.isHighlighted() && o.getPosition().distance(camera.getPosition()) < 10) {
                 o.render(RenderLayer.Base);
                 o.render(RenderLayer.Transparency);
             }
@@ -322,7 +339,14 @@ public class Game {
         if (window.isKeyPressed(GLFW_KEY_D))
             camera.getPosition().sub(new Vector3f(dx2, 0.0f, dz2));
 
-        shipCollider.updatePlayerLocation(camera.getPosition());
+        if (debug.isActive()) {
+            if (window.isKeyPressed(GLFW_KEY_SPACE))
+                camera.getPosition().add(new Vector3f(0, speed, 0));
+
+            if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT))
+                camera.getPosition().add(new Vector3f(0, -speed, 0));
+        } else
+            shipCollider.updatePlayerLocation(camera.getPosition());
 
         Vector2f pos = window.getCursorPosition();
         Vector2f delta = pos.sub(new Vector2f(window.getWidth() / 2.0f, window.getHeight() / 2.0f));
@@ -370,5 +394,16 @@ public class Game {
 
     public void setShadingStrategy(ShadingStrategy shadingStrategy) {
         this.shadingStrategy = shadingStrategy;
+    }
+
+    public TaskGameObject findTask(Room room, TaskType type) {
+        for (GameObject object : gameObjects) {
+            if (object instanceof TaskGameObject) {
+                TaskGameObject task = (TaskGameObject) object;
+                if (task.getRoom() == room && task.getTaskType() == type)
+                    return task;
+            }
+        }
+        return null;
     }
 }

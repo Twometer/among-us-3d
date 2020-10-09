@@ -2,7 +2,6 @@ package de.twometer.amongus3d.render;
 
 import de.twometer.amongus3d.io.TextureLoader;
 
-import javax.xml.soap.Text;
 import java.util.HashMap;
 import java.util.Map;
 
