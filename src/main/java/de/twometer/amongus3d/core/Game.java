@@ -1,5 +1,6 @@
 package de.twometer.amongus3d.core;
 
+import de.twometer.amongus3d.client.AmongUsClient;
 import de.twometer.amongus3d.io.ColliderLoader;
 import de.twometer.amongus3d.io.MapLoader;
 import de.twometer.amongus3d.mesh.shading.ShadingStrategies;
@@ -16,11 +17,11 @@ import de.twometer.amongus3d.postproc.SSAO;
 import de.twometer.amongus3d.render.*;
 import de.twometer.amongus3d.render.shaders.*;
 import de.twometer.amongus3d.ui.GuiRenderer;
+import de.twometer.amongus3d.ui.MainMenuScreen;
 import de.twometer.amongus3d.util.Debug;
 import de.twometer.amongus3d.util.Fps;
 import de.twometer.amongus3d.util.Log;
 import de.twometer.amongus3d.util.Timer;
-import javafx.print.PageLayout;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -32,6 +33,8 @@ import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
+import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
 public class Game {
 
@@ -39,7 +42,10 @@ public class Game {
 
     private static final boolean DEBUG_MODE = false;
 
-    private final GameWindow window = new GameWindow("Among Us 3D" + (DEBUG_MODE ? " [Debug]" : ""), 1024, 768);
+    public static final String NAME = "Among Us 3D";
+    public static final String VERSION = "beta-0.1";
+
+    private final GameWindow window = new GameWindow(NAME + " " + VERSION + (DEBUG_MODE ? " [Debug]" : ""), 1024, 768);
     private final Timer updateTimer = new Timer(90);
     private final ShaderProvider shaderProvider = new ShaderProvider();
     private final TextureProvider textureProvider = new TextureProvider();
@@ -51,6 +57,7 @@ public class Game {
     private final List<GameObject> gameObjects = new ArrayList<>();
     private Matrix4f viewMatrix;
     private Matrix4f projMatrix;
+    private Matrix4f guiMatrix;
 
     private final PostProcessing postProcessing = new PostProcessing();
     private int ssaoNoiseTexture;
@@ -73,6 +80,10 @@ public class Game {
 
     private ShadingStrategy shadingStrategy = ShadingStrategies.DEFAULT;
 
+    private final GameState gameState = new GameState();
+
+    private final AmongUsClient client = new AmongUsClient();
+
     private Player self;
 
     private Game() {
@@ -84,7 +95,6 @@ public class Game {
 
     public void run() {
         window.create();
-        window.setCursorVisible(false);
         setup();
 
         while (!window.shouldClose()) {
@@ -102,12 +112,7 @@ public class Game {
 
         glClearColor(0, 0, 0, 0);
 
-        gameObjects.addAll(MapLoader.loadMap("models/the_skeld.obj"));
-        shipCollider = ColliderLoader.loadCollider("models/collider.obj");
-        shipCollider.prepareDebugRender();
-
-        Log.i("Loaded " + gameObjects.size() + " game objects.");
-
+        //// INIT GLFW ////
         window.setSizeCallback((width, height) -> {
             glViewport(0, 0, width, height);
             handleSizeChange(width, height);
@@ -116,8 +121,31 @@ public class Game {
             for (GameObject object : gameObjects)
                 if (object.isSelected())
                     object.onClicked();
+
+            guiRenderer.onClick((int)window.getCursorPosition().x, (int) window.getCursorPosition().y);
         });
+        window.setCharTypedCallback(guiRenderer::onCharTyped);
         handleSizeChange(window.getWidth(), window.getHeight());
+
+        //// PRE-INIT ////
+        gameState.setCurrentState(GameState.State.Loading);
+        self = new Player("Debug", camera.getPosition(), Role.Crewmate);
+
+        //// LOADING SCREEN ////
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, window.getWidth(), window.getHeight());
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        guiRenderer.init();
+        guiRenderer.render();
+        window.update();
+
+        //// INIT OBJECTS ////
+
+        gameObjects.addAll(MapLoader.loadMap("models/the_skeld.obj"));
+        shipCollider = ColliderLoader.loadCollider("models/collider.obj");
+        shipCollider.prepareDebugRender();
+
+        Log.i("Loaded " + gameObjects.size() + " game objects.");
 
         for (GameObject object : gameObjects)
             object.init();
@@ -130,19 +158,19 @@ public class Game {
         mulShader = shaderProvider.getShader(ShaderMul.class);
         copyShader = shaderProvider.getShader(ShaderCopy.class);
         postProcessing.initialize();
-        guiRenderer.init();
+
         debug.init();
         debug.addDebugPos(new Vector3f());
         debug.setActive(DEBUG_MODE);
 
-        // TODO Configurable!
-        self = new Player("Debug", camera.getPosition(), Role.Crewmate);
+        gameState.setCurrentState(GameState.State.Menu);
+        guiRenderer.setCurrentScreen(new MainMenuScreen());
     }
 
     private void handleSizeChange(int w, int h) {
         float aspect = (float) w / h;
         projMatrix = new Matrix4f().perspective((float) Math.toRadians(70), aspect, 0.1f, 200.0f);
-        Matrix4f guiMatrix = new Matrix4f().ortho2D(0, w, h, 0);
+        guiMatrix = new Matrix4f().ortho2D(0, w, h, 0);
         guiRenderer.onSizeChange(guiMatrix);
         if (sceneBuffer != null) {
             sceneBuffer.destroy();
@@ -172,23 +200,28 @@ public class Game {
     }
 
     private void renderFrame() {
-        handleControls();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Picking
-        handlePicking();
+        if (gameState.getCurrentState() == GameState.State.Running) {
+            handleControls();
 
-        // Rendering
-        renderSceneWithSSAO();
-        glClear(GL_DEPTH_BUFFER_BIT);
-        renderOutlines();
-        glClear(GL_DEPTH_BUFFER_BIT);
+            // Picking
+            handlePicking();
+
+            // Rendering
+            renderSceneWithSSAO();
+            renderOutlines();
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, window.getWidth(), window.getHeight());
         guiRenderer.render();
 
         fps.frame();
     }
 
     private void renderOutlines() {
+        glClear(GL_DEPTH_BUFFER_BIT);
         shadingStrategy = ShadingStrategies.FLAT;
 
         // Stencil
@@ -417,5 +450,21 @@ public class Game {
 
     public Player getSelf() {
         return self;
+    }
+
+    public GameState getGameState() {
+        return gameState;
+    }
+
+    public Matrix4f getGuiMatrix() {
+        return guiMatrix;
+    }
+
+    public AmongUsClient getClient() {
+        return client;
+    }
+
+    public GuiRenderer getGuiRenderer() {
+        return guiRenderer;
     }
 }

@@ -7,12 +7,13 @@ layout(location = 3) in vec2 texCoords;
 out vec2 textureCoords;
 out vec4 fragmentColor;
 
-uniform vec2 offset;
+uniform vec4 flatColor;
+uniform mat4 transformationMatrix;
 uniform mat4 projectionMatrix;
 
 
 void main(void) {
-    gl_Position = projectionMatrix * vec4(position + offset, 0.0, 1.0);
-    fragmentColor = vec4(color, 1.0f);
+    gl_Position = projectionMatrix * transformationMatrix * vec4(position, 0.0, 1.0);
+    fragmentColor = flatColor * vec4(color, 1.0f);
     textureCoords = texCoords;
 }

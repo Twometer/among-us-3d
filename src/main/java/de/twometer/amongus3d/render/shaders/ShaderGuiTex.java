@@ -7,7 +7,7 @@ import org.joml.Vector3f;
 public class ShaderGuiTex extends Shader {
 
     private int loc_projectionMatrix;
-    private int loc_offset;
+    private int loc_transformationMatrix;
 
     public ShaderGuiTex() {
         super("shaders/gui.v.glsl", "shaders/gui_tex.f.glsl");
@@ -16,11 +16,11 @@ public class ShaderGuiTex extends Shader {
     @Override
     public void bindUniforms() {
         loc_projectionMatrix = getLocation("projectionMatrix");
-        loc_offset = getLocation("offset");
+        loc_transformationMatrix = getLocation("offset");
     }
 
-    public void setOffset(Vector3f offset) {
-        setVector3(loc_offset, offset);
+    public void setTransformationMatrix(Matrix4f matrix) {
+        setMatrix(loc_transformationMatrix, matrix);
     }
 
     public void setProjectionMatrix(Matrix4f matrix) {

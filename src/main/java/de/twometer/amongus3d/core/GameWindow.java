@@ -1,6 +1,7 @@
 package de.twometer.amongus3d.core;
 
 import org.joml.Vector2f;
+import org.lwjgl.glfw.GLFWCharCallbackI;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallbackI;
 import org.lwjgl.opengl.GL;
@@ -28,12 +29,18 @@ public class GameWindow implements ILifecycle {
 
     private ClickCallback clickCallback;
 
+    private CharTypedCallback charTypedCallback;
+
     public interface SizeCallback {
         void sizeChanged(int width, int height);
     }
 
     public interface ClickCallback {
         void onClick(int button);
+    }
+
+    public interface CharTypedCallback {
+        void onChar(char c);
     }
 
     public GameWindow(String title, int width, int height) {
@@ -44,6 +51,10 @@ public class GameWindow implements ILifecycle {
 
     public void setSizeCallback(SizeCallback sizeCallback) {
         this.sizeCallback = sizeCallback;
+    }
+
+    public void setCharTypedCallback(CharTypedCallback charTypedCallback) {
+        this.charTypedCallback = charTypedCallback;
     }
 
     public void setClickCallback(ClickCallback clickCallback) {
@@ -93,6 +104,15 @@ public class GameWindow implements ILifecycle {
         glfwSetMouseButtonCallback(handle, (window, button, action, mods) -> {
             if (action == GLFW_RELEASE)
                 clickCallback.onClick(button);
+        });
+
+        glfwSetCharCallback(handle, (window, codepoint) -> {
+            charTypedCallback.onChar((char) codepoint);
+        });
+
+        glfwSetKeyCallback(handle, (window, key, scancode, action, mods) -> {
+            if (key == GLFW_KEY_BACKSPACE &&( action == GLFW_REPEAT || action == GLFW_PRESS))
+                charTypedCallback.onChar('\b');
         });
     }
 
