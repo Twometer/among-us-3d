@@ -2,25 +2,44 @@ package de.twometer.amongus3d.model.player;
 
 import de.twometer.amongus3d.model.world.TaskDef;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PlayerTask {
 
-    private TaskDef task;
+    private List<TaskDef> tasks = new ArrayList<>();
 
-    private boolean isCompleted;
+    private int progress = 0;
 
-    public PlayerTask(TaskDef task) {
-        this.task = task;
+    public boolean hasRemaining(TaskDef def) {
+        for (int i = progress; i < tasks.size(); i++)
+            if (tasks.get(i).equals(def))
+                return true;
+        return false;
     }
 
-    public TaskDef getTask() {
-        return task;
+    public boolean isLongTask() {
+        return tasks.size() > 0;
     }
 
-    public boolean isCompleted() {
-        return isCompleted;
+    public List<TaskDef> getTasks() {
+        return tasks;
     }
 
-    public void setCompleted(boolean completed) {
-        isCompleted = completed;
+    public void setTasks(List<TaskDef> tasks) {
+        this.tasks = tasks;
+    }
+
+    public int getProgress() {
+        return progress;
+    }
+
+    public void setProgress(int progress) {
+        this.progress = progress;
+    }
+
+    public PlayerTask addTask(TaskDef taskDef) {
+        tasks.add(taskDef);
+        return this;
     }
 }

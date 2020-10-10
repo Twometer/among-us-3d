@@ -4,9 +4,12 @@ import java.util.Objects;
 
 public class TaskDef {
 
-    private final Room room;
+    private  Room room;
 
-    private final TaskType taskType;
+    private  TaskType taskType;
+
+    public TaskDef() {
+    }
 
     public TaskDef(Room room, TaskType taskType) {
         this.room = room;

@@ -10,27 +10,27 @@ public class Player {
 
     private final String username;
 
-    private final Vector3f position;
+    private Vector3f position;
 
-    private final Role role;
+    private Role role;
 
-    private final PlayerColor color;
+    private PlayerColor color;
 
-    private final List<TaskDef> remainingTasks = new ArrayList<>();
+    private List<PlayerTask> tasks = new ArrayList<>();
 
-    public Player(String username, Vector3f position, Role role, PlayerColor color) {
+    public Player(String username) {
         this.username = username;
-        this.position = position;
-        this.role = role;
-        this.color = color;
     }
 
     public boolean canDoTask(TaskDef task) {
-        return remainingTasks.contains(task);
+        for (PlayerTask t2 : tasks)
+            if (t2.hasRemaining(task))
+                return true;
+        return false;
     }
 
-    public List<TaskDef> getRemainingTasks() {
-        return remainingTasks;
+    public List<PlayerTask> getTasks() {
+        return tasks;
     }
 
     public String getUsername() {
@@ -41,9 +41,27 @@ public class Player {
         return position;
     }
 
-
+    public void setPosition(Vector3f position) {
+        this.position = position;
+    }
 
     public Role getRole() {
         return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public PlayerColor getColor() {
+        return color;
+    }
+
+    public void setColor(PlayerColor color) {
+        this.color = color;
+    }
+
+    public void setTasks(List<PlayerTask> tasks) {
+        this.tasks = tasks;
     }
 }

@@ -25,7 +25,7 @@ public class ServerSession {
 
     public void addPlayer(Connection connection, String username) {
         ServerPlayer player = new ServerPlayer(connection);
-        player.player = new Player(username, null, null, null);
+        player.player = new Player(username);
         players.put(username, player);
     }
 

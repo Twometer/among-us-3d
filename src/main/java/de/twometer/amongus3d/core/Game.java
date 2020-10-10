@@ -130,7 +130,7 @@ public class Game {
 
         //// PRE-INIT ////
         gameState.setCurrentState(GameState.State.Loading);
-        self = new Player("Debug", camera.getPosition(), Role.Crewmate, PlayerColor.Blue);
+        self = new Player("Debug");
 
         //// LOADING SCREEN ////
         glBindFramebuffer(GL_FRAMEBUFFER, 0);

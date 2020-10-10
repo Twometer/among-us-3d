@@ -1,12 +1,15 @@
 package de.twometer.amongus3d.model;
 
 import com.esotericsoftware.kryo.Kryo;
+import de.twometer.amongus3d.model.player.PlayerColor;
+import de.twometer.amongus3d.model.player.PlayerTask;
 import de.twometer.amongus3d.model.player.Role;
 import de.twometer.amongus3d.model.world.Room;
 import de.twometer.amongus3d.model.world.TaskDef;
 import de.twometer.amongus3d.model.world.TaskType;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public final class NetMessage {
@@ -36,9 +39,16 @@ public final class NetMessage {
                     PlayerMove.class,
                     Sabotage.class,
                     StartGame.class,
+
                     Role.class,
                     Vector3f.class,
-                    TaskDef.class
+                    TaskDef.class,
+                    PlayerColor.class,
+                    PlayerTask.class,
+                    TaskDef.class,
+                    Room.class,
+                    TaskType.class,
+                    ArrayList.class
             };
 
     public static void registerAll(Kryo kryo) {
@@ -125,8 +135,9 @@ public final class NetMessage {
     public static class GameStarted {
         public long startTime;
         public Role role;
-        public List<TaskDef> tasks;
+        public List<PlayerTask> tasks;
         public Vector3f position;
+        public PlayerColor color;
     }
 
     public static class GameEnded {
