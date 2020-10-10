@@ -32,6 +32,49 @@ public class ServerMain {
 
     private static final Map<String, ServerSession> sessions = new ConcurrentHashMap<>();
 
+    private static TaskDef[] possibleTaskDefs;
+
+    private static final String possibleCombinations[] = {"MedBay.Scan",
+            "Weapons.Shoot",
+            "Electrical.FixLights",
+            "Reactor.UnlockManifold",
+            "Navigation.ChartCourse",
+            "Admin.SwipeCard",
+            "Storage.RefuelEngine",
+            "Navigation.StabilizeSteering",
+            "Reactor.StartReactor",
+            "Reactor.UnlockManifold",
+            "Storage.ClearGarbage",
+            "Comms.FixComms",
+            "Admin.FixO2Depletion",
+            "MedBay.InspectSamples",
+            "O2.ClearGarbage",
+            "Cafeteria.ClearGarbage",
+            "O2.FixO2Depletion",
+            "Shields.PrimeShields",
+            "Reactor.FixMeltdown",
+            "Reactor.FixMeltdown",
+            "Weapons.DataTransfer",
+            "Weapons.EnergyDist",
+            "O2.EnergyDist",
+            "LowerEngine.EngineMgmt",
+            "Navigation.DataTransfer",
+            "Navigation.EnergyDist",
+            "Security.EnergyDist",
+            "Electrical.EnergyDist",
+            "Electrical.DataTransfer",
+            "Security.FixWiring",
+            "Cafeteria.DataTransfer",
+            "Comms.EnergyDist",
+            "Navigation.FixWiring",
+            "Electrical.FixWiring",
+            "Comms.DataTransfer",
+            "Cafeteria.FixWiring",
+            "Storage.FixWiring",
+            "Admin.DataTransfer",
+            "Reactor.EnergyDist",
+            "UpperEngine.EngineMgmt"};
+
     private static ServerPlayer getPlayer(Connection connection) {
         String name = connection.toString();
         String sessionId = name.substring(0, name.indexOf('|'));
@@ -48,6 +91,14 @@ public class ServerMain {
     public static void main(String[] args) throws IOException {
         Server server = new Server();
         server.start();
+
+        possibleTaskDefs = new TaskDef[possibleCombinations.length];
+        for (int i = 0; i < possibleTaskDefs.length; i++) {
+            String s[] = possibleCombinations[i].split("\\.");
+            String room = s[0];
+            String task = s[1];
+            possibleTaskDefs[i] = new TaskDef(Room.parse(room), TaskType.parse(task));
+        }
 
         NetMessage.registerAll(server.getKryo());
 
@@ -137,7 +188,11 @@ public class ServerMain {
 
     private static PlayerTask randomBasicTask() {
         return new PlayerTask()
-                .addTask(new TaskDef(Room.values()[(int) (Math.random() * Room.values().length)], TaskType.values()[(int) (Math.random() * TaskType.values().length)]));
+                .addTask(possibleTaskDefs[(int) (Math.random() * possibleTaskDefs.length)]);
+    }
+
+    private static TaskDef randomDataTransfer() {
+        return null;
     }
 
     private static void createLongTask(Player player) {
@@ -149,6 +204,10 @@ public class ServerMain {
                         .addTask(new TaskDef(Room.LowerEngine, TaskType.EngineMgmt))
                         .addTask(new TaskDef(Room.Storage, TaskType.RefuelEngine))
                         .addTask(new TaskDef(Room.UpperEngine, TaskType.EngineMgmt)));
+                break;
+            case 1:
+                player.getTasks().add(new PlayerTask()
+                        .addTask(new TaskDef(Room.Electrical, TaskType.EnergyDist)));
                 break;
         }
     }
@@ -172,7 +231,7 @@ public class ServerMain {
     private static String genImposter(List<String> imposters, ServerSession serverSession) {
         String imposter;
         do {
-            imposter = ((ServerPlayer)(serverSession.players.values().toArray()[(int) (Math.random() * serverSession.players.size())])).player.getUsername();
+            imposter = ((ServerPlayer) (serverSession.players.values().toArray()[(int) (Math.random() * serverSession.players.size())])).player.getUsername();
         } while (imposters.contains(imposter));
         return imposter;
     }
