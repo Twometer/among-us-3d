@@ -1,5 +1,6 @@
 package de.twometer.amongus3d.core;
 
+import de.twometer.amongus3d.audio.*;
 import de.twometer.amongus3d.client.AmongUsClient;
 import de.twometer.amongus3d.io.ColliderLoader;
 import de.twometer.amongus3d.io.MapLoader;
@@ -50,6 +51,7 @@ public class Game {
     private final Timer updateTimer = new Timer(90);
     private final ShaderProvider shaderProvider = new ShaderProvider();
     private final TextureProvider textureProvider = new TextureProvider();
+    private final SoundProvider soundProvider = new SoundProvider();
     private final Camera camera = new Camera();
     private final Fps fps = new Fps();
     private final Debug debug = new Debug();
@@ -166,6 +168,12 @@ public class Game {
 
         gameState.setCurrentState(GameState.State.Menu);
         guiRenderer.setCurrentScreen(new MainMenuScreen());
+
+        //// INIT SOUND ////
+        Log.i("Starting sound system");
+        OpenAL.create();
+        gameState.init();
+        SoundFX.addPositional("reactor", new Vector3f(6, 0, -15));
     }
 
     private void handleSizeChange(int w, int h) {
@@ -400,6 +408,7 @@ public class Game {
         if (camera.getAngle().y < -90) camera.getAngle().y = (float) -90;
 
         viewMatrix = camera.calcViewMatrix();
+        OpenAL.update();
     }
 
     public GameWindow getWindow() {
@@ -467,5 +476,9 @@ public class Game {
 
     public GuiRenderer getGuiRenderer() {
         return guiRenderer;
+    }
+
+    public SoundProvider getSoundProvider() {
+        return soundProvider;
     }
 }

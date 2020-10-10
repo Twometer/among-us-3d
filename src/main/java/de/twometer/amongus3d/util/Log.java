@@ -7,7 +7,7 @@ public class Log {
     }
 
     public static void d(String message) {
-        write("DEBUG", message);
+        write("FINE", message);
     }
 
     public static void i(String message) {

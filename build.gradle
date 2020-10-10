@@ -21,17 +21,20 @@ dependencies {
     implementation "org.lwjgl:lwjgl-openal"
     implementation "org.lwjgl:lwjgl-opengl"
     implementation "org.lwjgl:lwjgl-assimp"
+    implementation "org.lwjgl:lwjgl-stb"
     implementation "org.joml:joml:1.9.12"
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.esotericsoftware:kryo:5.0.0-RC9'
     implementation 'kryonet:kryonet:2.21'
     implementation 'org.greenrobot:eventbus:3.2.0'
 
+
     runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
 
     testCompile 'junit:junit:4.12'
 }

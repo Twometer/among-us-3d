@@ -3,6 +3,7 @@ package de.twometer.amongus3d.client;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
+import de.twometer.amongus3d.audio.SoundFX;
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.model.NetMessage;
 import de.twometer.amongus3d.model.player.Player;
@@ -34,7 +35,10 @@ public class AmongUsClient {
             users.add(((NetMessage.PlayerJoined) o).username);
         } else if (o instanceof NetMessage.EmergencyReport) {
             Log.i("Emergency meeting");
+            SoundFX.play("emergency");
         } else if (o instanceof NetMessage.GameStarted) {
+            Log.i("Game starting " + o.toString());
+            SoundFX.play("game_start");
             Player player = Game.instance().getSelf();
             Game.instance().getCamera().getPosition().x = ((NetMessage.GameStarted) o).position.x;
             Game.instance().getCamera().getPosition().z = ((NetMessage.GameStarted) o).position.z;
@@ -42,7 +46,6 @@ public class AmongUsClient {
             player.setRole(((NetMessage.GameStarted) o).role);
             player.setColor(((NetMessage.GameStarted) o).color);
             player.setTasks(((NetMessage.GameStarted) o).tasks);
-            Log.i(o.toString());
         }
     }
 
