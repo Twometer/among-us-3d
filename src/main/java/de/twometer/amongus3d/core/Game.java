@@ -122,9 +122,11 @@ public class Game {
             handleSizeChange(width, height);
         });
         window.setClickCallback(button -> {
-            for (GameObject object : gameObjects)
-                if (object.isSelected())
-                    object.onClicked();
+            if (gameState.getCurrentState() == GameState.State.Running) {
+                for (GameObject object : gameObjects)
+                    if (object.isSelected())
+                        object.onClicked();
+            }
 
             guiRenderer.onClick((int) window.getCursorPosition().x, (int) window.getCursorPosition().y);
         });
@@ -262,7 +264,7 @@ public class Game {
             }
 
             String prompt = self.getRole() == Role.Impostor ? "You're an IMPOSTOR" : "You're a crewmate";
-            Vector4f color = self.getRole() == Role.Impostor ? new Vector4f(1,0,0,1) : new Vector4f(0,0.25f,0.95f,1);
+            Vector4f color = self.getRole() == Role.Impostor ? new Vector4f(1, 0, 0, 1) : new Vector4f(0, 0.25f, 0.95f, 1);
             guiRenderer.getFontRenderer().drawCentered(prompt, window.getWidth() / 2f, window.getHeight() - 100f, 0.45f, color);
         }
         guiRenderer.render();

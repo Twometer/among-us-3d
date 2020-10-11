@@ -12,6 +12,11 @@ public class SoundFX {
     private static final HashMap<String, SoundSource> srcs = new HashMap<>();
     private static final List<SoundSource> srcs_positional = new ArrayList<>();
 
+    public static void playRandom(String fx) {
+        int n = (int) (((Math.random() * 10) % 2) + 1);
+        play(fx + n);
+    }
+
     public static void play(String fx) {
         SoundSource soundSource = srcs.get(fx);
         if (soundSource == null) {

@@ -8,16 +8,23 @@ public class ButtonComponent extends Component {
 
     private Runnable clickListener;
 
+    private Vector4f color = new Vector4f(1,1,1,1);
+
     public ButtonComponent(int w, int h, String text) {
         super(w, h);
         this.text = text;
+    }
+
+    public ButtonComponent setColor(Vector4f color) {
+        this.color = color;
+        return this;
     }
 
     @Override
     public void render(GuiRenderer renderer) {
         super.render(renderer);
         renderer.drawRect(getX(), getY(), getW(), getH(), new Vector4f(0.25f, 0.25f, 0.25f, 1.0f));
-        renderer.getFontRenderer().drawCentered(text, getX() + getW() / 2f, getY(), 0.5f, new Vector4f(1, 1, 1, 1));
+        renderer.getFontRenderer().drawCentered(text, getX() + getW() / 2f, getY(), 0.5f, color);
     }
 
     @Override
@@ -26,7 +33,8 @@ public class ButtonComponent extends Component {
             clickListener.run();
     }
 
-    public void setClickListener(Runnable clickListener) {
+    public ButtonComponent setClickListener(Runnable clickListener) {
         this.clickListener = clickListener;
+        return this;
     }
 }

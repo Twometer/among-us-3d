@@ -5,14 +5,17 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import de.twometer.amongus3d.audio.SoundFX;
 import de.twometer.amongus3d.core.Game;
+import de.twometer.amongus3d.core.GameState;
 import de.twometer.amongus3d.model.NetMessage;
 import de.twometer.amongus3d.model.player.Player;
 import de.twometer.amongus3d.server.ServerMain;
+import de.twometer.amongus3d.ui.EmergencyScreen;
 import de.twometer.amongus3d.util.Log;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
@@ -35,7 +38,8 @@ public class AmongUsClient {
             users.add(((NetMessage.PlayerJoined) o).username);
         } else if (o instanceof NetMessage.EmergencyReport) {
             Log.i("Emergency meeting");
-            SoundFX.play("emergency");
+            Game.instance().getGameState().setCurrentState(GameState.State.Emergency);
+            Game.instance().getGuiRenderer().setCurrentScreen(new EmergencyScreen(((NetMessage.EmergencyReport) o).deathReport, ((NetMessage.EmergencyReport) o).reporter));
         } else if (o instanceof NetMessage.GameStarted) {
             Log.i("Game starting " + o.toString());
             SoundFX.play("game_start");
@@ -46,6 +50,7 @@ public class AmongUsClient {
             player.setRole(((NetMessage.GameStarted) o).role);
             player.setColor(((NetMessage.GameStarted) o).color);
             player.setTasks(((NetMessage.GameStarted) o).tasks);
+            Collections.shuffle(player.getTasks());
         }
     }
 

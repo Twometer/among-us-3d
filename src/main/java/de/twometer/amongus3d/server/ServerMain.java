@@ -122,6 +122,14 @@ public class ServerMain {
                         msg.deathReport = ((NetMessage.EmergencyReport) o).deathReport;
                         serverSession.sendToAll(msg);
                     }
+                } else if (o instanceof NetMessage.VoteCast) {
+                    ServerSession serverSession = getSession(connection);
+                    if (serverSession != null) {
+                        NetMessage.VoteCast msg = new NetMessage.VoteCast();
+                        msg.srcUsername = getPlayer(connection).player.getUsername();
+                        msg.dstUsername = ((NetMessage.VoteCast) o).dstUsername;
+                        serverSession.sendToAll(msg);
+                    }
                 }
             }
         });

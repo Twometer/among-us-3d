@@ -46,9 +46,12 @@ public class GameState {
             if (!soundSource.isPlaying())
                 soundSource.play();
             SoundFX.setWorldRunning(false);
-        } else {
+        } else if (currentState == State.Running) {
             soundSource.stop();
             SoundFX.setWorldRunning(true);
+        } else if (currentState == State.Emergency) {
+            SoundFX.setWorldRunning(false);
+            SoundFX.play("emergency");
         }
     }
 
