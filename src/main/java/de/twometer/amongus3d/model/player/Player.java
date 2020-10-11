@@ -24,7 +24,7 @@ public class Player {
 
     public boolean canDoTask(TaskDef task) {
         for (PlayerTask t2 : tasks)
-            if (t2.hasRemaining(task))
+            if (t2.nextTask().equals(task))
                 return true;
         return false;
     }

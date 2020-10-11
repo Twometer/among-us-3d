@@ -51,4 +51,8 @@ public class GameState {
             SoundFX.setWorldRunning(true);
         }
     }
+
+    public boolean isRunning() {
+        return currentState == State.Running;
+    }
 }

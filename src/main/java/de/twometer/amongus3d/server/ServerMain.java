@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerMain {
@@ -32,48 +33,6 @@ public class ServerMain {
 
     private static final Map<String, ServerSession> sessions = new ConcurrentHashMap<>();
 
-    private static TaskDef[] possibleTaskDefs;
-
-    private static final String possibleCombinations[] = {"MedBay.Scan",
-            "Weapons.Shoot",
-            //"Electrical.FixLights",
-            "Reactor.UnlockManifold",
-            "Navigation.ChartCourse",
-            "Admin.SwipeCard",
-            "Storage.RefuelEngine",
-            "Navigation.StabilizeSteering",
-            "Reactor.StartReactor",
-            "Reactor.UnlockManifold",
-            "Storage.ClearGarbage",
-            //"Comms.FixComms",
-            //"Admin.FixO2Depletion",
-            "MedBay.InspectSamples",
-            "O2.ClearGarbage",
-            "Cafeteria.ClearGarbage",
-            //"O2.FixO2Depletion",
-            "Shields.PrimeShields",
-            //"Reactor.FixMeltdown",
-            //"Reactor.FixMeltdown",
-            "Weapons.DataTransfer",
-            "Weapons.EnergyDist",
-            "O2.EnergyDist",
-            "LowerEngine.EngineMgmt",
-            "Navigation.DataTransfer",
-            "Navigation.EnergyDist",
-            "Security.EnergyDist",
-            "Electrical.EnergyDist",
-            "Electrical.DataTransfer",
-            "Security.FixWiring",
-            "Cafeteria.DataTransfer",
-            "Comms.EnergyDist",
-            "Navigation.FixWiring",
-            "Electrical.FixWiring",
-            "Comms.DataTransfer",
-            "Cafeteria.FixWiring",
-            "Storage.FixWiring",
-            "Admin.DataTransfer",
-            "Reactor.EnergyDist",
-            "UpperEngine.EngineMgmt"};
 
     private static ServerPlayer getPlayer(Connection connection) {
         String name = connection.toString();
@@ -92,13 +51,6 @@ public class ServerMain {
         Server server = new Server();
         server.start();
 
-        possibleTaskDefs = new TaskDef[possibleCombinations.length];
-        for (int i = 0; i < possibleTaskDefs.length; i++) {
-            String s[] = possibleCombinations[i].split("\\.");
-            String room = s[0];
-            String task = s[1];
-            possibleTaskDefs[i] = new TaskDef(Room.parse(room), TaskType.parse(task));
-        }
 
         NetMessage.registerAll(server.getKryo());
 
@@ -188,16 +140,13 @@ public class ServerMain {
 
     private static PlayerTask randomBasicTask() {
         return new PlayerTask()
-                .addTask(possibleTaskDefs[(int) (Math.random() * possibleTaskDefs.length)]);
+                .addTask(TaskGenerator.genUnique(null, TaskGenerator.SHORT_TASKS));
     }
 
-    private static TaskDef randomDataTransfer() {
-        return null;
-    }
+    private static final Random r = new Random();
 
     private static void createLongTask(Player player) {
-        int r = (int) (Math.random() * 5);
-        switch (r) {
+        switch (r.nextInt(4)) {
             case 0:
                 player.getTasks().add(new PlayerTask()
                         .addTask(new TaskDef(Room.Storage, TaskType.RefuelEngine))
@@ -207,7 +156,19 @@ public class ServerMain {
                 break;
             case 1:
                 player.getTasks().add(new PlayerTask()
-                        .addTask(new TaskDef(Room.Electrical, TaskType.EnergyDist)));
+                        .addTask(TaskGenerator.genUnique(player, TaskGenerator.ENERGY_DIVERT))
+                        .addTask(TaskGenerator.genUnique(player, TaskGenerator.ENERGY_ACCEPT)));
+                break;
+            case 2:
+                player.getTasks().add(new PlayerTask()
+                        .addTask(TaskGenerator.genUnique(player, TaskGenerator.DATA_DOWNLOAD))
+                        .addTask(TaskGenerator.genUnique(player, TaskGenerator.DATA_UPLOAD)));
+                break;
+            case 3:
+                player.getTasks().add(new PlayerTask()
+                        .addTask(TaskGenerator.genUnique(player, TaskGenerator.WIRING))
+                        .addTask(TaskGenerator.genUnique(player, TaskGenerator.WIRING))
+                        .addTask(TaskGenerator.genUnique(player, TaskGenerator.WIRING)));
                 break;
         }
     }

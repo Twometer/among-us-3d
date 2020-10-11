@@ -9,8 +9,8 @@ import java.util.List;
 
 public class SoundFX {
 
-    private static HashMap<String, SoundSource> srcs = new HashMap<>();
-    private static List<SoundSource> srcs_positional = new ArrayList<>();
+    private static final HashMap<String, SoundSource> srcs = new HashMap<>();
+    private static final List<SoundSource> srcs_positional = new ArrayList<>();
 
     public static void play(String fx) {
         SoundSource soundSource = srcs.get(fx);
@@ -18,6 +18,8 @@ public class SoundFX {
             SoundBuffer buf = Game.instance().getSoundProvider().getBuffer("sound/" + fx + ".ogg");
             soundSource = new SoundSource(buf, false, true);
             soundSource.setPosition(new Vector3f(0, 0, 0));
+            soundSource.setGain(2f);
+            soundSource.setRolloffFactor(0f);
             srcs.put(fx, soundSource);
         }
         soundSource.play();

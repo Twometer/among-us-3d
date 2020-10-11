@@ -1,11 +1,15 @@
 package de.twometer.amongus3d.ui;
 
+import com.sun.scenario.effect.Color4f;
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.core.GameState;
 import de.twometer.amongus3d.model.NetMessage;
 import de.twometer.amongus3d.util.Log;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.joml.Vector3f;
+import org.joml.Vector4d;
+import org.joml.Vector4f;
 
 public class LobbyScreen extends GuiScreen {
 
@@ -29,6 +33,16 @@ public class LobbyScreen extends GuiScreen {
             });
         }
 
+    }
+
+    @Override
+    public void render(GuiRenderer renderer) {
+        super.render(renderer);
+        int y = 250;
+        for (String user : Game.instance().getClient().users) {
+            renderer.getFontRenderer().drawCentered(user, Game.instance().getWindow().getWidth() / 2f, y, 0.5f, new Vector4f(1, 1, 1, 1));
+            y += 30;
+        }
     }
 
     @Subscribe

@@ -7,6 +7,8 @@ import de.twometer.amongus3d.io.MapLoader;
 import de.twometer.amongus3d.mesh.shading.ShadingStrategies;
 import de.twometer.amongus3d.mesh.shading.ShadingStrategy;
 import de.twometer.amongus3d.model.player.Player;
+import de.twometer.amongus3d.model.player.PlayerTask;
+import de.twometer.amongus3d.model.player.Role;
 import de.twometer.amongus3d.model.world.Room;
 import de.twometer.amongus3d.model.world.TaskType;
 import de.twometer.amongus3d.obj.GameObject;
@@ -248,6 +250,21 @@ public class Game {
             guiRenderer.getFontRenderer().draw(camera.getPosition().x + " " + camera.getPosition().y + " " + camera.getPosition().z, 5, 25, 0.5f, new Vector4f(1, 1, 1, 1));
         }
         guiRenderer.getFontRenderer().draw(fps.get() + " fps", 5, 5, 0.25f, new Vector4f(1, 1, 1, 1));
+        int y = 65;
+        if (gameState.isRunning()) {
+            String header = self.getRole() == Role.Impostor ? "Fake tasks:" : "Your task manager lol:";
+            guiRenderer.getFontRenderer().draw(header, 5, 30, 0.5f, new Vector4f(1, 1, 1, 1));
+            for (PlayerTask task : self.getTasks()) {
+                String progress = task.isLongTask() ? " (" + task.getProgress() + "/" + task.getTasks().size() + ")" : "";
+                Vector4f color = task.isDone() ? new Vector4f(0, 1, 0, 0.9f) : new Vector4f(1, 1, 1, 0.9f);
+                guiRenderer.getFontRenderer().draw(task.nextTask().getRoom() + ": " + task.nextTask().getTaskType() + progress, 25, y, 0.5f, color);
+                y += 35;
+            }
+
+            String prompt = self.getRole() == Role.Impostor ? "You're an IMPOSTOR" : "You're a crewmate";
+            Vector4f color = self.getRole() == Role.Impostor ? new Vector4f(1,0,0,1) : new Vector4f(0,0.25f,0.95f,1);
+            guiRenderer.getFontRenderer().drawCentered(prompt, window.getWidth() / 2f, window.getHeight() - 100f, 0.45f, color);
+        }
         guiRenderer.render();
         glEnable(GL_DEPTH_TEST);
 

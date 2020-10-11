@@ -11,15 +11,16 @@ public class PlayerTask {
 
     private int progress = 0;
 
-    public boolean hasRemaining(TaskDef def) {
-        for (int i = progress; i < tasks.size(); i++)
-            if (tasks.get(i).equals(def))
-                return true;
-        return false;
+    public TaskDef nextTask() {
+        return tasks.get(progress);
+    }
+
+    public boolean isDone() {
+        return progress == tasks.size();
     }
 
     public boolean isLongTask() {
-        return tasks.size() > 0;
+        return tasks.size() > 1;
     }
 
     public List<TaskDef> getTasks() {
