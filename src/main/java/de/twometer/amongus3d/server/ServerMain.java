@@ -36,7 +36,7 @@ public class ServerMain {
 
     private static final String possibleCombinations[] = {"MedBay.Scan",
             "Weapons.Shoot",
-            "Electrical.FixLights",
+            //"Electrical.FixLights",
             "Reactor.UnlockManifold",
             "Navigation.ChartCourse",
             "Admin.SwipeCard",
@@ -45,15 +45,15 @@ public class ServerMain {
             "Reactor.StartReactor",
             "Reactor.UnlockManifold",
             "Storage.ClearGarbage",
-            "Comms.FixComms",
-            "Admin.FixO2Depletion",
+            //"Comms.FixComms",
+            //"Admin.FixO2Depletion",
             "MedBay.InspectSamples",
             "O2.ClearGarbage",
             "Cafeteria.ClearGarbage",
-            "O2.FixO2Depletion",
+            //"O2.FixO2Depletion",
             "Shields.PrimeShields",
-            "Reactor.FixMeltdown",
-            "Reactor.FixMeltdown",
+            //"Reactor.FixMeltdown",
+            //"Reactor.FixMeltdown",
             "Weapons.DataTransfer",
             "Weapons.EnergyDist",
             "O2.EnergyDist",
@@ -120,7 +120,7 @@ public class ServerMain {
             @Override
             public void received(Connection connection, Object o) {
                 super.received(connection, o);
-
+                Log.d("Incoming message: " + o.toString());
                 if (o instanceof NetMessage.CreateGame) {
                     String gameId = SessionCodeGenerator.generate();
                     ServerSession session = new ServerSession(gameId);

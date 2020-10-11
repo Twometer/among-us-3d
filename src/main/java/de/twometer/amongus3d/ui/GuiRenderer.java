@@ -70,8 +70,6 @@ public class GuiRenderer {
     }
 
     public void render() {
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glDisable(GL_DEPTH_TEST);
         game.setShadingStrategy(ShadingStrategies.NOP);
         switch (game.getGameState().getCurrentState()) {
             case Running: {
@@ -95,7 +93,6 @@ public class GuiRenderer {
                 break;
             }
         }
-        glEnable(GL_DEPTH_TEST);
     }
 
     public void relayout() {

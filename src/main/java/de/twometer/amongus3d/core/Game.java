@@ -7,8 +7,6 @@ import de.twometer.amongus3d.io.MapLoader;
 import de.twometer.amongus3d.mesh.shading.ShadingStrategies;
 import de.twometer.amongus3d.mesh.shading.ShadingStrategy;
 import de.twometer.amongus3d.model.player.Player;
-import de.twometer.amongus3d.model.player.PlayerColor;
-import de.twometer.amongus3d.model.player.Role;
 import de.twometer.amongus3d.model.world.Room;
 import de.twometer.amongus3d.model.world.TaskType;
 import de.twometer.amongus3d.obj.GameObject;
@@ -27,6 +25,7 @@ import de.twometer.amongus3d.util.Timer;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.BufferUtils;
 
 import java.nio.ByteBuffer;
@@ -173,7 +172,26 @@ public class Game {
         Log.i("Starting sound system");
         OpenAL.create();
         gameState.init();
-        SoundFX.addPositional("reactor", new Vector3f(6, 0, -15));
+
+        addAmbience("reactor", 4.16f, 1.37f, -15.38f);
+        addAmbience("engine", 9.98f, 1.26f, -22.48f).setGain(1f).setRolloffFactor(5);
+        addAmbience("engine", 9.98f, 1.26f, -8.33f).setGain(1f).setRolloffFactor(5);
+        addAmbience("security", 14.39f, 0.7f, -18.53f).setGain(0.5f).setRolloffFactor(2);
+        addAmbience("medbay", 20.7f, 0.62f, -15.65f).setGain(1.2f).setRolloffFactor(3);
+        addAmbience("cafeteria", 28.05f, 0.4f, -22.36f).setGain(1.4f);
+        addAmbience("weapons", 39.28f, 0.86f, -22.86f).setGain(0.75f).setRolloffFactor(4);
+        addAmbience("oxygen", 36.7f, 0.45f, -18.35f);
+        addAmbience("hallways", 49.42f, 0.86f, -16).setGain(1.2f).setRolloffFactor(1.2f);
+        addAmbience("shields", 40, 0.7f, -7.66f);
+        addAmbience("shields", 37, 0.62f, -4.9f);
+        addAmbience("comms", 33.42f, 0.78f, -2.3f).setRolloffFactor(2);
+        addAmbience("storage", 26.76f, 0.82f, -7.43f).setGain(1.3f);
+        addAmbience("electrical", 18.55f, 0.66f, -10).setRolloffFactor(4f);
+        addAmbience("admin", 34.22f, 0.7f, -11.5f).setGain(1.4f);
+    }
+
+    private SoundSource addAmbience(String name, float x, float y, float z) {
+        return SoundFX.addPositional("ambience/" + name, new Vector3f(x, y, z));
     }
 
     private void handleSizeChange(int w, int h) {
@@ -224,7 +242,14 @@ public class Game {
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, window.getWidth(), window.getHeight());
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
+        if (debug.isActive()) {
+            guiRenderer.getFontRenderer().draw(camera.getPosition().x + " " + camera.getPosition().y + " " + camera.getPosition().z, 5, 25, 0.5f, new Vector4f(1, 1, 1, 1));
+        }
+        guiRenderer.getFontRenderer().draw(fps.get() + " fps", 5, 5, 0.25f, new Vector4f(1, 1, 1, 1));
         guiRenderer.render();
+        glEnable(GL_DEPTH_TEST);
 
         fps.frame();
     }

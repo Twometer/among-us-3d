@@ -12,13 +12,9 @@ public class SessionCodeGenerator {
     public static String generate() {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < 6; i++) {
-            if (Math.random() > 0.8) {
-                builder.append('Q');
-            } else {
-
-                builder.append((char) ((int) START + r.nextInt((int)(END-START))));
-            }
+            builder.append((char) ((int) START + r.nextInt((int) (END - START))));
         }
+        builder.setCharAt(builder.length() - 1, 'Q');
         return builder.toString();
     }
 

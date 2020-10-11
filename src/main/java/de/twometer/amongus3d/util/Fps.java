@@ -14,7 +14,7 @@ public class Fps {
             fps = frames;
             lastReset = System.currentTimeMillis();
             frames = 0;
-            Log.i("FPS: " + fps);
+            // Log.i("FPS: " + fps);
         }
     }
 

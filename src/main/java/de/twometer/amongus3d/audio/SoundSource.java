@@ -21,6 +21,8 @@ public class SoundSource {
         }
         if (relative) {
             alSourcei(sourceId, AL_SOURCE_RELATIVE, AL_TRUE);
+        } else {
+            alSourcei(sourceId, AL_SOURCE_ABSOLUTE, AL_TRUE);
         }
     }
 
@@ -39,8 +41,13 @@ public class SoundSource {
         alSource3f(sourceId, AL_VELOCITY, speed.x, speed.y, speed.z);
     }
 
-    public void setGain(float gain) {
+    public SoundSource setGain(float gain) {
         alSourcef(sourceId, AL_GAIN, gain);
+        return this;
+    }
+
+    public void setRolloffFactor(float d) {
+        alSourcef(sourceId, AL_ROLLOFF_FACTOR, d);
     }
 
     public void setProperty(int param, float value) {

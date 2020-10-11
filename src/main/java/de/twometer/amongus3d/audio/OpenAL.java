@@ -37,7 +37,6 @@ public class OpenAL {
     public static void update() {
         Vector3f pos = Game.instance().getCamera().getPosition();
         alListener3f(AL_POSITION, pos.x, pos.y, pos.z);
-        Log.d(pos.toString());
         Matrix4f cameraMatrix = Game.instance().getViewMatrix();
         Vector3f at = new Vector3f();
         cameraMatrix.positiveZ(at).negate();

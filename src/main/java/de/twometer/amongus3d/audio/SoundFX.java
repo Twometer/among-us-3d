@@ -3,12 +3,14 @@ package de.twometer.amongus3d.audio;
 import de.twometer.amongus3d.core.Game;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class SoundFX {
 
     private static HashMap<String, SoundSource> srcs = new HashMap<>();
-    private static HashMap<String, SoundSource> srcs_positional = new HashMap<>();
+    private static List<SoundSource> srcs_positional = new ArrayList<>();
 
     public static void play(String fx) {
         SoundSource soundSource = srcs.get(fx);
@@ -21,19 +23,19 @@ public class SoundFX {
         soundSource.play();
     }
 
-    public static void addPositional(String fx, Vector3f pos) {
-        SoundSource soundSource = srcs_positional.get(fx);
-        if (soundSource == null) {
-            SoundBuffer buf = Game.instance().getSoundProvider().getBuffer("sound/" + fx + ".ogg");
-            soundSource = new SoundSource(buf, true, false);
-            soundSource.setPosition(pos);
-            srcs_positional.put(fx, soundSource);
-        }
+    public static SoundSource addPositional(String fx, Vector3f pos) {
+        SoundSource soundSource;
+        SoundBuffer buf = Game.instance().getSoundProvider().getBuffer("sound/" + fx + ".ogg");
+        soundSource = new SoundSource(buf, true, false);
+        soundSource.setPosition(pos);
+        srcs_positional.add(soundSource);
+
         Game.instance().getDebug().addDebugPos(pos);
+        return soundSource;
     }
 
     public static void setWorldRunning(boolean running) {
-        for (SoundSource soundSource : srcs_positional.values())
+        for (SoundSource soundSource : srcs_positional)
             if (running)
                 soundSource.play();
             else
