@@ -8,7 +8,7 @@ import java.util.List;
 
 public class Player {
 
-    private final String username;
+    private String username;
 
     private Vector3f position;
 
@@ -17,6 +17,10 @@ public class Player {
     private PlayerColor color;
 
     private List<PlayerTask> tasks = new ArrayList<>();
+
+    private int ejectionVotes;
+
+    private boolean isDead;
 
     public Player(String username) {
         this.username = username;
@@ -31,6 +35,11 @@ public class Player {
 
     public List<PlayerTask> getTasks() {
         return tasks;
+    }
+
+    public Player setUsername(String username) {
+        this.username = username;
+        return this;
     }
 
     public String getUsername() {
@@ -63,5 +72,26 @@ public class Player {
 
     public void setTasks(List<PlayerTask> tasks) {
         this.tasks = tasks;
+    }
+
+    public int getEjectionVotes() {
+        return ejectionVotes;
+    }
+
+    public void vote() {
+        ejectionVotes++;
+    }
+
+    public void resetVotes() {
+        ejectionVotes = 0;
+    }
+
+    public boolean isDead() {
+        return isDead;
+    }
+
+    public Player setDead(boolean dead) {
+        isDead = dead;
+        return this;
     }
 }

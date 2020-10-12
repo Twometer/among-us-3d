@@ -39,6 +39,7 @@ public final class NetMessage {
                     PlayerMove.class,
                     Sabotage.class,
                     StartGame.class,
+                    VotingEnd.class,
 
                     Role.class,
                     Vector3f.class,
@@ -100,6 +101,7 @@ public final class NetMessage {
     public static class EmergencyReport {
         public String reporter;
         public boolean deathReport;
+        public long voteDuration;
     }
 
     public static class VoteCast {
@@ -122,6 +124,9 @@ public final class NetMessage {
         public String username;
     }
 
+    public static class VotingEnd {
+    }
+
     public static class PlayerEjected {
         public String username;
         public boolean confirm;
@@ -138,11 +143,11 @@ public final class NetMessage {
         public List<PlayerTask> tasks;
         public Vector3f position;
         public PlayerColor color;
+        public List<String> impostors;
     }
 
     public static class GameEnded {
         public Role winner;
-        public List<String> impostors;
     }
 
     public static class EnterVent {

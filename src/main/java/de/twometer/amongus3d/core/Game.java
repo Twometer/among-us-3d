@@ -176,17 +176,17 @@ public class Game {
         addAmbience("engine", 9.98f, 1.26f, -22.48f).setGain(1f).setRolloffFactor(5);
         addAmbience("engine", 9.98f, 1.26f, -8.33f).setGain(1f).setRolloffFactor(5);
         addAmbience("security", 14.39f, 0.7f, -18.53f).setGain(0.5f).setRolloffFactor(2);
-        addAmbience("medbay", 20.7f, 0.62f, -15.65f).setGain(1.2f).setRolloffFactor(3);
-        addAmbience("cafeteria", 31.05f, 0.4f, -27.36f).setGain(1.4f);
+        addAmbience("medbay", 18.92f, 2.25f, -19.11f).setGain(1.2f).setRolloffFactor(3.5f);
+        addAmbience("cafeteria", 32.35f, 0.4f, -27.46f).setGain(1.4f);
         addAmbience("weapons", 39.28f, 0.86f, -22.86f).setGain(0.75f).setRolloffFactor(4);
-        addAmbience("oxygen", 36.7f, 0.45f, -18.35f);
+        addAmbience("oxygen", 36.7f, 0.45f, -18.35f).setRolloffFactor(1.4f);
         addAmbience("hallways", 49.42f, 0.86f, -16).setGain(1.2f).setRolloffFactor(1.2f);
-        addAmbience("shields", 40, 0.7f, -7.66f);
-        addAmbience("shields", 37, 0.62f, -4.9f);
+        addAmbience("shields", 41.5f, 0.7f, -8.14f).setRolloffFactor(1.4f);
+        addAmbience("shields", 37.72f, 0.62f, -9.39f).setRolloffFactor(1.4f);
         addAmbience("comms", 33.42f, 0.78f, -2.3f).setRolloffFactor(2);
         addAmbience("storage", 26.76f, 0.82f, -7.43f).setGain(1.3f);
         addAmbience("electrical", 18.55f, 0.66f, -10).setRolloffFactor(4f);
-        addAmbience("admin", 34.22f, 0.7f, -11.5f).setGain(1.4f);
+        addAmbience("admin", 34.14f, 0.7f, -13.85f).setGain(1.4f);
 
         Log.i("Init complete");
         gameState.setCurrentState(GameState.State.Menu);

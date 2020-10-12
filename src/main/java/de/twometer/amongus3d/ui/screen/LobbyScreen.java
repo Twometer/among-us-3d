@@ -21,7 +21,6 @@ public class LobbyScreen extends GuiScreen {
 
     public LobbyScreen(String gameCode, boolean host) {
         this.gameCode = gameCode;
-        EventBus.getDefault().register(this);
         addComponent(new LabelComponent(0, 50, "Code: " + gameCode, 0.5f));
         addComponent(numPlayers = new LabelComponent(0, 50, "Players: 0/10", 0.5f));
         numPlayers.setText("Players: " + Game.instance().getClient().users.size() + "/10");
@@ -39,7 +38,7 @@ public class LobbyScreen extends GuiScreen {
     public void render(GuiRenderer renderer) {
         super.render(renderer);
         int y = 250;
-        for (String user : Game.instance().getClient().users) {
+        for (String user : Game.instance().getClient().users.keySet()) {
             renderer.getFontRenderer().drawCentered(user, Game.instance().getWindow().getWidth() / 2f, y, 0.5f, new Vector4f(1, 1, 1, 1));
             y += 30;
         }
@@ -53,8 +52,6 @@ public class LobbyScreen extends GuiScreen {
     @Subscribe
     public void handleGameStarted(NetMessage.GameStarted message) {
         Log.i("game start");
-        Game.instance().getGameState().setCurrentState(GameState.State.Running);
-        Game.instance().getGuiRenderer().setCurrentScreen(null);
     }
 
 }

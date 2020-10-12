@@ -34,8 +34,7 @@ public class MainMenuScreen extends GuiScreen {
         addComponent(createGame = new ButtonComponent(200, 40, "Create game"));
 
         joinGame.setClickListener(() -> {
-            Game.instance().getGuiRenderer().setCurrentScreen(new EjectScreen("Twometer was Not an Impostor", "2 impostors remain"));
-            //Game.instance().getClient().sendMessage(new NetMessage.JoinGame(gameCodeBox.getText(), usernameBox.getText()));
+            Game.instance().getClient().sendMessage(new NetMessage.JoinGame(gameCodeBox.getText(), usernameBox.getText()));
         });
         createGame.setClickListener(() -> {
             if (usernameBox.getText().trim().length() == 0)

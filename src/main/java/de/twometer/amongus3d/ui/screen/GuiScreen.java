@@ -3,6 +3,9 @@ package de.twometer.amongus3d.ui.screen;
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.ui.GuiRenderer;
 import de.twometer.amongus3d.ui.component.Component;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.NoSubscriberEvent;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +20,16 @@ public abstract class GuiScreen extends Component {
 
     public GuiScreen() {
         super(Game.instance().getWindow().getWidth(), Game.instance().getWindow().getHeight());
+        EventBus.getDefault().register(this);
+    }
+
+    @Subscribe
+    public void dummy(NoSubscriberEvent event) {
+
+    }
+
+    public void onHide() {
+        EventBus.getDefault().unregister(this);
     }
 
     public void handleClickEvent(int x, int y) {
@@ -45,6 +58,10 @@ public abstract class GuiScreen extends Component {
 
     public void onShown() {
 
+    }
+
+    public boolean renderStarfield() {
+        return true;
     }
 
     @Override

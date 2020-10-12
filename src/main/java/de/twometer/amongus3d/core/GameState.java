@@ -20,6 +20,10 @@ public class GameState {
         Emergency
     }
 
+    public void stopMenuMusic() {
+        soundSource.stop();
+    }
+
     public void init() {
         SoundBuffer buffer = Game.instance().getSoundProvider().getBuffer("sound/menu.ogg");
         soundSource = new SoundSource(buffer, true, true);

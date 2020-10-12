@@ -3,20 +3,22 @@ package de.twometer.amongus3d.client;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
-import de.twometer.amongus3d.audio.SoundFX;
+import de.twometer.amongus3d.audio.SoundBuffer;
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.core.GameState;
 import de.twometer.amongus3d.model.NetMessage;
 import de.twometer.amongus3d.model.player.Player;
+import de.twometer.amongus3d.model.player.Role;
 import de.twometer.amongus3d.server.ServerMain;
+import de.twometer.amongus3d.ui.screen.EjectScreen;
 import de.twometer.amongus3d.ui.screen.EmergencyScreen;
+import de.twometer.amongus3d.ui.screen.GameStartScreen;
+import de.twometer.amongus3d.util.Constants;
 import de.twometer.amongus3d.util.Log;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
@@ -26,7 +28,7 @@ public class AmongUsClient {
 
     private final List<CallbackItem> callbackItems = new CopyOnWriteArrayList<>();
 
-    public List<String> users = new ArrayList<>();
+    public Map<String, Player> users = new HashMap<>();
 
     private static class CallbackItem {
         private Class<?> clazz;
@@ -35,30 +37,73 @@ public class AmongUsClient {
 
     private void handle(Object o) {
         if (o instanceof NetMessage.PlayerJoined) {
-            users.add(((NetMessage.PlayerJoined) o).username);
+            String usr = ((NetMessage.PlayerJoined) o).username;
+            users.put(usr, new Player(usr));
         } else if (o instanceof NetMessage.EmergencyReport) {
             Log.i("Emergency meeting");
             Game.instance().getGameState().setCurrentState(GameState.State.Emergency);
-            Game.instance().getGuiRenderer().setCurrentScreen(new EmergencyScreen(((NetMessage.EmergencyReport) o).deathReport, ((NetMessage.EmergencyReport) o).reporter));
+            Game.instance().getGuiRenderer().setCurrentScreen(new EmergencyScreen(((NetMessage.EmergencyReport) o).deathReport, ((NetMessage.EmergencyReport) o).reporter, ((NetMessage.EmergencyReport) o).voteDuration));
         } else if (o instanceof NetMessage.GameStarted) {
+            NetMessage.GameStarted started = (NetMessage.GameStarted) o;
             Log.i("Game starting " + o.toString());
-            SoundFX.play("game_start");
+
             Player player = Game.instance().getSelf();
-            Game.instance().getCamera().getPosition().x = ((NetMessage.GameStarted) o).position.x;
-            Game.instance().getCamera().getPosition().z = ((NetMessage.GameStarted) o).position.z;
+            Game.instance().getCamera().getPosition().x = started.position.x;
+            Game.instance().getCamera().getPosition().z = started.position.z;
             player.setPosition(Game.instance().getCamera().getPosition());
-            player.setRole(((NetMessage.GameStarted) o).role);
-            player.setColor(((NetMessage.GameStarted) o).color);
-            player.setTasks(((NetMessage.GameStarted) o).tasks);
+            player.setRole(started.role);
+            player.setColor(started.color);
+            player.setTasks(started.tasks);
             Collections.shuffle(player.getTasks());
+
+            for (String impostor : ((NetMessage.GameStarted) o).impostors) {
+                getPlayer(impostor).setRole(Role.Impostor);
+            }
+
+            Game.instance().getGuiRenderer().setCurrentScreen(new GameStartScreen());
+        } else if (o instanceof NetMessage.PlayerEjected) {
+            NetMessage.PlayerEjected ejected = (NetMessage.PlayerEjected) o;
+            int remainingImpostors = getRemainingImpostors();
+            if (ejected.username.equals(Constants.INVALID_USER)) {
+                Game.instance().getGuiRenderer().setCurrentScreen(new EjectScreen("No one was ejected (Tie)", remainingImpostors + " impostors remain"));
+                return;
+            } else if (ejected.username.equals(Constants.SKIP_USER)) {
+                Game.instance().getGuiRenderer().setCurrentScreen(new EjectScreen("No one was ejected (Skipped)", remainingImpostors + " impostors remain"));
+                return;
+            }
+
+            if (ejected.confirm) {
+                String ejectMsg = ejected.impostor ? " was the impostor" : " was not an impostor";
+                Game.instance().getGuiRenderer().setCurrentScreen(new EjectScreen(ejected.username + ejectMsg, remainingImpostors + " impostors remain"));
+            } else {
+                Game.instance().getGuiRenderer().setCurrentScreen(new EjectScreen(ejected.username + " was ejected", ""));
+            }
+        } else if (o instanceof NetMessage.PlayerKill) {
+            //if (Game.instance().getGameState().getCurrentState() == GameState.State.Running) {
+                //SoundBuffer buffer = Game.instance().getSoundProvider().getBuffer("")
+            //}
+            getPlayer(((NetMessage.PlayerKill) o).victim).setDead(true);
+            checkVictory();
         }
+    }
+
+    public void checkVictory() {
+
+    }
+
+    private int getRemainingImpostors() {
+        int impostors = 0;
+        for (Player player : users.values())
+            if (!player.isDead() && player.getRole() == Role.Impostor)
+                impostors++;
+        return impostors;
     }
 
     public void connect() {
         client = new Client();
         NetMessage.registerAll(client.getKryo());
 
-        Log.i("Connected.");
+
         client.addListener(new Listener() {
             @Override
             public void received(Connection connection, Object o) {
@@ -77,6 +122,12 @@ public class AmongUsClient {
             }
 
             @Override
+            public void connected(Connection connection) {
+                super.connected(connection);
+                Log.i("Connected.");
+            }
+
+            @Override
             public void disconnected(Connection connection) {
                 super.disconnected(connection);
                 Log.w("Connection lost");
@@ -92,7 +143,7 @@ public class AmongUsClient {
     }
 
     public AmongUsClient sendMessage(Object message) {
-        if (client == null)
+        if (client == null || !client.isConnected())
             connect();
         client.sendTCP(message);
         return this;
@@ -105,4 +156,7 @@ public class AmongUsClient {
         callbackItems.add(i);
     }
 
+    public Player getPlayer(String player) {
+        return users.get(player);
+    }
 }

@@ -94,9 +94,12 @@ public class GuiRenderer {
             case Lobby:
             case Emergency:
             case Menu: {
-                starfield.render();
-                if (currentScreen != null)
+
+                if (currentScreen != null) {
+                    if (currentScreen.renderStarfield())
+                        starfield.render();
                     currentScreen.render(this);
+                }
                 break;
             }
         }
@@ -135,6 +138,8 @@ public class GuiRenderer {
     }
 
     public void setCurrentScreen(GuiScreen currentScreen) {
+        if (this.currentScreen != null)
+            this.currentScreen.onHide();
         this.currentScreen = currentScreen;
         if (currentScreen != null)
             currentScreen.onShown();

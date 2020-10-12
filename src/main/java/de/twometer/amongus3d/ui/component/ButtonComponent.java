@@ -38,4 +38,9 @@ public class ButtonComponent extends Component {
         this.clickListener = clickListener;
         return this;
     }
+
+    public ButtonComponent setText(String text) {
+        this.text = text;
+        return this;
+    }
 }

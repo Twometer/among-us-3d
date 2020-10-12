@@ -12,26 +12,32 @@ import de.twometer.amongus3d.model.player.Role;
 import de.twometer.amongus3d.model.world.Room;
 import de.twometer.amongus3d.model.world.TaskDef;
 import de.twometer.amongus3d.model.world.TaskType;
+import de.twometer.amongus3d.util.Constants;
 import de.twometer.amongus3d.util.Log;
 import org.joml.Vector3f;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class ServerMain {
 
     public static final int COMMON_TASKS = 1;
     public static final int SHORT_TASKS = 2;
     public static final int LONG_TASKS = 2;
+    public static final int VOTE_DURATION_SEC = 20;
+    public static final int VOTE_DURATION_MS = 1000 * VOTE_DURATION_SEC;
+    public static final boolean CONFIRM = true;
 
     public static final int PORT1 = 37832;
     public static final int PORT2 = 37833;
 
     private static final Map<String, ServerSession> sessions = new ConcurrentHashMap<>();
+
+    private static final Scheduler SCHEDULER = new Scheduler();
 
 
     private static ServerPlayer getPlayer(Connection connection) {
@@ -55,7 +61,7 @@ public class ServerMain {
         NetMessage.registerAll(server.getKryo());
 
         server.bind(PORT1, PORT2);
-
+        SCHEDULER.init();
         server.addListener(new Listener() {
             @Override
             public void connected(Connection connection) {
@@ -102,7 +108,7 @@ public class ServerMain {
                         return;
                     }
                     if (session.gameState == GameState.State.Lobby /*&& session.players.size() > 4*/) {
-                        generateSession(session);
+                        List<String> impostors = generateSession(session);
 
                         for (ServerPlayer player : session.players.values()) {
                             NetMessage.GameStarted started = new NetMessage.GameStarted();
@@ -110,6 +116,7 @@ public class ServerMain {
                             started.role = player.player.getRole();
                             started.color = player.player.getColor();
                             started.tasks = player.player.getTasks();
+                            started.impostors = impostors;
                             player.connection.sendTCP(started);
                         }
 
@@ -120,7 +127,17 @@ public class ServerMain {
                         NetMessage.EmergencyReport msg = new NetMessage.EmergencyReport();
                         msg.reporter = getPlayer(connection).player.getUsername();
                         msg.deathReport = ((NetMessage.EmergencyReport) o).deathReport;
+                        msg.voteDuration = VOTE_DURATION_MS;
                         serverSession.sendToAll(msg);
+                        for (ServerPlayer player : serverSession.players.values())
+                            player.player.resetVotes();
+                        serverSession.skipVotes = 0;
+
+                        Log.i("Voting ends in " + VOTE_DURATION_MS);
+                        serverSession.autoSkipTask = SCHEDULER.runLater(VOTE_DURATION_MS, () -> {
+                            Log.i("Voting ended automatically...");
+                            closeVoting(serverSession);
+                        });
                     }
                 } else if (o instanceof NetMessage.VoteCast) {
                     ServerSession serverSession = getSession(connection);
@@ -129,11 +146,75 @@ public class ServerMain {
                         msg.srcUsername = getPlayer(connection).player.getUsername();
                         msg.dstUsername = ((NetMessage.VoteCast) o).dstUsername;
                         serverSession.sendToAll(msg);
+
+                        if (msg.dstUsername.equals(Constants.SKIP_USER)) {
+                            serverSession.skipVotes++;
+                        } else {
+                            serverSession.players.get(msg.dstUsername).player.vote();
+                        }
+
+                        int votes = 0;
+                        for (ServerPlayer player : serverSession.players.values())
+                            votes += player.player.getEjectionVotes();
+                        votes += serverSession.skipVotes;
+                        if (votes == serverSession.players.size()) {
+                            closeVoting(serverSession);
+                            Log.i("everyone has voted");
+                        } else {
+                            Log.i("votes: " + votes + " / " + serverSession.players.size());
+                        }
+
                     }
                 }
             }
         });
         Log.i("Server online");
+    }
+
+    private static void closeVoting(ServerSession serverSession) {
+        serverSession.sendToAll(new NetMessage.VotingEnd());
+        SCHEDULER.cancel(serverSession.autoSkipTask);
+
+        Log.i("Voting closed, autoSkip cancelled  " + serverSession.autoSkipTask);
+        SCHEDULER.runLater(5000, () -> {
+            Log.i("Eval voting results...");
+            List<ServerPlayer> orderedByVotes = serverSession.players.values().stream().sorted(Comparator.comparingDouble(c -> c.player.getEjectionVotes())).collect(Collectors.toList());
+            ServerPlayer mostVotes = orderedByVotes.get(0);
+            int secondMostVotes = orderedByVotes.size() > 1 ? orderedByVotes.get(1).player.getEjectionVotes() : 0;
+
+            Log.i("Most votes: " + mostVotes.player.getUsername() + " (" + mostVotes.player.getEjectionVotes() + ")");
+            Log.i("Second most:" + secondMostVotes);
+            Log.i("Skip votes: " + serverSession.skipVotes);
+
+            if (serverSession.skipVotes == mostVotes.player.getEjectionVotes() || (mostVotes.player.getEjectionVotes() == secondMostVotes && mostVotes.player.getEjectionVotes() != 0)) {
+                // Tie
+                NetMessage.PlayerEjected ejected = new NetMessage.PlayerEjected();
+                ejected.username = Constants.INVALID_USER;
+                ejected.confirm = CONFIRM;
+                ejected.impostor = false;
+                serverSession.sendToAll(ejected);
+            } else if (serverSession.skipVotes > mostVotes.player.getEjectionVotes()) {
+                // Skip
+                NetMessage.PlayerEjected ejected = new NetMessage.PlayerEjected();
+                ejected.username = Constants.SKIP_USER;
+                ejected.confirm = CONFIRM;
+                ejected.impostor = false;
+                serverSession.sendToAll(ejected);
+            } else {
+                // Eject
+                NetMessage.PlayerKill kill = new NetMessage.PlayerKill();
+                kill.attacker = Constants.INVALID_USER;
+                kill.victim = mostVotes.player.getUsername();
+                serverSession.sendToAll(kill);
+
+                NetMessage.PlayerEjected ejected = new NetMessage.PlayerEjected();
+                ejected.username = mostVotes.player.getUsername();
+                ejected.confirm = CONFIRM;
+                ejected.impostor = mostVotes.player.getRole() == Role.Impostor;
+                serverSession.sendToAll(ejected);
+            }
+        });
+
     }
 
     private static Vector3f createPosition(int idx) {
@@ -205,7 +286,7 @@ public class ServerMain {
         return imposter;
     }
 
-    private static void generateSession(ServerSession session) {
+    private static List<String> generateSession(ServerSession session) {
         PlayerTask com = randomBasicTask();
         int numImposters = session.players.size() > 7 ? 2 : 1;
 
@@ -222,6 +303,7 @@ public class ServerMain {
             player.player.setRole(imposters.contains(player.player.getUsername()) ? Role.Impostor : Role.Crewmate);
             playerIdx++;
         }
+        return imposters;
     }
 
 }

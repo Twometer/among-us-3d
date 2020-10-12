@@ -9,7 +9,10 @@ public class ServerPlayer {
 
     public Player player;
 
-    public ServerPlayer(Connection connection) {
+    public ServerSession session;
+
+    public ServerPlayer(Connection connection, ServerSession session) {
         this.connection = connection;
+        this.session = session;
     }
 }

@@ -15,16 +15,19 @@ public class ServerSession {
 
     public String host;
 
+    public long autoSkipTask = -9;
+
     public Map<String, ServerPlayer> players = new ConcurrentHashMap<>();
 
     public GameState.State gameState = GameState.State.Lobby;
+    public int skipVotes;
 
     public ServerSession(String gameId) {
         this.gameId = gameId;
     }
 
     public void addPlayer(Connection connection, String username) {
-        ServerPlayer player = new ServerPlayer(connection);
+        ServerPlayer player = new ServerPlayer(connection, this);
         player.player = new Player(username);
         players.put(username, player);
     }
