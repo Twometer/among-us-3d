@@ -448,7 +448,7 @@ public class Game {
 
             if (window.isKeyPressed(GLFW_KEY_LEFT_SHIFT))
                 camera.getPosition().add(new Vector3f(0, -speed, 0));
-        } else
+        } else if (!self.isDead())
             shipCollider.updatePlayerLocation(camera.getPosition());
 
         Vector2f pos = window.getCursorPosition();

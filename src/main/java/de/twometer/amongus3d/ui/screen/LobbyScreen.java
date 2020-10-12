@@ -1,5 +1,6 @@
 package de.twometer.amongus3d.ui.screen;
 
+import de.twometer.amongus3d.client.AmongUsClient;
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.core.GameState;
 import de.twometer.amongus3d.model.NetMessage;
@@ -13,19 +14,16 @@ import org.joml.Vector4f;
 
 public class LobbyScreen extends GuiScreen {
 
-    private String gameCode;
-
-    private boolean host;
 
     private LabelComponent numPlayers;
 
-    public LobbyScreen(String gameCode, boolean host) {
-        this.gameCode = gameCode;
-        addComponent(new LabelComponent(0, 50, "Code: " + gameCode, 0.5f));
+    public LobbyScreen() {
+        AmongUsClient c = Game.instance().getClient();
+        addComponent(new LabelComponent(0, 50, "Code: " + c.gameCode, 0.5f));
         addComponent(numPlayers = new LabelComponent(0, 50, "Players: 0/10", 0.5f));
         numPlayers.setText("Players: " + Game.instance().getClient().users.size() + "/10");
         ButtonComponent startGame;
-        if (host) {
+        if (c.isHost) {
             addComponent(startGame = new ButtonComponent(200, 40, "Start game"));
             startGame.setClickListener(() -> {
                 Game.instance().getClient().sendMessage(new NetMessage.StartGame());

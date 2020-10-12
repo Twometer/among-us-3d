@@ -41,7 +41,10 @@ public class EjectScreen extends GuiScreen {
                 timer2.reset();
             }
             if (vis > 20) {
-                Game.instance().getGameState().setCurrentState(GameState.State.Running);
+                if (Game.instance().getClient().gameEnded)
+                    Game.instance().getGuiRenderer().setCurrentScreen(new GameEndScreen());
+                else
+                    Game.instance().getGameState().setCurrentState(GameState.State.Running);
             }
             renderer.getFontRenderer().drawCentered(message2, getW() / 2f, getH() / 2f + 25, 0.45f, new Vector4f(1, 0.15f, 0.15f, vis));
         }

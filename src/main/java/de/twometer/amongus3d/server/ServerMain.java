@@ -165,10 +165,41 @@ public class ServerMain {
                         }
 
                     }
+                } else if (o instanceof NetMessage.PlayerKill) {
+                    ServerSession serverSession = getSession(connection);
+                    if (serverSession != null) {
+                        checkVictory(serverSession);
+                        serverSession.players.get(((NetMessage.PlayerKill) o).victim).player.setDead(true);
+                    }
                 }
             }
         });
         Log.i("Server online");
+    }
+
+    private static void checkVictory(ServerSession serverSession) {
+        int impostors = 0;
+        int crewmates = 0;
+        for (ServerPlayer player : serverSession.players.values())
+            if (player.player.getRole() == Role.Impostor && !player.player.isDead()) impostors++;
+            else if (player.player.getRole() == Role.Crewmate && !player.player.isDead()) crewmates++;
+
+        NetMessage.GameEnded ended = new NetMessage.GameEnded();
+        Log.i("Impostors: " + impostors + "; Crewmates: " + crewmates);
+        if (impostors == 0) ended.winner = Role.Crewmate;
+        else if (crewmates <= impostors) ended.winner = Role.Impostor;
+        else return;
+
+        Log.i("Resetting session " + serverSession.gameId);
+        serverSession.skipVotes = 0;
+        for (ServerPlayer player : serverSession.players.values())
+        {
+            player.player.resetVotes();
+            player.player.setDead(false);
+            player.player.setTasks(new ArrayList<>());
+        }
+        serverSession.gameState = GameState.State.Lobby;
+        serverSession.sendToAll(ended);
     }
 
     private static void closeVoting(ServerSession serverSession) {
@@ -212,6 +243,10 @@ public class ServerMain {
                 ejected.confirm = CONFIRM;
                 ejected.impostor = mostVotes.player.getRole() == Role.Impostor;
                 serverSession.sendToAll(ejected);
+
+                serverSession.players.get(ejected.username).player.setDead(true);
+
+                checkVictory(serverSession);
             }
         });
 

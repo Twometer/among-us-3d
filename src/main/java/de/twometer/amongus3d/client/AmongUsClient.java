@@ -12,6 +12,7 @@ import de.twometer.amongus3d.model.player.Role;
 import de.twometer.amongus3d.server.ServerMain;
 import de.twometer.amongus3d.ui.screen.EjectScreen;
 import de.twometer.amongus3d.ui.screen.EmergencyScreen;
+import de.twometer.amongus3d.ui.screen.GameEndScreen;
 import de.twometer.amongus3d.ui.screen.GameStartScreen;
 import de.twometer.amongus3d.util.Constants;
 import de.twometer.amongus3d.util.Log;
@@ -29,6 +30,12 @@ public class AmongUsClient {
     private final List<CallbackItem> callbackItems = new CopyOnWriteArrayList<>();
 
     public Map<String, Player> users = new HashMap<>();
+
+    public boolean gameEnded = false;
+    public Role winner;
+
+    public String gameCode;
+    public boolean isHost;
 
     private static class CallbackItem {
         private Class<?> clazz;
@@ -80,16 +87,25 @@ public class AmongUsClient {
             }
         } else if (o instanceof NetMessage.PlayerKill) {
             //if (Game.instance().getGameState().getCurrentState() == GameState.State.Running) {
-                //SoundBuffer buffer = Game.instance().getSoundProvider().getBuffer("")
+                //SoundBuffer buffer = Game.instance().getSoundProvider().getBuffer("kill.ogg")
             //}
             getPlayer(((NetMessage.PlayerKill) o).victim).setDead(true);
-            checkVictory();
+            if (((NetMessage.PlayerKill) o).victim.equals(Game.instance().getSelf().getUsername()))
+                Game.instance().getSelf().setDead(true);
+        } else if (o instanceof NetMessage.GameEnded) {
+            gameEnded = true;
+            winner = ((NetMessage.GameEnded) o).winner;
+            Log.i("Game end, win: " + winner);
+
+            if (Game.instance().getGameState().getCurrentState() == GameState.State.Running) {
+                Game.instance().getGuiRenderer().setCurrentScreen(new GameEndScreen());
+            }
+        } else if (o instanceof NetMessage.GameJoined) {
+            isHost =((NetMessage.GameJoined) o).host;
+
         }
     }
 
-    public void checkVictory() {
-
-    }
 
     private int getRemainingImpostors() {
         int impostors = 0;
