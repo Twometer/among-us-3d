@@ -43,6 +43,11 @@ public class GameStartScreen extends GuiScreen {
         Vector4f color = player.getRole() == Role.Impostor ? new Vector4f(1, 0, 0, vis) : new Vector4f(0, 0.5f, 1, vis);
         renderer.getFontRenderer().drawCentered(player.getRole().toString(), getW() / 2f, 60f + vis * 20f, 2.0f, color);
 
+        if (player.getRole() == Role.Crewmate) {
+            long impostors = Game.instance().getClient().users.values().stream().filter(p -> p.getRole() == Role.Impostor).count();
+            renderer.getFontRenderer().drawCentered("There are " + impostors + " impostors among us.", getW() / 2f, 250, 0.5f, new Vector4f(1, 0, 0, time - 0.1f));
+        }
+
         int y = 320;
         for (Player p : Game.instance().getClient().users.values()) {
             float o = (listvis * 35.0f) / (y - 285.0f);
