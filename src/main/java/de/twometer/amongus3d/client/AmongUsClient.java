@@ -9,7 +9,7 @@ import de.twometer.amongus3d.core.GameState;
 import de.twometer.amongus3d.model.NetMessage;
 import de.twometer.amongus3d.model.player.Player;
 import de.twometer.amongus3d.server.ServerMain;
-import de.twometer.amongus3d.ui.EmergencyScreen;
+import de.twometer.amongus3d.ui.screen.EmergencyScreen;
 import de.twometer.amongus3d.util.Log;
 import org.greenrobot.eventbus.EventBus;
 
@@ -24,7 +24,7 @@ public class AmongUsClient {
 
     private Client client;
 
-    private List<CallbackItem> callbackItems = new CopyOnWriteArrayList<>();
+    private final List<CallbackItem> callbackItems = new CopyOnWriteArrayList<>();
 
     public List<String> users = new ArrayList<>();
 

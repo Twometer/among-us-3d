@@ -1,8 +1,8 @@
 package de.twometer.amongus3d.io;
 
 import de.twometer.amongus3d.core.Game;
-import de.twometer.amongus3d.ui.Font;
-import de.twometer.amongus3d.ui.Glyph;
+import de.twometer.amongus3d.ui.font.Font;
+import de.twometer.amongus3d.ui.font.Glyph;
 
 import java.io.*;
 import java.util.HashMap;

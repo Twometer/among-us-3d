@@ -1,5 +1,6 @@
-package de.twometer.amongus3d.ui;
+package de.twometer.amongus3d.ui.component;
 
+import de.twometer.amongus3d.ui.GuiRenderer;
 import org.joml.Vector4f;
 
 public class InputBoxComponent extends Component {

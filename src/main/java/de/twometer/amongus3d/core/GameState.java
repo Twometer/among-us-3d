@@ -3,6 +3,7 @@ package de.twometer.amongus3d.core;
 import de.twometer.amongus3d.audio.SoundBuffer;
 import de.twometer.amongus3d.audio.SoundFX;
 import de.twometer.amongus3d.audio.SoundSource;
+import de.twometer.amongus3d.util.Log;
 import org.joml.Vector3f;
 
 public class GameState {
@@ -32,10 +33,12 @@ public class GameState {
 
     public void setCurrentState(State currentState) {
         this.currentState = currentState;
+        Log.d("Game state " + currentState);
 
-        if (currentState == State.Running)
+        if (currentState == State.Running) {
+            Game.instance().getGuiRenderer().setCurrentScreen(null);
             Game.instance().getWindow().setCursorVisible(false);
-        else {
+        }else {
             Game.instance().getWindow().setCursorVisible(true);
         }
 

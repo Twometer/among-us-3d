@@ -1,9 +1,11 @@
-package de.twometer.amongus3d.ui;
+package de.twometer.amongus3d.ui.screen;
 
 import de.twometer.amongus3d.audio.SoundFX;
-import de.twometer.amongus3d.client.AmongUsClient;
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.model.NetMessage;
+import de.twometer.amongus3d.ui.component.ButtonComponent;
+import de.twometer.amongus3d.ui.component.EmptyComponent;
+import de.twometer.amongus3d.ui.component.LabelComponent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.joml.Vector4f;

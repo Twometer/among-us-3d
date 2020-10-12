@@ -1,14 +1,14 @@
-package de.twometer.amongus3d.ui;
+package de.twometer.amongus3d.ui.screen;
 
-import com.sun.scenario.effect.Color4f;
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.core.GameState;
 import de.twometer.amongus3d.model.NetMessage;
+import de.twometer.amongus3d.ui.GuiRenderer;
+import de.twometer.amongus3d.ui.component.ButtonComponent;
+import de.twometer.amongus3d.ui.component.LabelComponent;
 import de.twometer.amongus3d.util.Log;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-import org.joml.Vector3f;
-import org.joml.Vector4d;
 import org.joml.Vector4f;
 
 public class LobbyScreen extends GuiScreen {

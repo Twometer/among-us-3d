@@ -5,6 +5,7 @@ import org.lwjgl.BufferUtils;
 
 import java.nio.ByteBuffer;
 
+import static de.twometer.amongus3d.util.MathUtil.lerp;
 import static org.lwjgl.opengl.GL11.*;
 
 public class SSAO {
@@ -13,9 +14,6 @@ public class SSAO {
         return (float) Math.random();
     }
 
-    private static float lerp(float a, float b, float f) {
-        return a + f * (b - a);
-    }
 
     public static Vector3f[] createSampleKernel(int size) {
         Vector3f[] kernel = new Vector3f[size];

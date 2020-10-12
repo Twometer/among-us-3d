@@ -1,4 +1,4 @@
-package de.twometer.amongus3d.ui;
+package de.twometer.amongus3d.ui.font;
 
 import de.twometer.amongus3d.render.Texture;
 

@@ -1,8 +1,12 @@
-package de.twometer.amongus3d.ui;
+package de.twometer.amongus3d.ui.screen;
 
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.core.GameState;
 import de.twometer.amongus3d.model.NetMessage;
+import de.twometer.amongus3d.ui.component.ButtonComponent;
+import de.twometer.amongus3d.ui.component.EmptyComponent;
+import de.twometer.amongus3d.ui.component.InputBoxComponent;
+import de.twometer.amongus3d.ui.component.LabelComponent;
 import de.twometer.amongus3d.util.Log;
 
 public class MainMenuScreen extends GuiScreen {
@@ -20,17 +24,18 @@ public class MainMenuScreen extends GuiScreen {
 
         addComponent(new LabelComponent(0, 30, "Username", 0.25f));
         addComponent(usernameBox = new InputBoxComponent(200, 40));
-        addComponent(new EmptyComponent(0, 10));
+        addComponent(new EmptyComponent(0, 50));
         addComponent(new LabelComponent(0, 30, "Game code", 0.25f));
         addComponent(gameCodeBox = new InputBoxComponent(200, 40));
 
-        addComponent(new EmptyComponent(0, 100));
+        addComponent(new EmptyComponent(0, 20));
         addComponent(joinGame = new ButtonComponent(200, 40, "Join game"));
-        addComponent(new EmptyComponent(0, 25));
+        addComponent(new EmptyComponent(0, 50));
         addComponent(createGame = new ButtonComponent(200, 40, "Create game"));
 
         joinGame.setClickListener(() -> {
-            Game.instance().getClient().sendMessage(new NetMessage.JoinGame(gameCodeBox.getText(), usernameBox.getText()));
+            Game.instance().getGuiRenderer().setCurrentScreen(new EjectScreen("Twometer was Not an Impostor", "2 impostors remain"));
+            //Game.instance().getClient().sendMessage(new NetMessage.JoinGame(gameCodeBox.getText(), usernameBox.getText()));
         });
         createGame.setClickListener(() -> {
             if (usernameBox.getText().trim().length() == 0)

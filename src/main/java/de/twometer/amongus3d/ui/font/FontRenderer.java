@@ -1,11 +1,10 @@
-package de.twometer.amongus3d.ui;
+package de.twometer.amongus3d.ui.font;
 
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.render.shaders.ShaderFont;
 import org.joml.Vector4f;
 
 import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class FontRenderer {
 

@@ -19,7 +19,7 @@ import de.twometer.amongus3d.postproc.SSAO;
 import de.twometer.amongus3d.render.*;
 import de.twometer.amongus3d.render.shaders.*;
 import de.twometer.amongus3d.ui.GuiRenderer;
-import de.twometer.amongus3d.ui.MainMenuScreen;
+import de.twometer.amongus3d.ui.screen.MainMenuScreen;
 import de.twometer.amongus3d.util.Debug;
 import de.twometer.amongus3d.util.Fps;
 import de.twometer.amongus3d.util.Log;
@@ -117,10 +117,6 @@ public class Game {
         glClearColor(0, 0, 0, 0);
 
         //// INIT GLFW ////
-        window.setSizeCallback((width, height) -> {
-            glViewport(0, 0, width, height);
-            handleSizeChange(width, height);
-        });
         window.setClickCallback(button -> {
             if (gameState.getCurrentState() == GameState.State.Running) {
                 for (GameObject object : gameObjects)
@@ -131,6 +127,8 @@ public class Game {
             guiRenderer.onClick((int) window.getCursorPosition().x, (int) window.getCursorPosition().y);
         });
         window.setCharTypedCallback(guiRenderer::onCharTyped);
+        prevWidth = window.getWidth();
+        prevHeight = window.getHeight();
         handleSizeChange(window.getWidth(), window.getHeight());
 
         //// PRE-INIT ////
@@ -169,9 +167,6 @@ public class Game {
         debug.addDebugPos(new Vector3f());
         debug.setActive(DEBUG_MODE);
 
-        gameState.setCurrentState(GameState.State.Menu);
-        guiRenderer.setCurrentScreen(new MainMenuScreen());
-
         //// INIT SOUND ////
         Log.i("Starting sound system");
         OpenAL.create();
@@ -182,7 +177,7 @@ public class Game {
         addAmbience("engine", 9.98f, 1.26f, -8.33f).setGain(1f).setRolloffFactor(5);
         addAmbience("security", 14.39f, 0.7f, -18.53f).setGain(0.5f).setRolloffFactor(2);
         addAmbience("medbay", 20.7f, 0.62f, -15.65f).setGain(1.2f).setRolloffFactor(3);
-        addAmbience("cafeteria", 28.05f, 0.4f, -22.36f).setGain(1.4f);
+        addAmbience("cafeteria", 31.05f, 0.4f, -27.36f).setGain(1.4f);
         addAmbience("weapons", 39.28f, 0.86f, -22.86f).setGain(0.75f).setRolloffFactor(4);
         addAmbience("oxygen", 36.7f, 0.45f, -18.35f);
         addAmbience("hallways", 49.42f, 0.86f, -16).setGain(1.2f).setRolloffFactor(1.2f);
@@ -192,6 +187,10 @@ public class Game {
         addAmbience("storage", 26.76f, 0.82f, -7.43f).setGain(1.3f);
         addAmbience("electrical", 18.55f, 0.66f, -10).setRolloffFactor(4f);
         addAmbience("admin", 34.22f, 0.7f, -11.5f).setGain(1.4f);
+
+        Log.i("Init complete");
+        gameState.setCurrentState(GameState.State.Menu);
+        guiRenderer.setCurrentScreen(new MainMenuScreen());
     }
 
     private SoundSource addAmbience(String name, float x, float y, float z) {
@@ -199,6 +198,7 @@ public class Game {
     }
 
     private void handleSizeChange(int w, int h) {
+        glViewport(0, 0, w, h);
         float aspect = (float) w / h;
         projMatrix = new Matrix4f().perspective((float) Math.toRadians(70), aspect, 0.1f, 200.0f);
         guiMatrix = new Matrix4f().ortho2D(0, w, h, 0);
@@ -230,8 +230,17 @@ public class Game {
         }
     }
 
+    private int prevWidth;
+    private int prevHeight;
+
     private void renderFrame() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        if (window.getWidth() != prevWidth || window.getHeight() != prevHeight) {
+            handleSizeChange(window.getWidth(), window.getHeight());
+            this.prevWidth = window.getWidth();
+            this.prevHeight = window.getHeight();
+        }
 
         if (gameState.getCurrentState() == GameState.State.Running) {
             handleControls();
@@ -249,12 +258,12 @@ public class Game {
         glClear(GL_DEPTH_BUFFER_BIT);
         glDisable(GL_DEPTH_TEST);
         if (debug.isActive()) {
-            guiRenderer.getFontRenderer().draw(camera.getPosition().x + " " + camera.getPosition().y + " " + camera.getPosition().z, 5, 25, 0.5f, new Vector4f(1, 1, 1, 1));
+            guiRenderer.getFontRenderer().draw(camera.getPosition().x + " " + camera.getPosition().y + " " + camera.getPosition().z, 5, 25, 0.25f, new Vector4f(1, 1, 1, 1));
         }
         guiRenderer.getFontRenderer().draw(fps.get() + " fps", 5, 5, 0.25f, new Vector4f(1, 1, 1, 1));
         int y = 65;
         if (gameState.isRunning()) {
-            String header = self.getRole() == Role.Impostor ? "Fake tasks:" : "Your task manager lol:";
+            String header = self.getRole() == Role.Impostor ? "Fake tasks:" : "Your tasks:";
             guiRenderer.getFontRenderer().draw(header, 5, 30, 0.5f, new Vector4f(1, 1, 1, 1));
             for (PlayerTask task : self.getTasks()) {
                 String progress = task.isLongTask() ? " (" + task.getProgress() + "/" + task.getTasks().size() + ")" : "";

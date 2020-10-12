@@ -1,15 +1,16 @@
 package de.twometer.amongus3d.ui;
 
 import de.twometer.amongus3d.core.Game;
-import de.twometer.amongus3d.core.GameState;
 import de.twometer.amongus3d.io.FontLoader;
 import de.twometer.amongus3d.mesh.Mesh;
 import de.twometer.amongus3d.mesh.Model;
 import de.twometer.amongus3d.mesh.shading.ShadingStrategies;
 import de.twometer.amongus3d.render.shaders.ShaderGuiFlat;
 import de.twometer.amongus3d.render.shaders.ShaderGuiTex;
+import de.twometer.amongus3d.ui.font.Font;
+import de.twometer.amongus3d.ui.font.FontRenderer;
+import de.twometer.amongus3d.ui.screen.GuiScreen;
 import org.joml.Matrix4f;
-import org.joml.Vector2f;
 import org.joml.Vector4f;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -30,6 +31,8 @@ public class GuiRenderer {
     private Model rectModel;
 
     private GuiScreen currentScreen;
+
+    private Starfield starfield = new Starfield();
 
     public void init() {
         game = Game.instance();
@@ -60,6 +63,9 @@ public class GuiRenderer {
                 .putColor(1, 1, 1)
                 .bake(GL_TRIANGLE_STRIP);
 
+        starfield = new Starfield();
+        starfield.init();
+
         Font font = FontLoader.loadFont("fonts/lucida.fnt", "fonts/lucida.png");
         fontRenderer = new FontRenderer(font);
     }
@@ -88,6 +94,7 @@ public class GuiRenderer {
             case Lobby:
             case Emergency:
             case Menu: {
+                starfield.render();
                 if (currentScreen != null)
                     currentScreen.render(this);
                 break;
@@ -98,6 +105,7 @@ public class GuiRenderer {
     public void relayout() {
         if (currentScreen != null)
             currentScreen.relayout();
+        starfield.regenerate();
     }
 
     public void drawRect(int x, int y, int w, int h, Vector4f color) {
@@ -128,6 +136,8 @@ public class GuiRenderer {
 
     public void setCurrentScreen(GuiScreen currentScreen) {
         this.currentScreen = currentScreen;
+        if (currentScreen != null)
+            currentScreen.onShown();
         relayout();
     }
 }

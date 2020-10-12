@@ -1,6 +1,8 @@
-package de.twometer.amongus3d.ui;
+package de.twometer.amongus3d.ui.screen;
 
 import de.twometer.amongus3d.core.Game;
+import de.twometer.amongus3d.ui.GuiRenderer;
+import de.twometer.amongus3d.ui.component.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +41,10 @@ public abstract class GuiScreen extends Component {
             component.setY(y);
             y += component.getH();
         }
+    }
+
+    public void onShown() {
+
     }
 
     @Override
