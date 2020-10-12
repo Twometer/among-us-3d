@@ -21,6 +21,8 @@ import org.greenrobot.eventbus.EventBus;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class AmongUsClient {
@@ -38,11 +40,32 @@ public class AmongUsClient {
     public boolean isHost;
 
     private static class CallbackItem {
+        private static int idc = 0;
+        private final int id;
         private Class<?> clazz;
         private Consumer consumer;
+
+        public CallbackItem() {
+            id = idc++;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            CallbackItem that = (CallbackItem) o;
+            return id == that.id &&
+                    Objects.equals(clazz, that.clazz);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, clazz);
+        }
     }
 
     private void handle(Object o) {
+
         if (o instanceof NetMessage.PlayerJoined) {
             String usr = ((NetMessage.PlayerJoined) o).username;
             users.put(usr, new Player(usr));
@@ -87,7 +110,7 @@ public class AmongUsClient {
             }
         } else if (o instanceof NetMessage.PlayerKill) {
             //if (Game.instance().getGameState().getCurrentState() == GameState.State.Running) {
-                //SoundBuffer buffer = Game.instance().getSoundProvider().getBuffer("kill.ogg")
+            //SoundBuffer buffer = Game.instance().getSoundProvider().getBuffer("kill.ogg")
             //}
             getPlayer(((NetMessage.PlayerKill) o).victim).setDead(true);
             if (((NetMessage.PlayerKill) o).victim.equals(Game.instance().getSelf().getUsername()))
@@ -101,7 +124,7 @@ public class AmongUsClient {
                 Game.instance().getGuiRenderer().setCurrentScreen(new GameEndScreen());
             }
         } else if (o instanceof NetMessage.GameJoined) {
-            isHost =((NetMessage.GameJoined) o).host;
+            isHost = ((NetMessage.GameJoined) o).host;
 
         }
     }
@@ -124,14 +147,16 @@ public class AmongUsClient {
             @Override
             public void received(Connection connection, Object o) {
                 super.received(connection, o);
+                // Log.i("Incoming message " + o.getClass().getSimpleName());
 
                 List<CallbackItem> remove = new ArrayList<>();
-                for (CallbackItem c : callbackItems) {
-                    if (c.clazz == o.getClass()) {
-                        remove.add(c);
-                        c.consumer.accept(o);
+                for (CallbackItem itm : callbackItems) {
+                    if (itm.clazz == o.getClass()) {
+                        itm.consumer.accept(o);
+                        remove.add(itm);
                     }
                 }
+                //  Log.d("Forwarded to " + remove.size() + " callbacks");
                 callbackItems.removeAll(remove);
                 handle(o);
                 EventBus.getDefault().post(o);
@@ -158,10 +183,20 @@ public class AmongUsClient {
         }
     }
 
+    private final Executor EXECUTOR = Executors.newSingleThreadExecutor();
+
+    private boolean connecting = false;
+
     public AmongUsClient sendMessage(Object message) {
-        if (client == null || !client.isConnected())
-            connect();
-        client.sendTCP(message);
+        EXECUTOR.execute(() -> {
+            if (client == null || (!client.isConnected() && !connecting)) {
+                connecting = true;
+                connect();
+                connecting = false;
+            }
+
+            client.sendTCP(message);
+        });
         return this;
     }
 
@@ -170,6 +205,7 @@ public class AmongUsClient {
         i.clazz = packet;
         i.consumer = consumer;
         callbackItems.add(i);
+        // Log.d("Registered callback " + i.id + " on Net::" + i.clazz.getSimpleName());
     }
 
     public Player getPlayer(String player) {
