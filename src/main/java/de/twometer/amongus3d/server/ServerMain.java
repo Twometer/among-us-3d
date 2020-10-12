@@ -19,8 +19,6 @@ import org.joml.Vector3f;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class ServerMain {
@@ -31,6 +29,7 @@ public class ServerMain {
     public static final int VOTE_DURATION_SEC = 20;
     public static final int VOTE_DURATION_MS = 1000 * VOTE_DURATION_SEC;
     public static final boolean CONFIRM = true;
+    public static final int MAX_IMPOSTORS = 2;
 
     public static final int PORT1 = 37832;
     public static final int PORT2 = 37833;
@@ -108,7 +107,7 @@ public class ServerMain {
                         return;
                     }
                     if (session.gameState == GameState.State.Lobby /*&& session.players.size() > 4*/) {
-                        List<String> impostors = generateSession(session);
+                        List<String> impostors = genSession(session);
 
                         for (ServerPlayer player : session.players.values()) {
                             NetMessage.GameStarted started = new NetMessage.GameStarted();
@@ -192,8 +191,7 @@ public class ServerMain {
 
         Log.i("Resetting session " + serverSession.gameId);
         serverSession.skipVotes = 0;
-        for (ServerPlayer player : serverSession.players.values())
-        {
+        for (ServerPlayer player : serverSession.players.values()) {
             player.player.resetVotes();
             player.player.setDead(false);
             player.player.setTasks(new ArrayList<>());
@@ -252,24 +250,24 @@ public class ServerMain {
 
     }
 
-    private static Vector3f createPosition(int idx) {
+    private static Vector3f genPosition(int idx) {
         Vector3f base = new Vector3f(30, 0, -21);
         Vector3f add = new Vector3f((float) Math.sin(idx), 0, (float) Math.cos(idx));
         return base.add(add.normalize(4));
     }
 
-    private static PlayerColor assignColor(int idx) {
+    private static PlayerColor genColor(int idx) {
         return PlayerColor.values()[idx];
     }
 
-    private static PlayerTask randomBasicTask() {
+    private static PlayerTask randomShortTask(Player player) {
         return new PlayerTask()
-                .addTask(TaskGenerator.genUnique(null, TaskGenerator.SHORT_TASKS));
+                .addTask(TaskGenerator.genUnique(player, TaskGenerator.SHORT_TASKS));
     }
 
     private static final Random r = new Random();
 
-    private static void createLongTask(Player player) {
+    private static void genLongTask(Player player) {
         switch (r.nextInt(4)) {
             case 0:
                 player.getTasks().add(new PlayerTask()
@@ -297,18 +295,20 @@ public class ServerMain {
         }
     }
 
-    private static void createShortTask(Player player) {
-        player.getTasks().add(randomBasicTask());
+    private static void genShortTask(Player player) {
+        player.getTasks().add(randomShortTask(player));
     }
 
-    private static void createTasksFor(Player player) {
+    private static void genTasks(Player player) {
 
         for (int i = 0; i < LONG_TASKS; i++) {
-            createLongTask(player);
+            Log.d("Generating long task for " + player.getUsername());
+            genLongTask(player);
         }
 
         for (int i = 0; i < SHORT_TASKS; i++) {
-            createShortTask(player);
+            Log.d("Generating short task for " + player.getUsername());
+            genShortTask(player);
         }
 
     }
@@ -321,9 +321,9 @@ public class ServerMain {
         return imposter;
     }
 
-    private static List<String> generateSession(ServerSession session) {
-        PlayerTask com = randomBasicTask();
-        int numImposters = session.players.size() > 7 ? 2 : 1;
+    private static List<String> genSession(ServerSession session) {
+        PlayerTask commonTask = randomShortTask(null);
+        int numImposters = Math.min(MAX_IMPOSTORS, session.players.size() > 7 ? 2 : 1);
 
         List<String> imposters = new ArrayList<>();
         for (int i = 0; i < numImposters; i++)
@@ -331,10 +331,10 @@ public class ServerMain {
 
         int playerIdx = 0;
         for (ServerPlayer player : session.players.values()) {
-            player.player.setPosition(createPosition(playerIdx));
-            player.player.setColor(assignColor(playerIdx));
-            player.player.getTasks().add(com);
-            createTasksFor(player.player);
+            player.player.setPosition(genPosition(playerIdx));
+            player.player.setColor(genColor(playerIdx));
+            player.player.getTasks().add(commonTask);
+            genTasks(player.player);
             player.player.setRole(imposters.contains(player.player.getUsername()) ? Role.Impostor : Role.Crewmate);
             playerIdx++;
         }

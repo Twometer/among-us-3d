@@ -15,6 +15,8 @@ public class FontRenderer {
     private int vao;
     private int vbo;
 
+    private static final int ADVANCE_RM = 10;
+
     public FontRenderer(Font font) {
         this.font = font;
         this.shader = Game.instance().getShaderProvider().getShader(ShaderFont.class);
@@ -28,7 +30,7 @@ public class FontRenderer {
         for (char c : string.toCharArray()) {
             Glyph glyph = font.getGlyphs().get((int)c);
             if (glyph == null) continue;
-            cursor += (glyph.advance - 12) * fontSize;
+            cursor += (glyph.advance - ADVANCE_RM) * fontSize;
         }
         return cursor;
     }
@@ -80,7 +82,7 @@ public class FontRenderer {
             glBufferData(GL_ARRAY_BUFFER, box, GL_DYNAMIC_DRAW);
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-            x += (glyph.advance - 12.0f) * size;
+            x += (glyph.advance - ADVANCE_RM) * size;
         }
 
 

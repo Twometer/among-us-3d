@@ -66,7 +66,7 @@ public class GuiRenderer {
         starfield = new Starfield();
         starfield.init();
 
-        Font font = FontLoader.loadFont("fonts/lucida.fnt", "fonts/lucida.png");
+        Font font = FontLoader.loadFont("fonts/nirmala.fnt", "fonts/nirmala.png");
         fontRenderer = new FontRenderer(font);
     }
 

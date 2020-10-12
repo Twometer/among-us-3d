@@ -11,7 +11,7 @@ public class Camera {
     private static final float BREATHING_STRENGTH = 0.01f;
     private static final float BREATHING_SPEED = 1.44f;
 
-    private final Vector3f position = new Vector3f(30, 0.50f, -21);
+    private final Vector3f position = new Vector3f(30, 0.56f, -21);
 
     private final Vector2f angle = new Vector2f(0, 0);
 

@@ -25,7 +25,7 @@ public class ButtonComponent extends Component {
     public void render(GuiRenderer renderer) {
         super.render(renderer);
         renderer.drawRect(getX(), getY(), getW(), getH(), new Vector4f(0.25f, 0.25f, 0.25f, 1.0f));
-        renderer.getFontRenderer().drawCentered(text, getX() + getW() / 2f, getY(), 0.5f, color);
+        renderer.getFontRenderer().drawCentered(text, getX() + getW() / 2f, getY() - 2, 0.5f, color);
     }
 
     @Override

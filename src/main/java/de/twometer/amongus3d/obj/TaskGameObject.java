@@ -2,6 +2,7 @@ package de.twometer.amongus3d.obj;
 
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.mesh.Renderable;
+import de.twometer.amongus3d.model.player.Role;
 import de.twometer.amongus3d.model.world.Room;
 import de.twometer.amongus3d.model.world.TaskDef;
 import de.twometer.amongus3d.model.world.TaskType;
@@ -54,7 +55,7 @@ public class TaskGameObject extends StaticGameObject {
 
     @Override
     public boolean canPlayerInteract() {
-        return isHighlighted();
+        return isHighlighted() && Game.instance().getSelf().getRole() != Role.Impostor;
     }
 
     @Override

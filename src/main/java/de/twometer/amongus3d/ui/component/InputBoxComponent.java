@@ -35,7 +35,7 @@ public class InputBoxComponent extends Component {
         renderer.drawRect(getX() + 1, getY() + 1, getW() - 2, getH() - 2, new Vector4f(0, 0, 0, 1));
         if (selectedInputBox == id)
         renderer.drawRect(getX() + 10 + (int) renderer.getFontRenderer().getStringWidth(text, 0.4f), getY() + 8, 2, getH() - 16, new Vector4f(0.75f, 0.75f, 0.75f, 1));
-        renderer.getFontRenderer().draw(text, getX() + 5, getY() + 10, 0.4f, new Vector4f(1, 1, 1, 1));
+        renderer.getFontRenderer().draw(text, getX() + 8, getY() + 5, 0.4f, new Vector4f(1, 1, 1, 1));
     }
 
     @Override

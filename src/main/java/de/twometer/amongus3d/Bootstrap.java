@@ -14,6 +14,7 @@ public class Bootstrap {
         Game.instance().run();
         Log.i("Shutting down...");
         OpenAL.close();
+        System.exit(0);
     }
 
 }

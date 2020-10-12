@@ -260,7 +260,7 @@ public class Game {
         if (debug.isActive()) {
             guiRenderer.getFontRenderer().draw(camera.getPosition().x + " " + camera.getPosition().y + " " + camera.getPosition().z, 5, 25, 0.25f, new Vector4f(1, 1, 1, 1));
         }
-        guiRenderer.getFontRenderer().draw(fps.get() + " fps", 5, 5, 0.25f, new Vector4f(1, 1, 1, 1));
+        guiRenderer.getFontRenderer().draw(fps.get() + " fps", window.getWidth() - 5 - guiRenderer.getFontRenderer().getStringWidth(fps.get() + " fps", 0.25f), 5, 0.25f, new Vector4f(1, 1, 1, 1));
         int y = 65;
         if (gameState.isRunning()) {
             String header = self.getRole() == Role.Impostor ? "Fake tasks:" : "Your tasks:";

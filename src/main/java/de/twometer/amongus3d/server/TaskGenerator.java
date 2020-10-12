@@ -34,12 +34,12 @@ public class TaskGenerator {
     });
 
     public static final TaskDef[] DATA_UPLOAD = convert(new String[]{
-            "Navigation.DataTransfer",
             "Admin.DataTransfer",
-            "Comms.DataTransfer",
     });
 
     public static final TaskDef[] DATA_DOWNLOAD = convert(new String[]{
+            "Comms.DataTransfer",
+            "Navigation.DataTransfer",
             "Electrical.DataTransfer",
             "Cafeteria.DataTransfer",
             "Weapons.DataTransfer",
@@ -66,12 +66,7 @@ public class TaskGenerator {
             "Cafeteria.ClearGarbage",
             "MedBay.Scan",
             "MedBay.InspectSamples",
-            "Shields.PrimeShields",
-            /*"Security.FixWiring",
-            "Navigation.FixWiring",
-            "Electrical.FixWiring",
-            "Cafeteria.FixWiring",
-            "Storage.FixWiring"*/});
+            "Shields.PrimeShields",});
 
     private static final Random r = new Random();
 
@@ -86,7 +81,7 @@ public class TaskGenerator {
     private static boolean hasTask(Player p, TaskDef d) {
         if (p == null) return false;
         for (PlayerTask task : p.getTasks())
-            if (task.getTasks().size() > 0 && task.getTasks().get(0).equals(d))
+            if (task.getTasks().contains(d))
                 return true;
         return false;
     }

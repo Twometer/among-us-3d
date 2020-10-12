@@ -43,4 +43,12 @@ public class PlayerTask {
         tasks.add(taskDef);
         return this;
     }
+
+    @Override
+    public String toString() {
+        TaskDef nextTask = nextTask();
+        String base = nextTask.getRoom().toString() + ": ";
+
+        return super.toString();
+    }
 }
