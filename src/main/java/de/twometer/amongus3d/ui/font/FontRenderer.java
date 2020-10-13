@@ -2,6 +2,7 @@ package de.twometer.amongus3d.ui.font;
 
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.render.shaders.ShaderFont;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import static org.lwjgl.opengl.GL30.*;
@@ -38,6 +39,11 @@ public class FontRenderer {
     public void drawCentered(String text, float x, float y, float fontSize, Vector4f color) {
         float width = getStringWidth(text, fontSize);
         draw(text, x - width / 2f, y, fontSize, color);
+    }
+
+    public void drawRightAligned(String text, float x, float y, float fontSize, Vector4f color) {
+        float width = getStringWidth(text, fontSize);
+        draw(text, x - width, y, fontSize, color);
     }
 
     public void draw(String value, float x, float y, float size, Vector4f color) {

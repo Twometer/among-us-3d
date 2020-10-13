@@ -10,9 +10,14 @@ public class Player {
 
     private String username;
 
-    private float rotation;
 
-    private Vector3f position;
+    private float networkRotation = 0;
+    private float nextTickRotation = 0;
+    private float lastTickRotation = 0;
+
+    private final Vector3f networkPosition = new Vector3f(0, 0, 0);
+    private final Vector3f nextTickPosition = new Vector3f(0, 0, 0);
+    private final Vector3f lastTickPosition = new Vector3f(0, 0, 0);
 
     private Role role = Role.Crewmate;
 
@@ -46,22 +51,6 @@ public class Player {
 
     public String getUsername() {
         return username;
-    }
-
-    public float getRotation() {
-        return rotation;
-    }
-
-    public void setRotation(float rotation) {
-        this.rotation = rotation;
-    }
-
-    public Vector3f getPosition() {
-        return position;
-    }
-
-    public void setPosition(Vector3f position) {
-        this.position = position;
     }
 
     public Role getRole() {
@@ -102,5 +91,45 @@ public class Player {
 
     public void setDead(boolean dead) {
         isDead = dead;
+    }
+
+    public void setPosition(Vector3f v) {
+        networkPosition.set(v);
+    }
+
+    public Vector3f getNextTickPosition() {
+        return nextTickPosition;
+    }
+
+    public Vector3f getLastTickPosition() {
+        return lastTickPosition;
+    }
+
+    public Vector3f getPosition() {
+        return networkPosition;
+    }
+
+    public float getRotation() {
+        return networkRotation;
+    }
+
+    public void setRotation(float rot) {
+        networkRotation = rot;
+    }
+
+    public float getNextTickRotation() {
+        return nextTickRotation;
+    }
+
+    public float getLastTickRotation() {
+        return lastTickRotation;
+    }
+
+    public void updatePosition() {
+        lastTickPosition.set(nextTickPosition);
+        nextTickPosition.set(networkPosition);
+
+        lastTickRotation = nextTickRotation;
+        nextTickRotation = networkRotation;
     }
 }

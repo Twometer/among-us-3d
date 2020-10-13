@@ -111,6 +111,10 @@ public class ServerMain {
                     }
                     if (session.gameState == GameState.State.Lobby /*&& session.players.size() > 4*/) {
                         List<String> impostors = genSession(session);
+                        NetMessage.AssignColors colors = new NetMessage.AssignColors();
+                        colors.colors = new HashMap<>();
+                        for (ServerPlayer player : session.players.values())
+                            colors.colors.put(player.player.getUsername(), player.player.getColor());
 
                         for (ServerPlayer player : session.players.values()) {
                             NetMessage.GameStarted started = new NetMessage.GameStarted();
@@ -119,6 +123,7 @@ public class ServerMain {
                             started.color = player.player.getColor();
                             started.tasks = player.player.getTasks();
                             started.impostors = impostors;
+                            player.connection.sendTCP(colors);
                             player.connection.sendTCP(started);
                         }
 
@@ -204,6 +209,7 @@ public class ServerMain {
             player.player.resetVotes();
             player.player.setDead(false);
             player.player.setTasks(new ArrayList<>());
+            player.player.setRole(Role.Crewmate);
         }
         serverSession.gameState = GameState.State.Lobby;
         serverSession.sendToAll(ended);
@@ -216,7 +222,7 @@ public class ServerMain {
         Log.i("Voting closed, autoSkip cancelled  " + serverSession.autoSkipTask);
         SCHEDULER.runLater(5000, () -> {
             Log.i("Eval voting results...");
-            List<ServerPlayer> orderedByVotes = serverSession.players.values().stream().sorted(Comparator.comparingDouble(c -> c.player.getEjectionVotes())).collect(Collectors.toList());
+            List<ServerPlayer> orderedByVotes = serverSession.players.values().stream().sorted(Comparator.comparingDouble(c -> -c.player.getEjectionVotes())).collect(Collectors.toList());
             ServerPlayer mostVotes = orderedByVotes.get(0);
             int secondMostVotes = orderedByVotes.size() > 1 ? orderedByVotes.get(1).player.getEjectionVotes() : 0;
 

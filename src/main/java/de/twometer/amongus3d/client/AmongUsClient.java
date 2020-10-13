@@ -8,6 +8,7 @@ import de.twometer.amongus3d.core.GameState;
 import de.twometer.amongus3d.mesh.Model;
 import de.twometer.amongus3d.model.NetMessage;
 import de.twometer.amongus3d.model.player.Player;
+import de.twometer.amongus3d.model.player.PlayerColor;
 import de.twometer.amongus3d.model.player.Role;
 import de.twometer.amongus3d.model.player.Sabotage;
 import de.twometer.amongus3d.server.ServerMain;
@@ -138,6 +139,10 @@ public class AmongUsClient {
             if (player != null) {
                 player.setRotation(mov.angle);
                 player.setPosition(new Vector3f(mov.x, 0, mov.z));
+            }
+        } else if (o instanceof NetMessage.AssignColors) {
+            for (Map.Entry<String, PlayerColor> colors : ((NetMessage.AssignColors) o).colors.entrySet()) {
+                getPlayer(colors.getKey()).setColor(colors.getValue());
             }
         }
     }

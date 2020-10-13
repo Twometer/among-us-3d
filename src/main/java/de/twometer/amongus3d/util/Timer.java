@@ -19,4 +19,8 @@ public class Timer {
         return System.currentTimeMillis() - lastReset > delay;
     }
 
+    public float getSubTicks() {
+        float f = (lastReset + delay - System.currentTimeMillis()) / (float) delay;
+        return 1 - f;
+    }
 }

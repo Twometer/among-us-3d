@@ -291,10 +291,12 @@ public class Game {
         guiRenderer.render();
 
         // Debug
+        guiRenderer.getFontRenderer().drawRightAligned(fps.get() + " fps", window.getWidth() - 5, 5, 0.25f, new Vector4f(1, 1, 1, 1));
         if (debug.isActive()) {
-            guiRenderer.getFontRenderer().draw(camera.getPosition().x + " " + camera.getPosition().y + " " + camera.getPosition().z, 5, 550, 0.25f, new Vector4f(1, 1, 1, 1));
+            guiRenderer.getFontRenderer().drawRightAligned(camera.getPosition().x + " " + camera.getPosition().y + " " + camera.getPosition().z, window.getWidth() - 5, 25, 0.25f, new Vector4f(1, 1, 1, 1));
+            guiRenderer.getFontRenderer().drawRightAligned(networkTimer.getSubTicks() + " [st]", window.getWidth() - 5, 50, 0.25f, new Vector4f(1, 1, 1, 1));
         }
-        guiRenderer.getFontRenderer().draw(fps.get() + " fps", window.getWidth() - 5 - guiRenderer.getFontRenderer().getStringWidth(fps.get() + " fps", 0.25f), 5, 0.25f, new Vector4f(1, 1, 1, 1));
+
 
         // Ingame Hud
         if (gameState.isRunning()) {
@@ -477,29 +479,40 @@ public class Game {
         for (Player player : client.users.values()) {
             if (!player.getUsername().equals(self.getUsername()) && !player.isDead() && player.getPosition() != null) {
                 ShadingStrategies.FLAT.setColor(player.getColor().toVector());
+                Vector3f oldPos = player.getLastTickPosition();
+                Vector3f newPos = player.getNextTickPosition();
+                float ipX = oldPos.x + (newPos.x - oldPos.x) * networkTimer.getSubTicks();
+                float ipY = oldPos.y + (newPos.y - oldPos.y) * networkTimer.getSubTicks();
+                float ipZ = oldPos.z + (newPos.z - oldPos.z) * networkTimer.getSubTicks();
+                float ipR = player.getLastTickRotation() + (player.getNextTickRotation() - player.getLastTickRotation()) * networkTimer.getSubTicks();
+
                 playerModel.render(new Matrix4f()
-                        .rotateLocal((float) (player.getRotation()), 0, 1, 0)
+                        .rotateLocal(ipR, 0, 1, 0)
                         .scaleLocal(0.18f)
-                        .translateLocal(player.getPosition()));
+                        .translateLocal(ipX, ipY, ipZ));
             }
         }
 
     }
 
     private void handleControls() {
-        if (!updateTimer.elapsed())
-            return;
-        updateTimer.reset();
+
 
         if (networkTimer.elapsed() && gameState.getCurrentState() == GameState.State.Running) {
+            networkTimer.reset();
             NetMessage.PlayerMove msg = new NetMessage.PlayerMove();
             msg.angle = (float) Math.toRadians(camera.getAngle().x);
             msg.x = camera.getPosition().x;
             msg.y = camera.getPosition().y;
             msg.z = camera.getPosition().z;
             client.sendMessage(msg);
-            networkTimer.reset();
+            for (Player player : client.users.values())
+                player.updatePosition();
         }
+
+        if (!updateTimer.elapsed())
+            return;
+        updateTimer.reset();
 
         float speed = 0.04f;
 

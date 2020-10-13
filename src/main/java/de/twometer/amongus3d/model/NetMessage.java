@@ -10,7 +10,9 @@ import de.twometer.amongus3d.model.world.TaskType;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class NetMessage {
 
@@ -40,6 +42,7 @@ public final class NetMessage {
                     Sabotage.class,
                     StartGame.class,
                     VotingEnd.class,
+                    AssignColors.class,
 
                     Role.class,
                     Vector3f.class,
@@ -50,6 +53,7 @@ public final class NetMessage {
                     Room.class,
                     TaskType.class,
                     ArrayList.class,
+                    HashMap.class,
                     Sabotage.class
             };
 
@@ -119,6 +123,10 @@ public final class NetMessage {
         public PlayerJoined(String username) {
             this.username = username;
         }
+    }
+
+    public static class AssignColors {
+        public Map<String, PlayerColor> colors;
     }
 
     public static class PlayerLeft {

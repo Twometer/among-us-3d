@@ -72,9 +72,11 @@ public class TaskGenerator {
 
     public static TaskDef genUnique(Player p, TaskDef[] arr) {
         TaskDef def;
+        int tries = 0;
         do {
             def = arr[r.nextInt(arr.length)];
-        } while (hasTask(p, def));
+            tries++;
+        } while (hasTask(p, def) && tries < 10);
         return def;
     }
 
