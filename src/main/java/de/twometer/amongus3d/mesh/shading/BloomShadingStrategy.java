@@ -23,6 +23,8 @@ public class BloomShadingStrategy implements ShadingStrategy {
         shader.setProjMatrix(game.getProjMatrix());
         shader.setViewMatrix(game.getViewMatrix());
         shader.setVertexColor(isBloom ? model.getMaterial().getDiffuseColor() : new Vector3f(0, 0, 0));
+        shader.setCameraPos(game.getCamera().getPosition());
+        shader.setVision(game.getVision());
         shader.setModelMatrix(modelMatrix);
     }
 

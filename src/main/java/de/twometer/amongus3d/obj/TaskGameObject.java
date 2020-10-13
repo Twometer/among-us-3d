@@ -1,8 +1,10 @@
 package de.twometer.amongus3d.obj;
 
+import de.twometer.amongus3d.client.AmongUsClient;
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.mesh.Renderable;
 import de.twometer.amongus3d.model.player.Role;
+import de.twometer.amongus3d.model.player.Sabotage;
 import de.twometer.amongus3d.model.world.Room;
 import de.twometer.amongus3d.model.world.TaskDef;
 import de.twometer.amongus3d.model.world.TaskType;
@@ -55,12 +57,12 @@ public class TaskGameObject extends StaticGameObject {
 
     @Override
     public boolean canPlayerInteract() {
-        return isHighlighted() && Game.instance().getSelf().getRole() != Role.Impostor;
+        return isCurrentSabotage() || (isHighlighted() && Game.instance().getSelf().getRole() != Role.Impostor);
     }
 
     @Override
     public boolean isHighlighted() {
-        return Game.instance().getSelf().canDoTask(task);
+        return Game.instance().getSelf().canDoTask(task) || isCurrentSabotage();
     }
 
     @Override
@@ -68,5 +70,10 @@ public class TaskGameObject extends StaticGameObject {
         super.onClicked();
         Log.d("Clicked on " + toString());
 
+    }
+
+    private boolean isCurrentSabotage() {
+        Sabotage curSabotage = Game.instance().getClient().currentSabotage;
+        return curSabotage != null && curSabotage.getTask() == getTaskType();
     }
 }

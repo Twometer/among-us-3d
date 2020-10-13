@@ -49,7 +49,8 @@ public final class NetMessage {
                     TaskDef.class,
                     Room.class,
                     TaskType.class,
-                    ArrayList.class
+                    ArrayList.class,
+                    Sabotage.class
             };
 
     public static void registerAll(Kryo kryo) {
@@ -183,7 +184,7 @@ public final class NetMessage {
     }
 
     public static class Sabotage {
-        public TaskType taskType;
+        public Sabotage sabotage;
     }
 
 }

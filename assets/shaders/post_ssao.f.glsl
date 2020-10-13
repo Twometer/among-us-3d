@@ -34,7 +34,7 @@ float ssao_fast()
     const float total_strength = 1.0;
     const float base = 0.2;
 
-    const float area = 0.0075;
+    const float area = 0.00095;
     const float falloff = 0.000002;
 
     const float radius = 0.006;
@@ -53,8 +53,8 @@ float ssao_fast()
 
 
     // Randomly chosen by fair dice roll
-    // normalize(normalize(texture(randomSampler, textureCoords * noiseScale).rgb))
-    vec3 random = vec3(1, 1, 0);
+    //
+    vec3 random = normalize(normalize(texture(randomSampler, textureCoords * vec2(16*250,9*250)).rgb));
 
     float depth = texture(depthSampler, textureCoords).r;
 

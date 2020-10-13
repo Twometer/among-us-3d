@@ -3,12 +3,12 @@ package de.twometer.amongus3d.client;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
-import de.twometer.amongus3d.audio.SoundBuffer;
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.core.GameState;
 import de.twometer.amongus3d.model.NetMessage;
 import de.twometer.amongus3d.model.player.Player;
 import de.twometer.amongus3d.model.player.Role;
+import de.twometer.amongus3d.model.player.Sabotage;
 import de.twometer.amongus3d.server.ServerMain;
 import de.twometer.amongus3d.ui.screen.EjectScreen;
 import de.twometer.amongus3d.ui.screen.EmergencyScreen;
@@ -26,6 +26,8 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class AmongUsClient {
+
+    public Sabotage currentSabotage = Sabotage.None;
 
     private Client client;
 

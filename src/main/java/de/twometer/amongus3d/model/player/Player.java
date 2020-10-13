@@ -12,15 +12,15 @@ public class Player {
 
     private Vector3f position;
 
-    private Role role;
+    private Role role = Role.Crewmate;
 
-    private PlayerColor color;
+    private PlayerColor color = PlayerColor.Black;
 
     private List<PlayerTask> tasks = new ArrayList<>();
 
-    private int ejectionVotes;
+    private int ejectionVotes = 0;
 
-    private boolean isDead;
+    private boolean isDead = false;
 
     public Player(String username) {
         this.username = username;
@@ -90,8 +90,7 @@ public class Player {
         return isDead;
     }
 
-    public Player setDead(boolean dead) {
+    public void setDead(boolean dead) {
         isDead = dead;
-        return this;
     }
 }

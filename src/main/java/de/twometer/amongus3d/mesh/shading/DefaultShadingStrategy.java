@@ -38,6 +38,8 @@ public class DefaultShadingStrategy implements ShadingStrategy {
         shader.setProjMatrix(game.getProjMatrix());
         shader.setViewMatrix(game.getViewMatrix());
         shader.setModelMatrix(modelMatrix);
+        shader.setCameraPos(game.getCamera().getPosition());
+        shader.setVision(game.getVision());
     }
 
 }

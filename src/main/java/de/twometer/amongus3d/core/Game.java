@@ -9,6 +9,7 @@ import de.twometer.amongus3d.mesh.shading.ShadingStrategy;
 import de.twometer.amongus3d.model.player.Player;
 import de.twometer.amongus3d.model.player.PlayerTask;
 import de.twometer.amongus3d.model.player.Role;
+import de.twometer.amongus3d.model.player.Sabotage;
 import de.twometer.amongus3d.model.world.Room;
 import de.twometer.amongus3d.model.world.TaskType;
 import de.twometer.amongus3d.obj.GameObject;
@@ -43,10 +44,16 @@ public class Game {
 
     private static final Game gameInstance = new Game();
 
+    private static final boolean FAST_ENTRY = true;
     private static final boolean DEBUG_MODE = false;
 
     public static final String NAME = "Among Us 3D";
     public static final String VERSION = "beta-0.1";
+
+    private static final float VISION_CREWMATE = 5.0f;
+    private static final float VISION_IMPOSTOR = 9.0f;
+    private static final float VISION_GHOST = 100.0f;
+    private static final float VISION_SABOTAGED = 0.5f;
 
     private final GameWindow window = new GameWindow(NAME + " " + VERSION + (DEBUG_MODE ? " [Debug]" : ""), 1024, 768);
     private final Timer updateTimer = new Timer(90);
@@ -132,6 +139,7 @@ public class Game {
         prevWidth = window.getWidth();
         prevHeight = window.getHeight();
         handleSizeChange(window.getWidth(), window.getHeight());
+        ssaoNoiseTexture = SSAO.createNoiseTexture(11, 11);
 
         //// PRE-INIT ////
         gameState.setCurrentState(GameState.State.Loading);
@@ -191,8 +199,12 @@ public class Game {
         addAmbience("admin", 34.14f, 0.7f, -13.85f).setGain(1.4f);
 
         Log.i("Init complete");
-        gameState.setCurrentState(GameState.State.Menu);
-        guiRenderer.setCurrentScreen(new MainMenuScreen());
+        if (FAST_ENTRY) {
+            gameState.setCurrentState(GameState.State.Running);
+        } else {
+            gameState.setCurrentState(GameState.State.Menu);
+            guiRenderer.setCurrentScreen(new MainMenuScreen());
+        }
     }
 
     private SoundSource addAmbience(String name, float x, float y, float z) {
@@ -223,9 +235,6 @@ public class Game {
         highlightBuffer = Framebuffer.create(w, h).withDepthBuffer();
         bloomBuffer = Framebuffer.create(w / 2, h / 2).withDepthBuffer();
 
-        glDeleteTextures(ssaoNoiseTexture);
-
-        ssaoNoiseTexture = SSAO.createNoiseTexture(10, 10);
     }
 
     private void selectObject(int id) {
@@ -578,5 +587,20 @@ public class Game {
 
     public FrustumCulling getFrustumCulling() {
         return frustumCulling;
+    }
+
+    public float getVision() {
+        if (self.isDead())
+            return VISION_GHOST;
+
+        if (client.currentSabotage == Sabotage.Lights)
+            return VISION_SABOTAGED;
+        else if (self.getRole() == Role.Impostor)
+            return VISION_IMPOSTOR;
+        else if (self.getRole() == Role.Crewmate)
+            return VISION_CREWMATE;
+
+        Log.e("Invalid vision condition");
+        return 0;
     }
 }

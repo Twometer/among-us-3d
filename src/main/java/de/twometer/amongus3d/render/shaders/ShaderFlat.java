@@ -10,6 +10,8 @@ public class ShaderFlat extends Shader {
     private int loc_projMatrix;
     private int loc_modelMatrix;
     private int loc_vertexColor;
+    private int loc_cameraPos;
+    private int loc_vision;
 
     public ShaderFlat() {
         super("shaders/base.v.glsl", "shaders/base_flat.f.glsl");
@@ -25,6 +27,8 @@ public class ShaderFlat extends Shader {
         loc_projMatrix = getLocation("projMatrix");
         loc_modelMatrix = getLocation("modelMatrix");
         loc_vertexColor = getLocation("vertexColor");
+        loc_cameraPos = getLocation("cameraPos");
+        loc_vision = getLocation("vision");
     }
 
     public void setModelMatrix(Matrix4f mat) {
@@ -41,5 +45,13 @@ public class ShaderFlat extends Shader {
 
     public void setVertexColor(Vector3f vertexColor) {
         setVector3(loc_vertexColor, vertexColor);
+    }
+
+    public void setCameraPos(Vector3f cameraPos) {
+        setVector3(loc_cameraPos, cameraPos);
+    }
+
+    public void setVision(float vision) {
+        setFloat(loc_vision, vision);
     }
 }

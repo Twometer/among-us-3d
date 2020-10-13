@@ -17,8 +17,10 @@ public class FlatShadingStrategy implements ShadingStrategy {
         shader.bind();
         shader.setProjMatrix(game.getProjMatrix());
         shader.setViewMatrix(game.getViewMatrix());
-        shader.setVertexColor(color);
         shader.setModelMatrix(modelMatrix);
+        shader.setVertexColor(color);
+        shader.setCameraPos(game.getCamera().getPosition());
+        shader.setVision(game.getVision());
     }
 
     public void setColor(Vector3f color) {
