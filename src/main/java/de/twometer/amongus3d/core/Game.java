@@ -56,6 +56,7 @@ public class Game {
     private final Camera camera = new Camera();
     private final Fps fps = new Fps();
     private final Debug debug = new Debug();
+    private final FrustumCulling frustumCulling = new FrustumCulling();
 
     private Collider shipCollider;
     private final List<GameObject> gameObjects = new ArrayList<>();
@@ -78,6 +79,7 @@ public class Game {
     private Framebuffer ssaoBuffer;
     private Framebuffer pickBuffer;
     private Framebuffer highlightBuffer;
+    private Framebuffer bloomBuffer;
 
     private final GuiRenderer guiRenderer = new GuiRenderer();
     private final ByteBuffer pickedBytes = BufferUtils.createByteBuffer(3);
@@ -210,6 +212,7 @@ public class Game {
             ssaoBuffer.destroy();
             pickBuffer.destroy();
             highlightBuffer.destroy();
+            bloomBuffer.destroy();
         }
 
         sceneBuffer = Framebuffer.create(w, h).withDepthTexture().withColorTexture(1);
@@ -218,6 +221,7 @@ public class Game {
         ssaoBuffer = Framebuffer.create(w, h);
         pickBuffer = Framebuffer.create(w, h).withDepthBuffer();
         highlightBuffer = Framebuffer.create(w, h).withDepthBuffer();
+        bloomBuffer = Framebuffer.create(w / 2, h / 2).withDepthBuffer();
 
         glDeleteTextures(ssaoNoiseTexture);
 
@@ -242,6 +246,8 @@ public class Game {
             this.prevHeight = window.getHeight();
         }
 
+        frustumCulling.update();
+
         if (gameState.getCurrentState() == GameState.State.Running) {
             handleControls();
 
@@ -253,22 +259,45 @@ public class Game {
             renderOutlines();
         }
 
+        renderHud();
+
+        fps.frame();
+    }
+
+    private void renderHud() {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, window.getWidth(), window.getHeight());
         glClear(GL_DEPTH_BUFFER_BIT);
         glDisable(GL_DEPTH_TEST);
+
+        // Gui
+        guiRenderer.render();
+
+        // Debug
         if (debug.isActive()) {
             guiRenderer.getFontRenderer().draw(camera.getPosition().x + " " + camera.getPosition().y + " " + camera.getPosition().z, 5, 25, 0.25f, new Vector4f(1, 1, 1, 1));
         }
         guiRenderer.getFontRenderer().draw(fps.get() + " fps", window.getWidth() - 5 - guiRenderer.getFontRenderer().getStringWidth(fps.get() + " fps", 0.25f), 5, 0.25f, new Vector4f(1, 1, 1, 1));
-        int y = 65;
+
+        // Ingame Hud
         if (gameState.isRunning()) {
+            // Task progress
+            final int taskHudWidth = 550;
+            guiRenderer.drawRect(5, 5, taskHudWidth, 40, new Vector4f(0, 0, 0, 1));
+            guiRenderer.drawRect(7, 7, taskHudWidth - 4, 40 - 4, new Vector4f(0.4f, 0.4f, 0.4f, 1));
+            guiRenderer.drawRect(7, 7, (int) ((taskHudWidth - 4) * client.taskProgress), 20 - 4, new Vector4f(0.2f, 0.95f, 0.2f, 1));
+            guiRenderer.getFontRenderer().draw("Task Progress", 15, 10, 0.35f, new Vector4f(1, 1, 1, 1));
+
+            // Task list
+            int y = 60;
+            guiRenderer.drawRect(5, y - 5, taskHudWidth, (self.getTasks().size() + 2) * 35 - 5, new Vector4f(0.45f, 0.45f, 0.45f, 0.45f));
             String header = self.getRole() == Role.Impostor ? "Fake tasks:" : "Your tasks:";
-            guiRenderer.getFontRenderer().draw(header, 5, 30, 0.5f, new Vector4f(1, 1, 1, 1));
+            guiRenderer.getFontRenderer().draw(header, 20, y, 0.5f, new Vector4f(1, 1, 1, 1));
+            y += 35;
             for (PlayerTask task : self.getTasks()) {
                 String progress = task.isLongTask() ? " (" + task.getProgress() + "/" + task.getTasks().size() + ")" : "";
                 Vector4f color = task.isDone() ? new Vector4f(0, 1, 0, 0.9f) : new Vector4f(1, 1, 1, 0.9f);
-                guiRenderer.getFontRenderer().draw(task.nextTask().getRoom() + ": " + task.nextTask().getTaskType() + progress, 25, y, 0.5f, color);
+                guiRenderer.getFontRenderer().draw(task.nextTask().getRoom() + ": " + task.nextTask().getTaskType() + progress, 35, y, 0.5f, color);
                 y += 35;
             }
 
@@ -276,10 +305,8 @@ public class Game {
             Vector4f color = self.getRole() == Role.Impostor ? new Vector4f(1, 0, 0, 1) : new Vector4f(0, 0.25f, 0.95f, 1);
             guiRenderer.getFontRenderer().drawCentered(prompt, window.getWidth() / 2f, window.getHeight() - 100f, 0.45f, color);
         }
-        guiRenderer.render();
-        glEnable(GL_DEPTH_TEST);
 
-        fps.frame();
+        glEnable(GL_DEPTH_TEST);
     }
 
     private void renderOutlines() {
@@ -376,8 +403,15 @@ public class Game {
         debug.render();
         sceneBuffer.unbind();
 
+        bloomBuffer.bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        shadingStrategy = ShadingStrategies.BLOOM;
+        renderScene();
+        bloomBuffer.unbind();
+
         postProcessing.begin();
 
+        // SSAO
         ssaoShader.bind();
         ssaoShader.setNoiseScale(window.getWidth() / 10f);
         postProcessing.bindTexture(0, sceneBuffer.getColorTexture(0)); // Color
@@ -387,18 +421,29 @@ public class Game {
         postProcessing.copyTo(vGaussBuffer);
 
         vGaussShader.bind();
-        vGaussShader.setTargetHeight(vGaussBuffer.getHeight());
+        vGaussShader.setTargetHeight(hGaussBuffer.getHeight());
         postProcessing.bindTexture(0, vGaussBuffer.getColorTexture(0));
         postProcessing.copyTo(hGaussBuffer);
 
         hGaussShader.bind();
-        hGaussShader.setTargetWidth(hGaussBuffer.getWidth());
+        hGaussShader.setTargetWidth(ssaoBuffer.getWidth());
         postProcessing.bindTexture(0, hGaussBuffer.getColorTexture(0));
         postProcessing.copyTo(ssaoBuffer);
+
+        // Bloom
+        vGaussShader.bind();
+        vGaussShader.setTargetHeight(vGaussBuffer.getHeight());
+        postProcessing.bindTexture(0, bloomBuffer.getColorTexture(0));
+        postProcessing.copyTo(vGaussBuffer);
+        hGaussShader.bind();
+        hGaussShader.setTargetWidth(bloomBuffer.getHeight());
+        postProcessing.bindTexture(0, vGaussBuffer.getColorTexture(0));
+        postProcessing.copyTo(bloomBuffer);
 
         mulShader.bind();
         postProcessing.bindTexture(0, sceneBuffer.getColorTexture(0));
         postProcessing.bindTexture(1, ssaoBuffer.getColorTexture(0));
+        postProcessing.bindTexture(2, bloomBuffer.getColorTexture(0));
         postProcessing.copyTo(null);
 
         postProcessing.end();
@@ -407,10 +452,6 @@ public class Game {
     private void renderScene() {
         for (GameObject go : gameObjects)
             go.render(RenderLayer.Base);
-
-        for (GameObject go : gameObjects)
-            go.render(RenderLayer.Glow);
-
         for (GameObject go : gameObjects)
             go.render(RenderLayer.Transparency);
     }
@@ -533,5 +574,9 @@ public class Game {
 
     public SoundProvider getSoundProvider() {
         return soundProvider;
+    }
+
+    public FrustumCulling getFrustumCulling() {
+        return frustumCulling;
     }
 }

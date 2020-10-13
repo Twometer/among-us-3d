@@ -14,5 +14,6 @@ public class ShaderMul extends Shader {
     public void bindUniforms() {
         glUniform1i(glGetUniformLocation(id, "aSampler"), 0);
         glUniform1i(glGetUniformLocation(id, "bSampler"), 1);
+        glUniform1i(glGetUniformLocation(id, "cSampler"), 2);
     }
 }

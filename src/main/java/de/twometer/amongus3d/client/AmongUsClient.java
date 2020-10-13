@@ -39,6 +39,8 @@ public class AmongUsClient {
     public String gameCode;
     public boolean isHost;
 
+    public float taskProgress;
+
     private static class CallbackItem {
         private static int idc = 0;
         private final int id;

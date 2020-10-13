@@ -4,11 +4,14 @@ import org.joml.Vector3f;
 
 public class Material {
 
-    private String texture;
+    private final String name;
 
-    private Vector3f diffuseColor;
+    private final String texture;
 
-    public Material(String texture, Vector3f diffuseColor) {
+    private final Vector3f diffuseColor;
+
+    public Material(String name, String texture, Vector3f diffuseColor) {
+        this.name = name;
         this.texture = texture;
         this.diffuseColor = diffuseColor;
     }
@@ -19,5 +22,9 @@ public class Material {
 
     public Vector3f getDiffuseColor() {
         return diffuseColor;
+    }
+
+    public String getName() {
+        return name;
     }
 }

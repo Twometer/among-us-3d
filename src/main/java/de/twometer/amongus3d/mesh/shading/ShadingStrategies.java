@@ -10,4 +10,6 @@ public final class ShadingStrategies {
 
     public static final FlatShadingStrategy FLAT = new FlatShadingStrategy();
 
+    public static final ShadingStrategy BLOOM = new BloomShadingStrategy();
+
 }

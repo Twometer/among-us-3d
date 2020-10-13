@@ -100,16 +100,20 @@ public class MapLoader {
             aiGetMaterialTexture(aiMaterial, aiTextureType_DIFFUSE, 0, texpath, (IntBuffer) null, null, null, null, null, null);
             String jtp = texpath.dataString();
 
+            AIString matname = AIString.calloc();
+            aiGetMaterialString(aiMaterial, AI_MATKEY_NAME, 0, 0, matname);
+
             AIColor4D color = AIColor4D.create();
             aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, aiTextureType_NONE, 0, color);
 
             Vector3f dcolor = new Vector3f(color.r(), color.g(), color.b());
 
-            materials.add(new Material(jtp, dcolor));
-
+            materials.add(new Material(matname.dataString(), jtp, dcolor));
             if (jtp.length() == 0)
                 continue;
             Game.instance().getTextureProvider().getTexture(jtp);
+            texpath.free();
+            matname.free();
         }
 
         PointerBuffer aiMeshes = aiScene.mMeshes();

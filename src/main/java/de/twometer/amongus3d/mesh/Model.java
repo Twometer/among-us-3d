@@ -19,6 +19,8 @@ public class Model extends Renderable {
     private final int normalBuffer;
     private final int texCoordBuffer;
 
+    private final int dimensions;
+
     private final int vertices;
 
     private final int primitiveType;
@@ -29,12 +31,14 @@ public class Model extends Renderable {
 
     private Material material;
 
-    private Model(int vao, int vertexBuffer, int colorBuffer, int normalBuffer, int texCoordBuffer, int vertices, int primitiveType, Vector3f min, Vector3f max, Vector3f com) {
+
+    private Model(int vao, int vertexBuffer, int colorBuffer, int normalBuffer, int texCoordBuffer, int dimensions, int vertices, int primitiveType, Vector3f min, Vector3f max, Vector3f com) {
         this.vao = vao;
         this.vertexBuffer = vertexBuffer;
         this.colorBuffer = colorBuffer;
         this.normalBuffer = normalBuffer;
         this.texCoordBuffer = texCoordBuffer;
+        this.dimensions = dimensions;
         this.vertices = vertices;
         this.primitiveType = primitiveType;
         this.minimum = min;
@@ -87,7 +91,7 @@ public class Model extends Renderable {
 
 
         Vector3f min = new Vector3f(9999999, 9999999, 9999999);
-        Vector3f max = new Vector3f(-9999999,-9999999, -9999999);
+        Vector3f max = new Vector3f(-9999999, -9999999, -9999999);
         Vector3f com = new Vector3f();
 
         if (dimensions == 3) {
@@ -113,7 +117,7 @@ public class Model extends Renderable {
 
         }
 
-        return new Model(vao, vertexBuffer, colorBuffer, normalBuffer, texCoordBuffer, mesh.getVertexCount(), primitiveType, min, max, com);
+        return new Model(vao, vertexBuffer, colorBuffer, normalBuffer, texCoordBuffer, dimensions, mesh.getVertexCount(), primitiveType, min, max, com);
     }
 
     public void destroy() {
@@ -127,6 +131,9 @@ public class Model extends Renderable {
     @Override
     public void render(Matrix4f mat) {
         getShadingStrategy().configureShaders(this, mat);
+
+        if (dimensions == 3 && !isVisible(mat))
+            return;
 
         boolean hasColors = colorBuffer != -1;
         boolean hasNormals = normalBuffer != -1;
@@ -162,4 +169,14 @@ public class Model extends Renderable {
         this.material = material;
     }
 
+    private boolean isVisible(Matrix4f mat) {
+        float rad = getSize().length();
+        Vector3f projectedCenter = new Vector3f();
+        centerOfMass.mulProject(mat, projectedCenter);
+        return Game.instance().getFrustumCulling().insideFrustum(projectedCenter, rad);
+    }
+
+    public Vector3f getSize() {
+        return new Vector3f(maximum.x - minimum.x, maximum.y - minimum.y, maximum.z - minimum.z);
+    }
 }

@@ -6,6 +6,7 @@ import de.twometer.amongus3d.mesh.Model;
 import de.twometer.amongus3d.render.shaders.ShaderFlat;
 import de.twometer.amongus3d.render.shaders.ShaderTextured;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 
@@ -22,6 +23,8 @@ public class DefaultShadingStrategy implements ShadingStrategy {
             shader = game.getShaderProvider().getShader(ShaderFlat.class);
             if (material != null)
                 shader.setVertexColor(material.getDiffuseColor());
+            else
+                shader.setVertexColor(new Vector3f(1, 1, 1));
         } else {
             glActiveTexture(0);
             game.getTextureProvider().getTexture(material.getTexture()).bind();
