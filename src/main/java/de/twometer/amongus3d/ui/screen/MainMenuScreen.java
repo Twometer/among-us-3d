@@ -41,7 +41,7 @@ public class MainMenuScreen extends GuiScreen {
         joinGame.setClickListener(() -> {
             Game.instance().getSelf().setUsername(usernameBox.getText());
             gameId = gameCodeBox.getText();
-            Game.instance().getClient().sendMessage(new NetMessage.JoinGame(gameCodeBox.getText(), usernameBox.getText()))
+            Game.instance().getClient().sendMessage(new NetMessage.JoinGame(usernameBox.getText(), gameCodeBox.getText()))
                     .awaitReply(NetMessage.GameJoined.class, gameJoinHandler);
         });
         createGame.setClickListener(() -> {

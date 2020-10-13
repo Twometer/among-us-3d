@@ -11,5 +11,5 @@ void main(void){
     vec4 ssao = texture(bSampler, textureCoords);
     vec4 highlight = texture(cSampler, textureCoords);
 
-    out_Colour = (max(ssao.r, 0.50) * scene) + highlight;
+    out_Colour = 0.95f * (max(ssao.r, 0.50) * scene) + highlight;
 }

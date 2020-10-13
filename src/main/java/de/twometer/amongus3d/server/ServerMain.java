@@ -29,7 +29,7 @@ public class ServerMain {
     public static final int VOTE_DURATION_SEC = 20;
     public static final int VOTE_DURATION_MS = 1000 * VOTE_DURATION_SEC;
     public static final boolean CONFIRM = true;
-    public static final int MAX_IMPOSTORS = 2;
+    public static final int MAX_IMPOSTORS = 1;
 
     public static final int PORT1 = 37832;
     public static final int PORT2 = 37833;
@@ -77,7 +77,7 @@ public class ServerMain {
             @Override
             public void received(Connection connection, Object o) {
                 super.received(connection, o);
-                Log.d("Incoming message: " + o.toString());
+                // Log.d("Incoming message: " + o.toString());
                 if (o instanceof NetMessage.CreateGame) {
                     String gameId = SessionCodeGenerator.generate();
                     ServerSession session = new ServerSession(gameId);
@@ -85,11 +85,12 @@ public class ServerMain {
                     connection.sendTCP(new NetMessage.GameCreated(gameId));
                 } else if (o instanceof NetMessage.JoinGame) {
                     String username = ((NetMessage.JoinGame) o).username;
-                    String gameId = ((NetMessage.JoinGame) o).gameId;
+                    String gameId = ((NetMessage.JoinGame) o).gameId.toUpperCase().trim();
                     ServerSession session = sessions.get(gameId);
-                    if (session == null || session.players.containsKey(username) || session.gameState != GameState.State.Lobby)
+                    Log.d("Joining " + gameId);
+                    if (session == null || session.players.containsKey(username) || session.gameState != GameState.State.Lobby) {
                         connection.sendTCP(new NetMessage.GameJoined(false, false));
-                    else {
+                    } else {
                         if (session.players.size() == 0) {
                             session.host = username;
                             connection.sendTCP(new NetMessage.GameJoined(true, true));
@@ -97,6 +98,8 @@ public class ServerMain {
                             connection.sendTCP(new NetMessage.GameJoined(true, false));
                         }
                         connection.setName(gameId + "|" + username);
+                        for (ServerPlayer p2 : session.players.values())
+                            connection.sendTCP(new NetMessage.PlayerJoined(p2.player.getUsername()));
                         session.addPlayer(connection, username);
                         session.sendToAll(new NetMessage.PlayerJoined(username));
                     }
@@ -169,6 +172,12 @@ public class ServerMain {
                     if (serverSession != null) {
                         checkVictory(serverSession);
                         serverSession.players.get(((NetMessage.PlayerKill) o).victim).player.setDead(true);
+                    }
+                } else if (o instanceof NetMessage.PlayerMove) {
+                    ServerPlayer player = getPlayer(connection);
+                    if (player != null) {
+                        ((NetMessage.PlayerMove) o).username = player.player.getUsername();
+                        player.session.sendToAll(o);
                     }
                 }
             }

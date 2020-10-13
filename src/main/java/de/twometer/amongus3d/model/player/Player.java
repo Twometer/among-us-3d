@@ -10,11 +10,13 @@ public class Player {
 
     private String username;
 
+    private float rotation;
+
     private Vector3f position;
 
     private Role role = Role.Crewmate;
 
-    private PlayerColor color = PlayerColor.Black;
+    private PlayerColor color = PlayerColor.Red;
 
     private List<PlayerTask> tasks = new ArrayList<>();
 
@@ -44,6 +46,14 @@ public class Player {
 
     public String getUsername() {
         return username;
+    }
+
+    public float getRotation() {
+        return rotation;
+    }
+
+    public void setRotation(float rotation) {
+        this.rotation = rotation;
     }
 
     public Vector3f getPosition() {

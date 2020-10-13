@@ -5,6 +5,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.core.GameState;
+import de.twometer.amongus3d.mesh.Model;
 import de.twometer.amongus3d.model.NetMessage;
 import de.twometer.amongus3d.model.player.Player;
 import de.twometer.amongus3d.model.player.Role;
@@ -17,6 +18,7 @@ import de.twometer.amongus3d.ui.screen.GameStartScreen;
 import de.twometer.amongus3d.util.Constants;
 import de.twometer.amongus3d.util.Log;
 import org.greenrobot.eventbus.EventBus;
+import org.joml.Vector3f;
 
 import java.io.IOException;
 import java.util.*;
@@ -130,6 +132,13 @@ public class AmongUsClient {
         } else if (o instanceof NetMessage.GameJoined) {
             isHost = ((NetMessage.GameJoined) o).host;
 
+        } else if (o instanceof NetMessage.PlayerMove) {
+            NetMessage.PlayerMove mov = (NetMessage.PlayerMove) o;
+            Player player = getPlayer(mov.username);
+            if (player != null) {
+                player.setRotation(mov.angle);
+                player.setPosition(new Vector3f(mov.x, 0, mov.z));
+            }
         }
     }
 

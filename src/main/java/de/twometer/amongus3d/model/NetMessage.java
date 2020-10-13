@@ -177,6 +177,7 @@ public final class NetMessage {
     }
 
     public static class PlayerMove {
+        public String username;
         public float x;
         public float y;
         public float z;

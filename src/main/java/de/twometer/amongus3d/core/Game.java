@@ -4,8 +4,11 @@ import de.twometer.amongus3d.audio.*;
 import de.twometer.amongus3d.client.AmongUsClient;
 import de.twometer.amongus3d.io.ColliderLoader;
 import de.twometer.amongus3d.io.MapLoader;
+import de.twometer.amongus3d.io.ModelLoader;
+import de.twometer.amongus3d.mesh.Model;
 import de.twometer.amongus3d.mesh.shading.ShadingStrategies;
 import de.twometer.amongus3d.mesh.shading.ShadingStrategy;
+import de.twometer.amongus3d.model.NetMessage;
 import de.twometer.amongus3d.model.player.Player;
 import de.twometer.amongus3d.model.player.PlayerTask;
 import de.twometer.amongus3d.model.player.Role;
@@ -25,6 +28,7 @@ import de.twometer.amongus3d.util.Debug;
 import de.twometer.amongus3d.util.Fps;
 import de.twometer.amongus3d.util.Log;
 import de.twometer.amongus3d.util.Timer;
+import org.greenrobot.eventbus.EventBus;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -44,7 +48,7 @@ public class Game {
 
     private static final Game gameInstance = new Game();
 
-    private static final boolean FAST_ENTRY = true;
+    private static final boolean FAST_ENTRY = false;
     private static final boolean DEBUG_MODE = false;
 
     public static final String NAME = "Among Us 3D";
@@ -57,6 +61,7 @@ public class Game {
 
     private final GameWindow window = new GameWindow(NAME + " " + VERSION + (DEBUG_MODE ? " [Debug]" : ""), 1024, 768);
     private final Timer updateTimer = new Timer(90);
+    private final Timer networkTimer = new Timer(25);
     private final ShaderProvider shaderProvider = new ShaderProvider();
     private final TextureProvider textureProvider = new TextureProvider();
     private final SoundProvider soundProvider = new SoundProvider();
@@ -87,6 +92,8 @@ public class Game {
     private Framebuffer pickBuffer;
     private Framebuffer highlightBuffer;
     private Framebuffer bloomBuffer;
+
+    private Model playerModel;
 
     private final GuiRenderer guiRenderer = new GuiRenderer();
     private final ByteBuffer pickedBytes = BufferUtils.createByteBuffer(3);
@@ -142,6 +149,7 @@ public class Game {
         ssaoNoiseTexture = SSAO.createNoiseTexture(11, 11);
 
         //// PRE-INIT ////
+        EventBus.builder().logNoSubscriberMessages(false).installDefaultEventBus();
         gameState.setCurrentState(GameState.State.Loading);
         self = new Player("Debug");
 
@@ -154,7 +162,7 @@ public class Game {
         window.update();
 
         //// INIT OBJECTS ////
-
+        playerModel = ModelLoader.load("models/astronaut.obj");
         gameObjects.addAll(MapLoader.loadMap("models/the_skeld.obj"));
         shipCollider = ColliderLoader.loadCollider("models/collider.obj");
         shipCollider.prepareDebugRender();
@@ -284,7 +292,7 @@ public class Game {
 
         // Debug
         if (debug.isActive()) {
-            guiRenderer.getFontRenderer().draw(camera.getPosition().x + " " + camera.getPosition().y + " " + camera.getPosition().z, 5, 25, 0.25f, new Vector4f(1, 1, 1, 1));
+            guiRenderer.getFontRenderer().draw(camera.getPosition().x + " " + camera.getPosition().y + " " + camera.getPosition().z, 5, 550, 0.25f, new Vector4f(1, 1, 1, 1));
         }
         guiRenderer.getFontRenderer().draw(fps.get() + " fps", window.getWidth() - 5 - guiRenderer.getFontRenderer().getStringWidth(fps.get() + " fps", 0.25f), 5, 0.25f, new Vector4f(1, 1, 1, 1));
 
@@ -463,12 +471,35 @@ public class Game {
             go.render(RenderLayer.Base);
         for (GameObject go : gameObjects)
             go.render(RenderLayer.Transparency);
+
+        shadingStrategy = ShadingStrategies.FLAT;
+
+        for (Player player : client.users.values()) {
+            if (!player.getUsername().equals(self.getUsername()) && !player.isDead() && player.getPosition() != null) {
+                ShadingStrategies.FLAT.setColor(player.getColor().toVector());
+                playerModel.render(new Matrix4f()
+                        .rotateLocal((float) (player.getRotation()), 0, 1, 0)
+                        .scaleLocal(0.18f)
+                        .translateLocal(player.getPosition()));
+            }
+        }
+
     }
 
     private void handleControls() {
         if (!updateTimer.elapsed())
             return;
         updateTimer.reset();
+
+        if (networkTimer.elapsed() && gameState.getCurrentState() == GameState.State.Running) {
+            NetMessage.PlayerMove msg = new NetMessage.PlayerMove();
+            msg.angle = (float) Math.toRadians(camera.getAngle().x);
+            msg.x = camera.getPosition().x;
+            msg.y = camera.getPosition().y;
+            msg.z = camera.getPosition().z;
+            client.sendMessage(msg);
+            networkTimer.reset();
+        }
 
         float speed = 0.04f;
 
