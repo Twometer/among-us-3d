@@ -2,6 +2,7 @@ package de.twometer.amongus3d.ui.font;
 
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.render.shaders.ShaderFont;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -29,7 +30,7 @@ public class FontRenderer {
         fontSize *= Game.instance().getWindow().getScale();
         float cursor = 0;
         for (char c : string.toCharArray()) {
-            Glyph glyph = font.getGlyphs().get((int)c);
+            Glyph glyph = font.getGlyphs().get((int) c);
             if (glyph == null) continue;
             cursor += (glyph.advance - ADVANCE_RM) * fontSize;
         }
@@ -37,8 +38,12 @@ public class FontRenderer {
     }
 
     public void drawCentered(String text, float x, float y, float fontSize, Vector4f color) {
+        drawCentered(text, x, y, fontSize, color, Game.instance().getGuiMatrix());
+    }
+
+    public void drawCentered(String text, float x, float y, float fontSize, Vector4f color, Matrix4f m) {
         float width = getStringWidth(text, fontSize);
-        draw(text, x - width / 2f, y, fontSize, color);
+        draw(text, x - width / 2f, y, fontSize, color, m);
     }
 
     public void drawRightAligned(String text, float x, float y, float fontSize, Vector4f color) {
@@ -47,6 +52,10 @@ public class FontRenderer {
     }
 
     public void draw(String value, float x, float y, float size, Vector4f color) {
+        draw(value, x, y, size, color, Game.instance().getGuiMatrix());
+    }
+
+    public void draw(String value, float x, float y, float size, Vector4f color, Matrix4f mat) {
         size *= Game.instance().getWindow().getScale();
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -56,7 +65,7 @@ public class FontRenderer {
         glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, 0);
 
         shader.bind();
-        shader.setProjectionMatrix(Game.instance().getGuiMatrix());
+        shader.setProjectionMatrix(mat);
         shader.setColor(color.x, color.y, color.z, color.w);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, font.getTexture().getTextureId());
@@ -65,7 +74,7 @@ public class FontRenderer {
         float th = font.getTexture().getHeight();
 
         for (char c : value.toCharArray()) {
-            Glyph glyph = font.getGlyphs().get((int)c);
+            Glyph glyph = font.getGlyphs().get((int) c);
             if (glyph == null)
                 continue;
 
@@ -80,10 +89,10 @@ public class FontRenderer {
             float v1 = (glyph.y + glyph.height) / th;
 
             float box[] = {
-                x0, y0, u0, v0,
-                        x1, y0, u1, v0,
-                        x0, y1, u0, v1,
-                        x1, y1, u1, v1
+                    x0, y0, u0, v0,
+                    x1, y0, u1, v0,
+                    x0, y1, u0, v1,
+                    x1, y1, u1, v1
             };
             glBufferData(GL_ARRAY_BUFFER, box, GL_DYNAMIC_DRAW);
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

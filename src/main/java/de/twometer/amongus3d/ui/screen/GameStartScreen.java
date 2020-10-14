@@ -45,7 +45,8 @@ public class GameStartScreen extends GuiScreen {
 
         if (player.getRole() == Role.Crewmate) {
             long impostors = Game.instance().getClient().users.values().stream().filter(p -> p.getRole() == Role.Impostor).count();
-            renderer.getFontRenderer().drawCentered("There are " + impostors + " impostors among us.", getW() / 2f, 250, 0.5f, new Vector4f(1, 0, 0, time - 0.1f));
+            String message = impostors == 1 ? "There is 1 impostor among us" : "There are " + impostors + " impostors among us.";
+            renderer.getFontRenderer().drawCentered(message, getW() / 2f, 250, 0.5f, new Vector4f(1, 0, 0, time - 0.1f));
         }
 
         int y = 320;

@@ -46,6 +46,11 @@ public class AmongUsClient {
 
     public float taskProgress;
 
+    public void disconnect() {
+        client.close();
+        client = null;
+    }
+
     private static class CallbackItem {
         private static int idc = 0;
         private final int id;
@@ -101,17 +106,18 @@ public class AmongUsClient {
         } else if (o instanceof NetMessage.PlayerEjected) {
             NetMessage.PlayerEjected ejected = (NetMessage.PlayerEjected) o;
             int remainingImpostors = getRemainingImpostors();
+            String remainingImpostorsStr = remainingImpostors == 1 ? "1 impostor remains" : remainingImpostors + " impostors remain";
             if (ejected.username.equals(Constants.INVALID_USER)) {
-                Game.instance().getGuiRenderer().setCurrentScreen(new EjectScreen("No one was ejected (Tie)", remainingImpostors + " impostors remain"));
+                Game.instance().getGuiRenderer().setCurrentScreen(new EjectScreen("No one was ejected (Tie)", remainingImpostorsStr));
                 return;
             } else if (ejected.username.equals(Constants.SKIP_USER)) {
-                Game.instance().getGuiRenderer().setCurrentScreen(new EjectScreen("No one was ejected (Skipped)", remainingImpostors + " impostors remain"));
+                Game.instance().getGuiRenderer().setCurrentScreen(new EjectScreen("No one was ejected (Skipped)", remainingImpostorsStr));
                 return;
             }
 
             if (ejected.confirm) {
                 String ejectMsg = ejected.impostor ? " was the impostor" : " was not an impostor";
-                Game.instance().getGuiRenderer().setCurrentScreen(new EjectScreen(ejected.username + ejectMsg, remainingImpostors + " impostors remain"));
+                Game.instance().getGuiRenderer().setCurrentScreen(new EjectScreen(ejected.username + ejectMsg, remainingImpostorsStr));
             } else {
                 Game.instance().getGuiRenderer().setCurrentScreen(new EjectScreen(ejected.username + " was ejected", ""));
             }
@@ -138,12 +144,14 @@ public class AmongUsClient {
             Player player = getPlayer(mov.username);
             if (player != null) {
                 player.setRotation(mov.angle);
-                player.setPosition(new Vector3f(mov.x, 0, mov.z));
+                player.setPosition(new Vector3f(mov.x, mov.y, mov.z));
             }
         } else if (o instanceof NetMessage.AssignColors) {
             for (Map.Entry<String, PlayerColor> colors : ((NetMessage.AssignColors) o).colors.entrySet()) {
                 getPlayer(colors.getKey()).setColor(colors.getValue());
             }
+        } else if (o instanceof NetMessage.PlayerLeft) {
+            users.remove(((NetMessage.PlayerLeft) o).username);
         }
     }
 
@@ -190,6 +198,7 @@ public class AmongUsClient {
             public void disconnected(Connection connection) {
                 super.disconnected(connection);
                 Log.w("Connection lost");
+                users.clear();
             }
         });
 

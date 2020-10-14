@@ -11,7 +11,10 @@ public class Camera {
     private static final float BREATHING_STRENGTH = 0.01f;
     private static final float BREATHING_SPEED = 1.44f;
 
-    private final Vector3f position = new Vector3f(30, 0.56f, -21);
+    private static final float EYE_HEIGHT = 0.56f;
+
+    private final Vector3f position = new Vector3f(30, 0, -21);
+    //private final Vector3f position = new Vector3f(0,0,0);
 
     private final Vector2f angle = new Vector2f(0, 0);
 
@@ -20,6 +23,7 @@ public class Camera {
         float pitch = (float) Math.toRadians(angle.y);
 
         Vector3f breathing = new Vector3f(0, BREATHING_STRENGTH * (float) Math.sin(BREATHING_SPEED * glfwGetTime()), 0);
+        breathing.add(0, EYE_HEIGHT, 0);
         breathing.add(position);
 
         Vector3f direction = new Vector3f(

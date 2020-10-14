@@ -22,6 +22,9 @@ public class ServerSession {
     public GameState.State gameState = GameState.State.Lobby;
     public int skipVotes;
 
+    public int totalTasks = 0;
+    public int totalTasksDone = 0;
+
     public ServerSession(String gameId) {
         this.gameId = gameId;
     }

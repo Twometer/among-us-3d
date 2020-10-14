@@ -72,118 +72,131 @@ public class ServerMain {
             public void disconnected(Connection connection) {
                 super.disconnected(connection);
                 Log.i("Connection lost");
+                ServerPlayer player = getPlayer(connection);
+                if (player != null && player.session != null) {
+                    player.session.players.remove(player.player.getUsername());
+                    NetMessage.PlayerLeft left = new NetMessage.PlayerLeft();
+                    left.username = player.player.getUsername();
+                    player.session.sendToAll(left);
+                }
             }
 
             @Override
             public void received(Connection connection, Object o) {
                 super.received(connection, o);
-                // Log.d("Incoming message: " + o.toString());
-                if (o instanceof NetMessage.CreateGame) {
-                    String gameId = SessionCodeGenerator.generate();
-                    ServerSession session = new ServerSession(gameId);
-                    sessions.put(gameId, session);
-                    connection.sendTCP(new NetMessage.GameCreated(gameId));
-                } else if (o instanceof NetMessage.JoinGame) {
-                    String username = ((NetMessage.JoinGame) o).username;
-                    String gameId = ((NetMessage.JoinGame) o).gameId.toUpperCase().trim();
-                    ServerSession session = sessions.get(gameId);
-                    Log.d("Joining " + gameId);
-                    if (session == null || session.players.containsKey(username) || session.gameState != GameState.State.Lobby) {
-                        connection.sendTCP(new NetMessage.GameJoined(false, false));
-                    } else {
-                        if (session.players.size() == 0) {
-                            session.host = username;
-                            connection.sendTCP(new NetMessage.GameJoined(true, true));
+                try {
+
+                    // Log.d("Incoming message: " + o.toString());
+                    if (o instanceof NetMessage.CreateGame) {
+                        String gameId = SessionCodeGenerator.generate();
+                        ServerSession session = new ServerSession(gameId);
+                        sessions.put(gameId, session);
+                        connection.sendTCP(new NetMessage.GameCreated(gameId));
+                    } else if (o instanceof NetMessage.JoinGame) {
+                        String username = ((NetMessage.JoinGame) o).username;
+                        String gameId = ((NetMessage.JoinGame) o).gameId.toUpperCase().trim();
+                        ServerSession session = sessions.get(gameId);
+                        Log.d("Joining " + gameId);
+                        if (session == null || session.players.containsKey(username) || session.gameState != GameState.State.Lobby) {
+                            connection.sendTCP(new NetMessage.GameJoined(false, false));
                         } else {
-                            connection.sendTCP(new NetMessage.GameJoined(true, false));
+                            if (session.players.size() == 0) {
+                                session.host = username;
+                                connection.sendTCP(new NetMessage.GameJoined(true, true));
+                            } else {
+                                connection.sendTCP(new NetMessage.GameJoined(true, false));
+                            }
+                            connection.setName(gameId + "|" + username);
+                            for (ServerPlayer p2 : session.players.values())
+                                connection.sendTCP(new NetMessage.PlayerJoined(p2.player.getUsername()));
+                            session.addPlayer(connection, username);
+                            session.sendToAll(new NetMessage.PlayerJoined(username));
                         }
-                        connection.setName(gameId + "|" + username);
-                        for (ServerPlayer p2 : session.players.values())
-                            connection.sendTCP(new NetMessage.PlayerJoined(p2.player.getUsername()));
-                        session.addPlayer(connection, username);
-                        session.sendToAll(new NetMessage.PlayerJoined(username));
-                    }
-                } else if (o instanceof NetMessage.StartGame) {
-                    ServerSession session = getSession(connection);
-                    if (session == null) {
-                        Log.w("Starting null session: cancelled");
-                        return;
-                    }
-                    if (session.gameState == GameState.State.Lobby /*&& session.players.size() > 4*/) {
-                        List<String> impostors = genSession(session);
-                        NetMessage.AssignColors colors = new NetMessage.AssignColors();
-                        colors.colors = new HashMap<>();
-                        for (ServerPlayer player : session.players.values())
-                            colors.colors.put(player.player.getUsername(), player.player.getColor());
-
-                        for (ServerPlayer player : session.players.values()) {
-                            NetMessage.GameStarted started = new NetMessage.GameStarted();
-                            started.position = player.player.getPosition();
-                            started.role = player.player.getRole();
-                            started.color = player.player.getColor();
-                            started.tasks = player.player.getTasks();
-                            started.impostors = impostors;
-                            player.connection.sendTCP(colors);
-                            player.connection.sendTCP(started);
+                    } else if (o instanceof NetMessage.StartGame) {
+                        ServerSession session = getSession(connection);
+                        if (session == null) {
+                            Log.w("Starting null session: cancelled");
+                            return;
                         }
+                        if (session.gameState == GameState.State.Lobby /*&& session.players.size() > 4*/) {
+                            List<String> impostors = genSession(session);
+                            NetMessage.AssignColors colors = new NetMessage.AssignColors();
+                            colors.colors = new HashMap<>();
+                            for (ServerPlayer player : session.players.values())
+                                colors.colors.put(player.player.getUsername(), player.player.getColor());
 
-                    }
-                } else if (o instanceof NetMessage.EmergencyReport) {
-                    ServerSession serverSession = getSession(connection);
-                    if (serverSession != null) {
-                        NetMessage.EmergencyReport msg = new NetMessage.EmergencyReport();
-                        msg.reporter = getPlayer(connection).player.getUsername();
-                        msg.deathReport = ((NetMessage.EmergencyReport) o).deathReport;
-                        msg.voteDuration = VOTE_DURATION_MS;
-                        serverSession.sendToAll(msg);
-                        for (ServerPlayer player : serverSession.players.values())
-                            player.player.resetVotes();
-                        serverSession.skipVotes = 0;
+                            for (ServerPlayer player : session.players.values()) {
+                                NetMessage.GameStarted started = new NetMessage.GameStarted();
+                                started.position = player.player.getPosition();
+                                started.role = player.player.getRole();
+                                started.color = player.player.getColor();
+                                started.tasks = player.player.getTasks();
+                                started.impostors = impostors;
+                                player.connection.sendTCP(colors);
+                                player.connection.sendTCP(started);
+                            }
 
-                        Log.i("Voting ends in " + VOTE_DURATION_MS);
-                        serverSession.autoSkipTask = SCHEDULER.runLater(VOTE_DURATION_MS, () -> {
-                            Log.i("Voting ended automatically...");
-                            closeVoting(serverSession);
-                        });
-                    }
-                } else if (o instanceof NetMessage.VoteCast) {
-                    ServerSession serverSession = getSession(connection);
-                    if (serverSession != null) {
-                        NetMessage.VoteCast msg = new NetMessage.VoteCast();
-                        msg.srcUsername = getPlayer(connection).player.getUsername();
-                        msg.dstUsername = ((NetMessage.VoteCast) o).dstUsername;
-                        serverSession.sendToAll(msg);
-
-                        if (msg.dstUsername.equals(Constants.SKIP_USER)) {
-                            serverSession.skipVotes++;
-                        } else {
-                            serverSession.players.get(msg.dstUsername).player.vote();
                         }
+                    } else if (o instanceof NetMessage.EmergencyReport) {
+                        ServerSession serverSession = getSession(connection);
+                        if (serverSession != null) {
+                            NetMessage.EmergencyReport msg = new NetMessage.EmergencyReport();
+                            msg.reporter = getPlayer(connection).player.getUsername();
+                            msg.deathReport = ((NetMessage.EmergencyReport) o).deathReport;
+                            msg.voteDuration = VOTE_DURATION_MS;
+                            serverSession.sendToAll(msg);
+                            for (ServerPlayer player : serverSession.players.values())
+                                player.player.resetVotes();
+                            serverSession.skipVotes = 0;
 
-                        int votes = 0;
-                        for (ServerPlayer player : serverSession.players.values())
-                            votes += player.player.getEjectionVotes();
-                        votes += serverSession.skipVotes;
-                        if (votes == serverSession.players.size()) {
-                            closeVoting(serverSession);
-                            Log.i("everyone has voted");
-                        } else {
-                            Log.i("votes: " + votes + " / " + serverSession.players.size());
+                            Log.i("Voting ends in " + VOTE_DURATION_MS);
+                            serverSession.autoSkipTask = SCHEDULER.runLater(VOTE_DURATION_MS, () -> {
+                                Log.i("Voting ended automatically...");
+                                closeVoting(serverSession);
+                            });
                         }
+                    } else if (o instanceof NetMessage.VoteCast) {
+                        ServerSession serverSession = getSession(connection);
+                        if (serverSession != null) {
+                            NetMessage.VoteCast msg = new NetMessage.VoteCast();
+                            msg.srcUsername = getPlayer(connection).player.getUsername();
+                            msg.dstUsername = ((NetMessage.VoteCast) o).dstUsername;
+                            serverSession.sendToAll(msg);
 
+                            if (msg.dstUsername.equals(Constants.SKIP_USER)) {
+                                serverSession.skipVotes++;
+                            } else {
+                                serverSession.players.get(msg.dstUsername).player.vote();
+                            }
+
+                            int votes = 0;
+                            for (ServerPlayer player : serverSession.players.values())
+                                votes += player.player.getEjectionVotes();
+                            votes += serverSession.skipVotes;
+                            if (votes == serverSession.players.size()) {
+                                closeVoting(serverSession);
+                                Log.i("Everyone has voted");
+                            } else {
+                                Log.i("Votes: " + votes + " / " + serverSession.players.size());
+                            }
+
+                        }
+                    } else if (o instanceof NetMessage.PlayerKill) {
+                        ServerSession serverSession = getSession(connection);
+                        if (serverSession != null) {
+                            checkVictory(serverSession);
+                            serverSession.players.get(((NetMessage.PlayerKill) o).victim).player.setDead(true);
+                        }
+                    } else if (o instanceof NetMessage.PlayerMove) {
+                        ServerPlayer player = getPlayer(connection);
+                        if (player != null) {
+                            ((NetMessage.PlayerMove) o).username = player.player.getUsername();
+                            player.session.sendToAll(o);
+                        }
                     }
-                } else if (o instanceof NetMessage.PlayerKill) {
-                    ServerSession serverSession = getSession(connection);
-                    if (serverSession != null) {
-                        checkVictory(serverSession);
-                        serverSession.players.get(((NetMessage.PlayerKill) o).victim).player.setDead(true);
-                    }
-                } else if (o instanceof NetMessage.PlayerMove) {
-                    ServerPlayer player = getPlayer(connection);
-                    if (player != null) {
-                        ((NetMessage.PlayerMove) o).username = player.player.getUsername();
-                        player.session.sendToAll(o);
-                    }
+                } catch (Exception e) {
+                    Log.e("Client violation, disconnecting.", e);
+                    connection.close();
                 }
             }
         });

@@ -416,7 +416,7 @@ public class Game {
         shadingStrategy = ShadingStrategies.DEFAULT;
         sceneBuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        renderScene();
+        renderScene(false);
         shadingStrategy = ShadingStrategies.FLAT;
         ShadingStrategies.FLAT.setColor(new Vector3f(1.0f, 1.0f, 0));
         debug.render();
@@ -425,7 +425,7 @@ public class Game {
         bloomBuffer.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         shadingStrategy = ShadingStrategies.BLOOM;
-        renderScene();
+        renderScene(true);
         bloomBuffer.unbind();
 
         postProcessing.begin();
@@ -468,13 +468,17 @@ public class Game {
         postProcessing.end();
     }
 
-    private void renderScene() {
+    private void renderScene(boolean bloom) {
         for (GameObject go : gameObjects)
             go.render(RenderLayer.Base);
         for (GameObject go : gameObjects)
             go.render(RenderLayer.Transparency);
 
         shadingStrategy = ShadingStrategies.FLAT;
+
+
+        if (bloom)
+            return;
 
         for (Player player : client.users.values()) {
             if (!player.getUsername().equals(self.getUsername()) && !player.isDead() && player.getPosition() != null) {
@@ -490,14 +494,30 @@ public class Game {
                         .rotateLocal(ipR, 0, 1, 0)
                         .scaleLocal(0.18f)
                         .translateLocal(ipX, ipY, ipZ));
+
+                if (player.getPosition().distance(camera.getPosition()) < getVision() + 1.5f)
+                    renderBillboard(player.getUsername(), ipX, ipY + 1.25f, ipZ, ipR);
             }
         }
 
+        //renderBillboard("Helo", camera.getPosition().x + 1, camera.getPosition().y, camera.getPosition().z + 1);
+    }
+
+    private void renderBillboard(String text, float x, float y, float z, float angle) {
+        Matrix4f modelMatrix = new Matrix4f();
+        modelMatrix.scale(1f, -1f, 1f);
+        modelMatrix.rotateLocal(angle, 0, 1, 0);
+        modelMatrix.translateLocal(x, y, z);
+
+        Matrix4f fontMatrix = new Matrix4f();
+        fontMatrix.set(projMatrix);
+        fontMatrix.mul(viewMatrix);
+        fontMatrix.mul(modelMatrix);
+
+        guiRenderer.getFontRenderer().drawCentered(text, 0, 0, 0.005f, new Vector4f(1, 1, 1, 1), fontMatrix);
     }
 
     private void handleControls() {
-
-
         if (networkTimer.elapsed() && gameState.getCurrentState() == GameState.State.Running) {
             networkTimer.reset();
             NetMessage.PlayerMove msg = new NetMessage.PlayerMove();
@@ -634,7 +654,7 @@ public class Game {
     }
 
     public float getVision() {
-        if (self.isDead())
+        if (self.isDead() || DEBUG_MODE)
             return VISION_GHOST;
 
         if (client.currentSabotage == Sabotage.Lights)
@@ -648,3 +668,4 @@ public class Game {
         return 0;
     }
 }
+
