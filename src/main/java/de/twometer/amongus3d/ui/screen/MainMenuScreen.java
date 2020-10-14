@@ -37,6 +37,8 @@ public class MainMenuScreen extends GuiScreen {
         addComponent(joinGame = new ButtonComponent(200, 40, "Join game"));
         addComponent(new EmptyComponent(0, 50));
         addComponent(createGame = new ButtonComponent(200, 40, "Create game"));
+        addComponent(new EmptyComponent(0, 50));
+        addComponent(new ButtonComponent(200, 40, "Exit").setClickListener(() -> Game.instance().getWindow().close()));
 
         joinGame.setClickListener(() -> {
             Game.instance().getSelf().setUsername(usernameBox.getText());

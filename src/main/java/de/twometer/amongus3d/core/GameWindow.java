@@ -139,6 +139,10 @@ public class GameWindow implements ILifecycle {
         return glfwWindowShouldClose(handle);
     }
 
+    public void close() {
+        glfwSetWindowShouldClose(handle, true);
+    }
+
     public void setCursorPosition(Vector2f vec) {
         glfwSetCursorPos(handle, vec.x, vec.y);
     }

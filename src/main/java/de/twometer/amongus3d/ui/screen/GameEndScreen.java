@@ -49,7 +49,7 @@ public class GameEndScreen extends GuiScreen {
         Role winners = Game.instance().getClient().winner;
 
         Vector4f color = winners == Role.Impostor ? new Vector4f(1, 0, 0, vis) : new Vector4f(0, 0.5f, 1, vis);
-        renderer.getFontRenderer().drawCentered(winners == Role.Impostor ? "Defeat" : "Victory", getW() / 2f, 60f + vis * 20f, 2.0f, color);
+        renderer.getFontRenderer().drawCentered(winners == Game.instance().getSelf().getRole() ? "VICTORY" : "DEFEAT", getW() / 2f, 60f + vis * 20f, 2.0f, color);
 
         int y = 320;
         for (Player p : Game.instance().getClient().users.values()) {
