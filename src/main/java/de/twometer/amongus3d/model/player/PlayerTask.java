@@ -12,6 +12,8 @@ public class PlayerTask {
     private int progress = 0;
 
     public TaskDef nextTask() {
+        if (progress >= tasks.size())
+            return null;
         return tasks.get(progress);
     }
 
@@ -39,6 +41,10 @@ public class PlayerTask {
         this.progress = progress;
     }
 
+    public void completeOne() {
+        progress++;
+    }
+
     public PlayerTask addTask(TaskDef taskDef) {
         tasks.add(taskDef);
         return this;
@@ -47,8 +53,10 @@ public class PlayerTask {
     @Override
     public String toString() {
         TaskDef nextTask = nextTask();
+        if (nextTask == null)
+            nextTask = tasks.get(tasks.size() - 1);
         String base = nextTask.getRoom().toString() + ": ";
-
-        return super.toString();
+        String progress = isLongTask() ? " (" + getProgress() + "/" + getTasks().size() + ")" : "";
+        return base + nextTask.getTaskType().toString() + progress;
     }
 }

@@ -1,8 +1,11 @@
 package de.twometer.amongus3d.obj;
 
+import de.twometer.amongus3d.audio.SoundFX;
 import de.twometer.amongus3d.client.AmongUsClient;
 import de.twometer.amongus3d.core.Game;
 import de.twometer.amongus3d.mesh.Renderable;
+import de.twometer.amongus3d.model.NetMessage;
+import de.twometer.amongus3d.model.player.PlayerTask;
 import de.twometer.amongus3d.model.player.Role;
 import de.twometer.amongus3d.model.player.Sabotage;
 import de.twometer.amongus3d.model.world.Room;
@@ -68,8 +71,17 @@ public class TaskGameObject extends StaticGameObject {
     @Override
     public void onClicked() {
         super.onClicked();
-        Log.d("Clicked on " + toString());
-
+        PlayerTask parent = Game.instance().getSelf().getParentTask(getTask());
+        if (parent == null) {
+            Log.w("Can't find task parent for " + toString());
+            return;
+        }
+        Log.d("Clicked on " + toString() + ": " + parent.toString());
+        NetMessage.CompleteTask msg = new NetMessage.CompleteTask();
+        msg.task = getTask();
+        Game.instance().getClient().sendMessage(msg);
+        parent.completeOne();
+        SoundFX.play("task_complete");
     }
 
     private boolean isCurrentSabotage() {

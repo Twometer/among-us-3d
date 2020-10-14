@@ -304,7 +304,7 @@ public class Game {
             final int taskHudWidth = 550;
             guiRenderer.drawRect(5, 5, taskHudWidth, 40, new Vector4f(0, 0, 0, 1));
             guiRenderer.drawRect(7, 7, taskHudWidth - 4, 40 - 4, new Vector4f(0.4f, 0.4f, 0.4f, 1));
-            guiRenderer.drawRect(7, 7, (int) ((taskHudWidth - 4) * client.taskProgress), 20 - 4, new Vector4f(0.2f, 0.95f, 0.2f, 1));
+            guiRenderer.drawRect(7, 7, (int) ((taskHudWidth - 4) * client.taskProgress), 40 - 4, new Vector4f(0.2f, 0.95f, 0.2f, 1));
             guiRenderer.getFontRenderer().draw("Task Progress", 15, 10, 0.35f, new Vector4f(1, 1, 1, 1));
 
             // Task list
@@ -314,9 +314,12 @@ public class Game {
             guiRenderer.getFontRenderer().draw(header, 20, y, 0.5f, new Vector4f(1, 1, 1, 1));
             y += 35;
             for (PlayerTask task : self.getTasks()) {
-                String progress = task.isLongTask() ? " (" + task.getProgress() + "/" + task.getTasks().size() + ")" : "";
-                Vector4f color = task.isDone() ? new Vector4f(0, 1, 0, 0.9f) : new Vector4f(1, 1, 1, 0.9f);
-                guiRenderer.getFontRenderer().draw(task.nextTask().getRoom() + ": " + task.nextTask().getTaskType() + progress, 35, y, 0.5f, color);
+                Vector4f color = new Vector4f(1, 1, 1, 0.9f);
+                if (task.isDone())
+                    color = new Vector4f(0, 1, 0, 0.9f);
+                else if (task.isLongTask() && task.getProgress() > 0)
+                    color = new Vector4f(1, 1, 0, 0.9f);
+                guiRenderer.getFontRenderer().draw(task.toString(), 35, y, 0.5f, color);
                 y += 35;
             }
 

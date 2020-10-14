@@ -35,9 +35,16 @@ public class Player {
 
     public boolean canDoTask(TaskDef task) {
         for (PlayerTask t2 : tasks)
-            if (t2.nextTask().equals(task))
+            if (task.equals(t2.nextTask()))
                 return true;
         return false;
+    }
+
+    public PlayerTask getParentTask(TaskDef def) {
+        for (PlayerTask t2 : tasks)
+            if (def.equals(t2.nextTask()))
+                return t2;
+        return null;
     }
 
     public List<PlayerTask> getTasks() {

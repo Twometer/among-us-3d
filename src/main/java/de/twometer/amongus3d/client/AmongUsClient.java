@@ -152,6 +152,8 @@ public class AmongUsClient {
             }
         } else if (o instanceof NetMessage.PlayerLeft) {
             users.remove(((NetMessage.PlayerLeft) o).username);
+        } else if (o instanceof NetMessage.TaskProgress) {
+            taskProgress = ((NetMessage.TaskProgress) o).totalProgress;
         }
     }
 
