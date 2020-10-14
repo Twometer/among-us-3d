@@ -193,6 +193,22 @@ public class ServerMain {
                             ((NetMessage.PlayerMove) o).username = player.player.getUsername();
                             player.session.sendToAll(o);
                         }
+                    } else if (o instanceof NetMessage.CompleteTask) {
+                        ServerPlayer player = getPlayer(connection);
+                        if (player == null || player.session == null) {
+                            Log.w("Player null or session null");
+                            return;
+                        }
+                        if (player.player.canDoTask(((NetMessage.CompleteTask) o).task)) {
+                            player.session.totalTasksDone++;
+                            NetMessage.TaskProgress progress = new NetMessage.TaskProgress();
+                            progress.totalProgress = player.session.totalTasksDone / (float) player.session.totalTasks;
+                            player.session.sendToAll(progress);
+                            checkVictory(player.session);
+                            Log.d(player.player.getUsername() + " did task " + ((NetMessage.CompleteTask) o).task.getTaskType().toString());
+                        } else {
+                            Log.w("Cheater! Player " + player.player.getUsername() + " cannot do that task right now!");
+                        }
                     }
                 } catch (Exception e) {
                     Log.e("Client violation, disconnecting.", e);
@@ -212,12 +228,14 @@ public class ServerMain {
 
         NetMessage.GameEnded ended = new NetMessage.GameEnded();
         Log.i("Impostors: " + impostors + "; Crewmates: " + crewmates);
-        if (impostors == 0) ended.winner = Role.Crewmate;
+        if (impostors == 0 || serverSession.totalTasks == serverSession.totalTasksDone) ended.winner = Role.Crewmate;
         else if (crewmates <= impostors) ended.winner = Role.Impostor;
         else return;
 
         Log.i("Resetting session " + serverSession.gameId);
         serverSession.skipVotes = 0;
+        serverSession.totalTasks = 0;
+        serverSession.totalTasksDone = 0;
         for (ServerPlayer player : serverSession.players.values()) {
             player.player.resetVotes();
             player.player.setDead(false);
@@ -280,7 +298,8 @@ public class ServerMain {
 
     private static Vector3f genPosition(int idx) {
         Vector3f base = new Vector3f(30, 0, -21);
-        Vector3f add = new Vector3f((float) Math.sin(idx), 0, (float) Math.cos(idx));
+        double angle = Math.toRadians(idx * (360.0 / 10.0));
+        Vector3f add = new Vector3f((float) Math.sin(angle), 0, (float) Math.cos(angle));
         return base.add(add.normalize(4));
     }
 
@@ -364,8 +383,19 @@ public class ServerMain {
             player.player.getTasks().add(commonTask);
             genTasks(player.player);
             player.player.setRole(imposters.contains(player.player.getUsername()) ? Role.Impostor : Role.Crewmate);
+
+            if (player.player.getRole() == Role.Crewmate) {
+                player.session.totalTasks += COMMON_TASKS;
+                for (PlayerTask task : player.player.getTasks()) {
+                    player.session.totalTasks += task.getTasks().size();
+                }
+            }
+
             playerIdx++;
         }
+
+        Log.d("Total tasks: " + session.totalTasks);
+
         return imposters;
     }
 
