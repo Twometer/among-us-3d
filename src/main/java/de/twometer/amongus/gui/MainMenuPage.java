@@ -26,7 +26,7 @@ public class MainMenuPage extends Page {
     }
 
     public void credits() {
-
+        AmongUs.get().getGuiManager().showPage(new CreditsPage());
     }
 
 }
