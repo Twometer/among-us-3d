@@ -2,39 +2,18 @@ plugins {
     id 'java'
 }
 
-group 'org.example'
+group 'de.twometer'
 version '1.0-SNAPSHOT'
-
-project.ext.lwjglVersion = "3.2.3"
-project.ext.lwjglNatives = "natives-windows"
 
 repositories {
     mavenCentral()
     maven { url 'http://clojars.org/repo/' }
+    maven { url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/' }
+    maven { url 'https://cloud.twometer.de/nexus/repository/maven-releases' }
 }
 
 dependencies {
-    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
-
-    implementation "org.lwjgl:lwjgl"
-    implementation "org.lwjgl:lwjgl-glfw"
-    implementation "org.lwjgl:lwjgl-openal"
-    implementation "org.lwjgl:lwjgl-opengl"
-    implementation "org.lwjgl:lwjgl-assimp"
-    implementation "org.lwjgl:lwjgl-stb"
-    implementation "org.joml:joml:1.9.12"
-    implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'com.esotericsoftware:kryo:5.0.0-RC9'
-    implementation 'kryonet:kryonet:2.21'
-    implementation 'org.greenrobot:eventbus:3.2.0'
-
-
-    runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
+    implementation 'de.twometer.neko:neko-engine:1.0.0'
 
     testCompile 'junit:junit:4.12'
 }

@@ -19,6 +19,16 @@
     <remote-repository>
       <option name="id" value="maven" />
       <option name="name" value="maven" />
+      <option name="url" value="https://cloud.twometer.de/nexus/repository/maven-releases" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven2" />
+      <option name="name" value="maven2" />
+      <option name="url" value="https://oss.sonatype.org/service/local/staging/deploy/maven2/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven" />
+      <option name="name" value="maven" />
       <option name="url" value="http://clojars.org/repo/" />
     </remote-repository>
   </component>
