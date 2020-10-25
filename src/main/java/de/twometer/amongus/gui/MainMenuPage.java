@@ -18,7 +18,7 @@ public class MainMenuPage extends Page {
     }
 
     public void settings() {
-
+        AmongUs.get().getGuiManager().showPage(new SettingsPage());
     }
 
     public void quit() {

@@ -1,0 +1,125 @@
+<html>
+<head>
+    <style>
+        * {
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-image: url("img/WallpaperSkeld.png");
+            background-size: cover;
+            color: white;
+            font-family: 'In your face, Joffrey!';
+            padding: 20px 50px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 60px;
+            margin: 15px 0;
+        }
+
+        .settings-panel {
+            padding: 25px;
+            width: 800px;
+            background: #56565688;
+            margin: auto;
+        }
+        th,td {
+            font-size: 55px;
+            padding: 10px 50px;
+            text-align: right;
+        }
+        th {
+            text-align: left!important;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: none;
+        }
+        .button-panel {
+            text-align: center;
+            margin: 15px auto auto;
+        }
+        button {
+            font-family: 'In your face, Joffrey!';
+            font-size: 50px;
+            border: 0;
+            width: 270px;
+            height: 70px;
+            margin: 0px 5px;
+            color: white;
+            transition: background-color .4s;
+            background: rgba(0, 0, 0, 0.65);
+        }
+        button:hover {
+            transition: background-color .4s;
+            background: rgba(0, 0, 0, 1.0);
+        }
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 15px;
+            outline: none;
+            background: rgba(0, 0, 0, 0.65);
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none; /* Override default look */
+            width: 25px;
+            height: 25px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+        }
+        input[type="checkbox"] {
+            -webkit-appearance: none;
+            width: 65px;
+            height: 65px;
+            border: none;
+            border-radius: 0;
+            float: right;
+            background: rgba(0, 0, 0, 0.65);
+            display: block;
+            margin-right: 5px;
+        }
+        input[type="checkbox"]:checked  {
+            background: rgba(1, 1, 1, 0.65);
+        }
+    </style>
+</head>
+<body>
+    <h1>Settings</h1>
+    <div class="settings-panel">
+        <table>
+            <tr>
+                <th>Ambient Occlusion</th>
+                <td><input type="checkbox"/></td>
+            </tr>
+            <tr>
+                <th>AO Quality</th>
+                <td><input type="range" min="1" max="64" value="11" class="slider"></td>
+            </tr>
+            <tr>
+                <th>Bloom</th>
+                <td><input type="checkbox" checked/></td>
+            </tr>
+            <tr>
+                <th>Vignette</th>
+                <td><input type="checkbox"/></td>
+            </tr>
+            <tr>
+                <th>FXAA</th>
+                <td><input type="checkbox"/></td>
+            </tr>
+        </table>
+
+        <div class="button-panel">
+            <button onclick="_remote.apply()">Apply</button>
+            <button onclick="_remote.back()">Cancel</button>
+        </div>
+
+    </div>
+</body>
+</html>
