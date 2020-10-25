@@ -10,7 +10,7 @@ public class MainMenuPage extends Page {
     }
 
     public void createGame() {
-
+        AmongUs.get().getGuiManager().showPage(new IngamePage());
     }
 
     public void joinGame() {

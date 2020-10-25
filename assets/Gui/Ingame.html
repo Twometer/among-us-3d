@@ -1,0 +1,152 @@
+<html>
+<head>
+    <style>
+        * {
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .actions-panel {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+        }
+
+        .action-item {
+            display: inline-block;
+            margin: 0 15px;
+            opacity: .75;
+        }
+
+        .action-hint {
+            margin-top: 10px;
+            font-family: Calibri;
+            font-size: 30px;
+            width: 35px;
+            height: 35px;
+            border-radius: 6px;
+            background: black;
+            color: white;
+            margin: auto;
+            text-align: center;
+        }
+
+        .vcenter {
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .taskbar {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+        }
+
+        .taskbar-fill-state {
+            position: absolute;
+            top: 23px;
+            left: 23px;
+            height: 34px;
+            width: 381px; /* Max width: 762 */
+            background: #72D65B;
+        }
+
+        .taskbar-text {
+            position: absolute;
+            top: 24px;
+            left: 29px;
+            color: white;
+            font-size: 32px;
+            font-family: 'In your face, Joffrey!';
+        }
+
+        .taskmanager {
+            font-family: 'In your face, Joffrey!';
+            position: absolute;
+            top: 90px;
+            width: 786px;
+            left: 11px;
+            background: #6868689F;
+            color: #fff;
+            font-size: 48px;
+            padding: 14px;
+        }
+
+        .taskmanager > p {
+            padding: 0;
+            margin: 4px 4px;
+        }
+
+        .sabotage {
+            color: red;
+        }
+
+        #alarm-overlay {
+            z-index: 15;
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            bottom: 0;
+            background: #ff000035;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<img class="taskbar" src="img/Taskbar.png">
+<div class="taskbar-fill-state"></div>
+<div class="taskbar-text">Task progress</div>
+<div class="taskmanager">
+    <p>Cafeteria: Fix wiring</p>
+    <p>Storage: Refuel Engines (0/2)</p>
+    <p>Comms: Download Data</p>
+    <p>Admin: Swipe card</p>
+    <p id="sabotage" class="sabotage">Fix lights</p>
+</div>
+
+<div id="alarm-overlay"></div>
+
+<div class="actions-panel">
+    <div class="action-item">
+        <img id="action2" src="img/ActionSabotage.png">
+        <div class="action-hint">
+            Q
+        </div>
+    </div>
+
+    <div class="action-item">
+        <img id="action1" src="img/ActionReport.png">
+        <div class="action-hint">
+            R
+        </div>
+    </div>
+
+    <div class="action-item">
+        <img id="action0" src="img/ActionUse.png">
+        <div class="action-hint">
+            <img class="vcenter" src="img/LMB.png">
+        </div>
+    </div>
+</div>
+
+</body>
+
+<script>
+    var _AlarmRunning = false;
+
+    var blinkstate = false;
+    setInterval(() => {
+        if (!_AlarmRunning)
+            return;
+        document.getElementById('alarm-overlay').style.display = blinkstate ? 'block' : 'none';
+        blinkstate = !blinkstate;
+    }, 1000);
+</script>
+</html>
