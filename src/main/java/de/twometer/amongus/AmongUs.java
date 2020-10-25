@@ -1,5 +1,7 @@
 package de.twometer.amongus;
 
+import de.twometer.amongus.gui.LoadingPage;
+import de.twometer.amongus.gui.MainMenuPage;
 import de.twometer.neko.core.NekoApp;
 import de.twometer.neko.render.filter.FrustumCullingFilter;
 import de.twometer.neko.render.light.LightSource;
@@ -9,13 +11,19 @@ import de.twometer.neko.res.TextureLoader;
 
 public class AmongUs extends NekoApp {
 
+    private static AmongUs instance;
+
     public static void main(String[] args) {
-        (new AmongUs()).launch("Among Us 3D", 1280, 720);
+        (instance = new AmongUs()).launch("Among Us 3D", 1280, 720);
+    }
+
+    public static AmongUs get() {
+        return instance;
     }
 
     @Override
     protected void onPreLoad() {
-        super.onPreLoad();
+        getGuiManager().setLoadingScreen(new LoadingPage());
     }
 
     @Override
@@ -42,5 +50,7 @@ public class AmongUs extends NekoApp {
         var skyboxCubemap = TextureLoader.loadCubemap("Sky/right.png", "Sky/left.png", "Sky/top.png", "Sky/bottom.png", "Sky/front.png", "Sky/back.png");
         getScene().getSkybox().setActive(true);
         getScene().getSkybox().setTexture(skyboxCubemap);
+
+        getGuiManager().showPage(new MainMenuPage());
     }
 }
