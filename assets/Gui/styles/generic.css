@@ -1,0 +1,43 @@
+* {
+    -webkit-user-select: none;
+}
+
+body {
+    background-image: url("../img/WallpaperSkeld.png");
+    background-size: cover;
+    color: white;
+    font-family: 'In your face, Joffrey!';
+    padding: 20px 50px;
+    text-align: center;
+    overflow: hidden;
+}
+
+h1 {
+    font-size: 60px;
+    margin: 15px 0;
+}
+
+.container {
+    padding: 25px;
+    width: 800px;
+    background: #56565688;
+    margin: auto;
+    max-height: 75%;
+    overflow-y: scroll;
+}
+button {
+    font-family: 'In your face, Joffrey!';
+    font-size: 50px;
+    border: 0 !important;
+    width: 270px;
+    height: 70px;
+    margin: 0px 5px;
+    color: white;
+    transition: background-color .4s;
+    background: rgba(0, 0, 0, 0.65);
+}
+
+button:hover {
+    transition: background-color .4s;
+    background: rgba(0, 0, 0, 1.0);
+}

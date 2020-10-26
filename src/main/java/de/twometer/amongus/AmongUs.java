@@ -1,6 +1,7 @@
 package de.twometer.amongus;
 
 import de.twometer.amongus.game.GameStateManager;
+import de.twometer.amongus.gui.EmergencyPage;
 import de.twometer.amongus.gui.LoadingPage;
 import de.twometer.amongus.gui.MainMenuPage;
 import de.twometer.neko.core.NekoApp;

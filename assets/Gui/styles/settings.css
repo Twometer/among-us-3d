@@ -12,20 +12,6 @@ body {
     overflow: hidden;
 }
 
-h1 {
-    font-size: 60px;
-    margin: 15px 0;
-}
-
-.settings-panel {
-    padding: 25px;
-    width: 800px;
-    background: #56565688;
-    margin: auto;
-    max-height: 75%;
-    overflow-y: scroll;
-}
-
 th, td {
     font-size: 55px;
     padding: 10px 50px;
@@ -47,22 +33,7 @@ table {
     margin: 15px auto auto;
 }
 
-button {
-    font-family: 'In your face, Joffrey!';
-    font-size: 50px;
-    border: 0 !important;
-    width: 270px;
-    height: 70px;
-    margin: 0px 5px;
-    color: white;
-    transition: background-color .4s;
-    background: rgba(0, 0, 0, 0.65);
-}
 
-button:hover {
-    transition: background-color .4s;
-    background: rgba(0, 0, 0, 1.0);
-}
 
 .slider {
     -webkit-appearance: none;
