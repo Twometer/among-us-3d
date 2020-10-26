@@ -13,6 +13,8 @@ Element.prototype.disableAni = function() {
 
 var _baseX;
 var _baseY;
+var _baseW;
+var _baseH;
 
 function OnLoaded() {
     var background = document.getElementsByClassName("background")[0];
@@ -32,6 +34,8 @@ function OnLoaded() {
         if (r != null) a.style.right = r;
     }
     document.body.style.zoom = "150%";
+    _baseW = container.getBoundingClientRect().right - container.getBoundingClientRect().left;
+    _baseH = container.getBoundingClientRect().bottom - container.getBoundingClientRect().top;
     _baseX = container.getBoundingClientRect().left;
     _baseY = container.getBoundingClientRect().top;
 }
