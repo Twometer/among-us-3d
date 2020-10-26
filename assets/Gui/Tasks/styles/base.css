@@ -10,6 +10,21 @@ body, html {
     overflow: hidden;
 }
 
+.ctr {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.ctrx {
+    left: 50%;
+    transform: translateX(-50%);
+}
+.ctry {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
 .container {
     position: relative;
     top: 50%;

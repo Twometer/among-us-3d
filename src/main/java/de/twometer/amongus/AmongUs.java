@@ -4,6 +4,7 @@ import de.twometer.amongus.game.GameStateManager;
 import de.twometer.amongus.gui.*;
 import de.twometer.amongus.model.TaskType;
 import de.twometer.amongus.util.RemoteGuiApi;
+import de.twometer.amongus.util.Scheduler;
 import de.twometer.neko.core.NekoApp;
 import de.twometer.neko.render.filter.FrustumCullingFilter;
 import de.twometer.neko.render.light.LightSource;
@@ -15,6 +16,7 @@ public class AmongUs extends NekoApp {
 
     // Game services
     private final GameStateManager gameStateManager = new GameStateManager();
+    private final Scheduler scheduler = new Scheduler();
 
     // Singleton
     private static AmongUs instance;
@@ -62,10 +64,20 @@ public class AmongUs extends NekoApp {
         // UI
         getGuiManager().registerGlobalJsObject("_api", new RemoteGuiApi());
         getGuiManager().showPage(new MainMenuPage());
-        getGuiManager().showPage(new TaskPage(TaskType.SwipeCard));
+        getGuiManager().showPage(new TaskPage(TaskType.PrimeShields));
+    }
+
+    @Override
+    protected void onTick() {
+        super.onTick();
+        scheduler.update();
     }
 
     public GameStateManager getGameStateManager() {
         return gameStateManager;
+    }
+
+    public Scheduler getScheduler() {
+        return scheduler;
     }
 }

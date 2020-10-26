@@ -2,6 +2,10 @@ function $(s) {
     return document.getElementById(s);
 }
 
+function _(s)  {
+    return document.getElementsByClassName(s);
+}
+
 Element.prototype.disableAni = function() {
     this.classList.remove("ani1");
     this.classList.remove("ani05");

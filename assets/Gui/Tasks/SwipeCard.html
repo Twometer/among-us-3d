@@ -82,9 +82,7 @@
                             card.style.left = 15;
                             card.style.bottom = 15;
                             card.width=150;
-                setTimeout(() => {
-                    _remote.taskComplete();
-                }, 400);
+                _remote.taskComplete();
                 return;
                 }
             _api.playSound('CardDeny.ogg');
