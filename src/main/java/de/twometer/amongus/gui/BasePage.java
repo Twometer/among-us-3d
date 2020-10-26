@@ -12,7 +12,7 @@ public abstract class BasePage extends Page {
         previous = AmongUs.get().getGuiManager().getCurrentPage();
     }
 
-    protected void goBack() {
+    protected final void goBack() {
         AmongUs.get().getGuiManager().showPage(previous);
     }
 

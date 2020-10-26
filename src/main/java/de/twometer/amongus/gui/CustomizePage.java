@@ -2,7 +2,6 @@ package de.twometer.amongus.gui;
 
 import de.twometer.amongus.AmongUs;
 import de.twometer.amongus.model.PlayerColor;
-import de.twometer.neko.gui.Page;
 
 public class CustomizePage extends BasePage {
 
