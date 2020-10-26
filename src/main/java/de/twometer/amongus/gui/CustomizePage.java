@@ -22,7 +22,7 @@ public class CustomizePage extends Page {
     }
 
     public void apply() {
-
+        AmongUs.get().getGuiManager().showPage(new LobbyPage());
     }
 
     public void back() {
