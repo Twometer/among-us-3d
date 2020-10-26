@@ -3,6 +3,7 @@ package de.twometer.amongus;
 import de.twometer.amongus.game.GameStateManager;
 import de.twometer.amongus.gui.*;
 import de.twometer.amongus.model.TaskType;
+import de.twometer.amongus.util.RemoteGuiApi;
 import de.twometer.neko.core.NekoApp;
 import de.twometer.neko.render.filter.FrustumCullingFilter;
 import de.twometer.neko.render.light.LightSource;
@@ -47,7 +48,7 @@ public class AmongUs extends NekoApp {
         getFxManager().getBloom().setActive(true);
 
         // Base map
-        var skeld = ModelLoader.loadModel("TheSkeld.obj");
+        /*var skeld = ModelLoader.loadModel("TheSkeld.obj");
         skeld.streamTree()
                 .filter(m -> m instanceof ModelPart && m.getName().contains("Luces"))
                 .forEach(m -> getScene().addLight(new LightSource(m.getCenter())));
@@ -56,10 +57,12 @@ public class AmongUs extends NekoApp {
         // Sky
         var skyboxCubemap = TextureLoader.loadCubemap("Sky/right.png", "Sky/left.png", "Sky/top.png", "Sky/bottom.png", "Sky/front.png", "Sky/back.png");
         getScene().getSkybox().setActive(true);
-        getScene().getSkybox().setTexture(skyboxCubemap);
+        getScene().getSkybox().setTexture(skyboxCubemap);*/
 
+        // UI
+        getGuiManager().registerGlobalJsObject("_api", new RemoteGuiApi());
         getGuiManager().showPage(new MainMenuPage());
-        // getGuiManager().showPage(new TaskPage(TaskType.SwipeCard));
+        getGuiManager().showPage(new TaskPage(TaskType.SwipeCard));
     }
 
     public GameStateManager getGameStateManager() {

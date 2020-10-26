@@ -1,8 +1,101 @@
 <html>
 <head>
-
+    <link rel="stylesheet" href="styles/base.css">
+    <style>
+        .err {
+            font-family: monospace;
+            color: white;
+            font-size: 25px;
+        }
+    </style>
 </head>
 <body>
 
+<div class="container">
+    <img class="background abs" src="img/admin_BG.png">
+    <img class="abs" src="img/admin_sliderBottom.png" t="125">
+    <img class="abs z2" src="img/admin_sliderTop.png">
+
+    <img class="abs" src="img/admin_Wallet.png" b="0">
+    <img onclick="cardClicked()" id="card" class="abs ani1" src="img/admin_Card.png" b="15" l="40" width="150">
+    <img class="abs" src="img/admin_walletFront.png" b="0" l="7">
+
+    <div id="message" class="abs z3 err" t="18" l="53">PLEASE SWIPE CARD</div>
+</div>
+
+
 </body>
+<script>
+    var inwallet = true;
+    function cardClicked() {
+        if (!inwallet) return;
+        inwallet = false;
+        var card = $('card');
+        card.width = 200;
+        card.style.bottom = 250;
+        card.style.left = 20;
+        cardMover();
+        _api.playSound('CardTakeOut.ogg');
+    }
+
+    function cardMover() {
+        var card = $('card');
+        var message = $('message')
+        var startx = 0;
+        var start_time = 0;
+        var started = false;
+        var moved = false;
+        card.onmousedown = function(e) {
+            startx = e.offsetX / 1.5;
+            card.disableAni();
+            start_time = new Date().getTime();
+            started = true;
+            document.onmousemove = function(e) {
+                if (!moved) {
+                    _api.playSoundRandom('CardMove', 3);
+                }
+                moved = true;
+                let newx = (e.x/1.5) - _baseX - startx;
+                if (newx < 20) newx = 20;
+                if (newx > 296) newx = 296;
+                card.style.left = newx;
+            }
+        }
+        document.onmouseup = function(e) {
+            document.onmousemove =null;
+            if (!started) return;
+            card.classList.add('ani05');
+
+            var duration = new Date().getTime() - start_time;
+            var progress = (card.style.left.replace('px', '') - 20) / 276;
+            var random = Math.random() * 10 > 9;
+            if (random || progress < 0.99)
+                message.innerHTML = ("BAD READ.");
+            else if (duration < 650)
+                message.innerHTML = ("TOO FAST. TRY AGAIN.");
+            else if(duration > 800)
+                message.innerHTML = ("TOO SLOW. TRY AGAIN.");
+            else
+                {
+                message.innerHTML = ("ACCEPTED. THANK YOU.");
+                _api.playSound('CardAccept.ogg');
+                            card.style.left = 15;
+                            card.style.bottom = 15;
+                            card.width=150;
+                setTimeout(() => {
+                    _remote.taskComplete();
+                }, 400);
+                return;
+                }
+            _api.playSound('CardDeny.ogg');
+            moved = false;
+            started = false;
+            card.style.left = 20;
+        }
+    }
+
+
+
+</script>
+<script src="scripts/base.js"></script>
 </html>

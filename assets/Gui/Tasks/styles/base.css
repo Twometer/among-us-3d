@@ -1,0 +1,49 @@
+* {
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    cursor: default;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.container {
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.abs {
+    position: absolute;
+}
+
+.ani05 {
+    transition: .5s all;
+}
+.ani1 {
+    transition: 1s all;
+}
+
+.z1 {
+    z-index: 1;
+}
+
+.z2 {
+    z-index: 2;
+}
+
+.z3 {
+    z-index: 3;
+}
+
+.z4 {
+    z-index: 4;
+}
+
+.z5 {
+    z-index: 5;
+}
