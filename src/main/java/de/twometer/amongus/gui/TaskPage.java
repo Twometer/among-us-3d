@@ -11,6 +11,10 @@ public class TaskPage extends BasePage {
 
     public void taskComplete() {
         AmongUs.get().getSoundFX().play("TaskComplete.ogg");
+        close();
+    }
+
+    public void close() {
         AmongUs.get().getScheduler().runLater(800, this::goBack);
     }
 

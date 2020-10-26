@@ -10,6 +10,14 @@ public class RemoteGuiApi {
         AmongUs.get().getSoundFX().play(sound  + rand + ".ogg");
     }
 
+    public void playSoundPitched(String sound, float pitch) {
+        AmongUs.get().getSoundFX().sourceBuilder(sound)
+                .setAbsolute(false)
+                .setPitch(pitch)
+                .play();
+    }
+
+
     public void playSound(String sound) {
         AmongUs.get().getSoundFX().play(sound);
     }
