@@ -1,5 +1,6 @@
 package de.twometer.amongus;
 
+import de.twometer.amongus.game.GameStateManager;
 import de.twometer.amongus.gui.LoadingPage;
 import de.twometer.amongus.gui.MainMenuPage;
 import de.twometer.neko.core.NekoApp;
@@ -11,16 +12,22 @@ import de.twometer.neko.res.TextureLoader;
 
 public class AmongUs extends NekoApp {
 
-    private static AmongUs instance;
+    // Game services
+    private final GameStateManager gameStateManager = new GameStateManager();
 
-    public static void main(String[] args) {
-        (instance = new AmongUs()).launch("Among Us 3D", 1280, 720);
-    }
+    // Singleton
+    private static AmongUs instance;
 
     public static AmongUs get() {
         return instance;
     }
 
+    // Entry point
+    public static void main(String[] args) {
+        (instance = new AmongUs()).launch("Among Us 3D", 1280, 720);
+    }
+
+    // Callbacks
     @Override
     protected void onPreLoad() {
         getGuiManager().setLoadingScreen(new LoadingPage());
@@ -40,12 +47,11 @@ public class AmongUs extends NekoApp {
         getFxManager().getBloom().setActive(true);
 
         // Base map
-        var skeld = ModelLoader.loadModel("TheSkeld.obj");
+        /*var skeld = ModelLoader.loadModel("TheSkeld.obj");
         skeld.streamTree()
                 .filter(m -> m instanceof ModelPart && m.getName().contains("Luces"))
                 .forEach(m -> getScene().addLight(new LightSource(m.getCenter())));
-        getScene().addModel(skeld);
-
+        getScene().addModel(skeld);*/
 
         // Sky
         var skyboxCubemap = TextureLoader.loadCubemap("Sky/right.png", "Sky/left.png", "Sky/top.png", "Sky/bottom.png", "Sky/front.png", "Sky/back.png");
@@ -53,5 +59,9 @@ public class AmongUs extends NekoApp {
         getScene().getSkybox().setTexture(skyboxCubemap);
 
         getGuiManager().showPage(new MainMenuPage());
+    }
+
+    public GameStateManager getGameStateManager() {
+        return gameStateManager;
     }
 }

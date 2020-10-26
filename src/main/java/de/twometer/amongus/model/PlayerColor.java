@@ -32,7 +32,7 @@ public enum PlayerColor {
 
     private static Color fromHex(String hex) {
         java.awt.Color c = java.awt.Color.decode(hex);
-        return new Color(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+        return new Color(c.getRed() / 255.0f, c.getGreen() / 255.0f, c.getBlue() / 255.0f, c.getAlpha() / 255.0f);
     }
 
 }

@@ -1,0 +1,106 @@
+* {
+    -webkit-user-select: none;
+}
+
+body {
+    background-image: url("../img/WallpaperSkeld.png");
+    background-size: cover;
+    color: white;
+    font-family: 'In your face, Joffrey!';
+    padding: 20px 50px;
+    text-align: center;
+    overflow: hidden;
+}
+
+h1 {
+    font-size: 60px;
+    margin: 15px 0;
+}
+
+.settings-panel {
+    padding: 25px;
+    width: 800px;
+    background: #56565688;
+    margin: auto;
+    max-height: 75%;
+    overflow-y: scroll;
+}
+
+th, td {
+    font-size: 55px;
+    padding: 10px 50px;
+    text-align: right;
+}
+
+th {
+    text-align: left !important;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border: none;
+}
+
+.button-panel {
+    text-align: center;
+    margin: 15px auto auto;
+}
+
+button {
+    font-family: 'In your face, Joffrey!';
+    font-size: 50px;
+    border: 0 !important;
+    width: 270px;
+    height: 70px;
+    margin: 0px 5px;
+    color: white;
+    transition: background-color .4s;
+    background: rgba(0, 0, 0, 0.65);
+}
+
+button:hover {
+    transition: background-color .4s;
+    background: rgba(0, 0, 0, 1.0);
+}
+
+.slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 15px;
+    outline: none;
+    background: rgba(0, 0, 0, 0.65);
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    width: 25px;
+    height: 25px;
+    background: white;
+    border: none;
+    border-radius: 50%;
+}
+
+input[type="checkbox"] {
+    -webkit-appearance: none;
+    width: 65px;
+    height: 65px;
+    border: none;
+    border-radius: 0;
+    float: right;
+    background: rgba(0, 0, 0, 0.65);
+    display: block;
+    margin-right: 5px;
+    box-sizing: content-box;
+}
+
+input[type="checkbox"]:checked {
+    width: 35px;
+    height: 35px;
+    border: 15px solid rgba(0, 0, 0, 1);
+    background: rgba(255, 255, 255, 0.65);
+}
+
+.tab-panel {
+    width: 100%;
+}
