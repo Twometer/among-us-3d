@@ -4,7 +4,7 @@ import de.twometer.amongus.AmongUs;
 import de.twometer.amongus.model.PlayerColor;
 import de.twometer.neko.gui.Page;
 
-public class CustomizePage extends Page {
+public class CustomizePage extends BasePage {
 
     public CustomizePage() {
         super("Customize.html");
@@ -26,7 +26,7 @@ public class CustomizePage extends Page {
     }
 
     public void back() {
-        AmongUs.get().getGuiManager().showPage(new MainMenuPage());
+        goBack();
     }
 
 }

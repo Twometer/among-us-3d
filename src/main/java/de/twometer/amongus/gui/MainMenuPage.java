@@ -3,7 +3,7 @@ package de.twometer.amongus.gui;
 import de.twometer.amongus.AmongUs;
 import de.twometer.neko.gui.Page;
 
-public class MainMenuPage extends Page {
+public class MainMenuPage extends BasePage {
 
     public MainMenuPage() {
         super("MainMenu.html");

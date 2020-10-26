@@ -23,7 +23,7 @@ public class OrbitingPlayerController implements IPlayerController {
 
         var dirVec = new Vector3f(center.x - camera.getPosition().x, 0, center.z - camera.getPosition().z);
         dirVec = dirVec.normalize();
-        var yaw = MathF.toDegrees(MathF.atan2(dirVec.z, dirVec.x));
+        var yaw = MathF.toDegrees(MathF.atan2(dirVec.x, dirVec.z));
         if (yaw < 0) yaw += 360;
         camera.getAngle().set(yaw, -20f);
     }

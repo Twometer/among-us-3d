@@ -4,7 +4,7 @@ import de.twometer.amongus.AmongUs;
 import de.twometer.neko.gui.Page;
 import de.twometer.neko.sound.SoundSource;
 
-public class CreditsPage extends Page {
+public class CreditsPage extends BasePage {
 
     private SoundSource soundSource;
 
@@ -13,8 +13,8 @@ public class CreditsPage extends Page {
     }
 
     public void back() {
-        AmongUs.get().getGuiManager().showPage(new MainMenuPage());
         soundSource.stop();
+        goBack();
     }
 
     @Override
