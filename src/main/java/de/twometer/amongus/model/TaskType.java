@@ -2,10 +2,13 @@ package de.twometer.amongus.model;
 
 public enum TaskType {
     // General
-    EnergyDist,
+    AcceptPower,
     DataTransfer,
     FixWiring,
     ClearGarbage,
+
+    // Electrical
+    DivertPower,
 
     // Medbay
     Scan,
