@@ -27,7 +27,7 @@
 <script>
 
     function setRotation(a) {
-        $('align-indicator').style.transform = 'translateX(100%) rotateZ(' + a + 'deg) translateX(-100%) translateY(-50%)';
+        $('align-indicator').style.transform = 'translateY(-50%) translateX(100%) rotateZ(' + a + 'deg) translateX(-100%)';
     }
 
     var dragging = false;
@@ -76,6 +76,8 @@
         rand = Math.random() * 2 - 1;
     } while (Math.abs(rand) < 0.1);
     setSliderPos(rand);
+
+    function OnLoaded() {}
 
 </script>
 
