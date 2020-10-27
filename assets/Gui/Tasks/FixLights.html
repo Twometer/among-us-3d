@@ -1,17 +1,72 @@
 <html>
 <head>
     <link rel="stylesheet" href="styles/base.css">
+    <style>
+        .switch.off {
+            transform: scaleY(-1) translateY(-92%);
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
+    <img class="abs" src="img/electricity_switches_wiresTop.png" t="-218" l="-84">
+    <img class="abs background" src="img/electricity_switches_base.png">
 
+    <img class="switch-shadow abs" src="img/electricity_switches_SwitchShadow.png" t="385" l="41">
+    <img class="switch off abs" src="img/electricity_switches_Switch.png" t="338" l="41">
+    <img class="led abs" src="img/electricity_switches_led0.png" t="438.5" l="45">
+
+    <img class="switch-shadow abs" src="img/electricity_switches_SwitchShadow.png" t="385" l="138">
+    <img class="switch off abs" src="img/electricity_switches_Switch.png" t="338" l="138">
+    <img class="led abs" src="img/electricity_switches_led0.png" t="438.5" l="142">
+
+    <img class="switch-shadow abs" src="img/electricity_switches_SwitchShadow.png" t="385" l="235">
+    <img class="switch off abs" src="img/electricity_switches_Switch.png" t="338" l="235">
+    <img class="led abs" src="img/electricity_switches_led0.png" t="438.5" l="239">
+
+    <img class="switch-shadow abs" src="img/electricity_switches_SwitchShadow.png" t="385" l="332">
+    <img class="switch off abs" src="img/electricity_switches_Switch.png" t="338" l="332">
+    <img class="led abs" src="img/electricity_switches_led0.png" t="438.5" l="336">
+
+    <img class="switch-shadow abs" src="img/electricity_switches_SwitchShadow.png" t="385" l="429">
+    <img class="switch off abs" src="img/electricity_switches_Switch.png" t="338" l="429">
+    <img class="led abs" src="img/electricity_switches_led0.png" t="438.5" l="432">
 </div>
 
 
 </body>
+<script src="scripts/base.js"></script>
 <script>
 
+    var switches = _('switch');
+    var leds = _('led');
+    var switches_online = 0;
+
+
+
+    var idx = 0;
+    for (const sw of switches) {
+        const _i = idx;
+        sw.onclick = function(e) {
+            sw.classList.toggle('off');
+            var newoff = sw.classList.contains('off');
+            leds[_i].src = newoff ? "img/electricity_switches_led0.png" : "img/electricity_switches_led1.png";
+            if (!newoff) switches_online++;
+            else switches_online--;
+            _api.playSound('SabotageSwitch.ogg');
+            if (switches_online == 5) {
+                _remote.taskComplete();
+            }
+        }
+        idx++;
+    }
+
+    var num_preswitched = Math.floor(Math.random() * 4);
+    for (var i = 0; i < num_preswitched; i++)
+        switches[Math.floor(Math.random() * switches.length)].onclick();
+
+    function OnLoaded() {}
+
 </script>
-<script src="scripts/base.js"></script>
 </html>
