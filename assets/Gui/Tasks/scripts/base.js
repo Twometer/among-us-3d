@@ -11,6 +11,14 @@ Element.prototype.disableAni = function() {
     this.classList.remove("ani05");
 }
 
+MouseEvent.prototype.getRealX = function() {
+    return this.x / 1.5 - _baseX;
+}
+
+MouseEvent.prototype.getRealY = function() {
+    return this.y / 1.5 - _baseY;
+}
+
 Element.prototype.hide = function() {
 this.style.display='none';
 }
@@ -54,4 +62,14 @@ window.onresize = function() {
     _baseY = container.getBoundingClientRect().top;
 }
 
+
+
 OnLoaded();
+
+function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
