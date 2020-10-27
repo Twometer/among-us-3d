@@ -11,6 +11,14 @@ Element.prototype.disableAni = function() {
     this.classList.remove("ani05");
 }
 
+Element.prototype.hide = function() {
+this.style.display='none';
+}
+
+Element.prototype.show = function() {
+this.style.display = 'block';
+}
+
 var _baseX;
 var _baseY;
 var _baseW;

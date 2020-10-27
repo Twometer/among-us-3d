@@ -1,17 +1,140 @@
 <html>
 <head>
     <link rel="stylesheet" href="styles/base.css">
+    <style>
+        div {
+            font-family: monospace;
+            color: white;
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
+    <img class="background abs" src="img/dataTransfer_Base.png">
 
+    <img id="button" class="abs ctrx" src="img/dataTransfer_uploadButton.png" b="100" onclick="begintransfer()">
+    <img id="progress" class="abs ctrx d-none" src="img/dataTransfer_progressBar.png" b=100 width="290">
+    <div id="folder-left" class="abs" l="75" t="175">My tablet</div>
+    <div id="folder-right" class="abs" r="70" t="175">Headquarters</div>
+    <div id="estimate" class="abs d-none" b="80" l="50">
+        Estimated Time: <span id="estct">5 days 13 hours 9 minutes</span>
+    </div>
+    <img id="file" src="img/dataTransfer_fileFill.png" class="abs d-none ani1" t="80" l="50">
+    <img id="fopenL" src="img/dataTransfer_folderOpen.png" class="abs d-none" t="104" l="48">
+    <img id="fcloseL" src="img/dataTransfer_folderClosed.png" class="abs" t="100" l="55">
+    <img id="fclose" src="img/dataTransfer_folderClosed.png" class="abs" t="100" r="52">
+
+    <div id="progContent" class="abs ani05" style="border-radius:4px; background-color: green;width:0px;height:13.5px;" l="107" b="102"></div>
+
+    <img class="abs clickthru" src="img/dateTransfer_glassTop.png" t="25" l="30">
 </div>
 
 
 </body>
+<script src="scripts/base.js"></script>
 <script>
 
+var _isUpload = true;
+
+function ConfigureTaskUI(isUpload, source) {
+    var btn = $('button');
+    _isUpload = isUpload;
+    if (!isUpload) {
+        // Reconfigure for Download
+        btn.src = 'img/dataTransfer_downloadButton.png';
+        $('folder-left').innerText = source;
+        $('folder-right').innerText = 'My tablet';
+    }
+}
+
+async function fileAnimation() {
+    var file = $('file');
+    file.classList.add('ani1');
+    var fopen = $('fopenL');
+    var fclose = $('fcloseL');
+    fclose.hide(); fopen.show();
+    file.show();
+    file.style.opacity = '1';
+    await delay(200);
+    file.style.left = '340px';
+    await delay(500);
+    file.style.opacity = 0;
+    await delay(1000);
+    file.classList.remove('ani1');
+    file.style.left = '50px';
+    file.style.opacity = 1;
+}
+
+var ani_interval = 0;
+function stopAni() {
+    clearInterval(ani_interval);
+    var file = $('file');
+    var fopen = $('fopenL');
+    var fclose = $('fcloseL');
+    file.hide();
+    fopen.hide();
+    fclose.show();
+}
+
+async function begintransfer() {
+    $('button').style.display = 'none';
+    var prog  = $('progress');
+    prog.style.display = 'block';
+    await delay(1000);
+    fileAnimation();
+    ani_interval = setInterval(fileAnimation, 2100);
+    $('estimate').style.display='block';
+    prog.classList.add('progbig');
+    setProgress(0.2);
+    await delay(1000);
+    setProgText('3 days 7 hours 42 minutes');
+    setProgress(0.4);
+    await delay(1000);
+    setProgText('2 days 0 hours 16 minutes');
+    setProgress(0.62);
+    await delay(1000);
+    setProgText('1 days 2 hours 14 minutes');
+    setProgress(0.75);
+
+    await delay(1000);
+
+
+    setProgText('3 seconds');
+    $('progContent').style.transition = 'all 4s linear';
+    setProgress(1.0);
+    await delay(1000);
+
+    setProgText('2 seconds');
+    await delay(1000);
+
+    setProgText('1 seconds');
+    await delay(1000);
+
+    setProgText('0 seconds');
+    await delay(1000);
+
+     $('estimate').innerHTML = (_isUpload ? 'Upload completed' : 'Download completed');
+    stopAni();
+    _remote.taskComplete();
+}
+
+function setProgText(t) {
+    $('estct').innerText = t;
+}
+
+function delay(d) {
+    return new Promise((resolve, reject) => {
+        setTimeout(function() {
+            resolve();
+        }, d);
+    });
+}
+
+function setProgress(f) {
+var progContent=$('progContent');
+    progContent.style.width= (286.5 * f) + 'px';
+}
+
 </script>
-<script src="scripts/base.js"></script>
 </html>
