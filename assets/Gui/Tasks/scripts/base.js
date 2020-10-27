@@ -73,3 +73,11 @@ function shuffle(a) {
     }
     return a;
 }
+
+function delay(d) {
+    return new Promise((resolve, reject) => {
+        setTimeout(function() {
+            resolve();
+        }, d);
+    });
+}

@@ -1,6 +1,7 @@
 package de.twometer.amongus.gui;
 
 import de.twometer.amongus.AmongUs;
+import de.twometer.amongus.util.RemoteGuiApi;
 import de.twometer.neko.gui.Page;
 
 public abstract class BasePage extends Page {
@@ -16,4 +17,9 @@ public abstract class BasePage extends Page {
         AmongUs.get().getGuiManager().showPage(previous);
     }
 
+    @Override
+    public void onUnload() {
+        super.onUnload();
+        RemoteGuiApi.reset();
+    }
 }

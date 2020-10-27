@@ -1,25 +1,65 @@
 package de.twometer.amongus.util;
 
 import de.twometer.amongus.AmongUs;
+import de.twometer.neko.sound.SoundSource;
 import de.twometer.neko.util.MathF;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class RemoteGuiApi {
 
-    public void playSoundRandom(String sound, int n) {
-        var rand = (int)(MathF.rand() * n) + 1;
-        AmongUs.get().getSoundFX().play(sound  + rand + ".ogg");
+    private static int idCounter = 0;
+    private static final Map<Integer, SoundSource> sources = new HashMap<>();
+
+    public static void reset() {
+        for (var src : sources.values())
+            src.stop();
     }
 
-    public void playSoundPitched(String sound, float pitch) {
-        AmongUs.get().getSoundFX().sourceBuilder(sound)
-                .setAbsolute(false)
-                .setPitch(pitch)
-                .play();
+    public int playSoundRandom(String sound, int n) {
+        var rand = (int) (MathF.rand() * n) + 1;
+        return saveSource(
+                AmongUs.get().getSoundFX().play(sound + rand + ".ogg")
+        );
     }
 
+    public int playSoundLooping(String sound) {
+        return saveSource(
+                AmongUs.get().getSoundFX().sourceBuilder(sound)
+                        .setAbsolute(false)
+                        .setLooping(true)
+                        .play()
+        );
+    }
 
-    public void playSound(String sound) {
-        AmongUs.get().getSoundFX().play(sound);
+    public int playSoundPitched(String sound, float pitch) {
+        return saveSource(
+                AmongUs.get().getSoundFX().sourceBuilder(sound)
+                        .setAbsolute(false)
+                        .setPitch(pitch)
+                        .play()
+        );
+    }
+
+    public int playSound(String sound) {
+        return saveSource(
+                AmongUs.get().getSoundFX().play(sound)
+        );
+    }
+
+    public void stopSource(int id) {
+        var src = sources.get(id);
+        if (src != null) {
+            src.setLooping(false);
+            src.stop();
+        }
+    }
+
+    private int saveSource(SoundSource src) {
+        var id = idCounter++;
+        sources.put(id, src);
+        return id;
     }
 
 }
