@@ -11,11 +11,17 @@ public class CodeGenerator {
 
     private static final Random rand = new Random();
 
-    public static String generate() {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < LENGTH; i++) {
+    public static String newGameCode() {
+        var builder = new StringBuilder();
+        for (int i = 0; i < LENGTH; i++)
             builder.append((char) ((int) START + rand.nextInt(END - START)));
-        }
+        return builder.toString();
+    }
+
+    public static String newO2Code() {
+        var builder = new StringBuilder();
+        for (int i = 0; i < LENGTH; i++)
+            builder.append(rand.nextInt(10));
         return builder.toString();
     }
 

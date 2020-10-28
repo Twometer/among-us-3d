@@ -1,7 +1,6 @@
 package de.twometer.amongus.gui;
 
-import de.twometer.amongus.AmongUs;
-import de.twometer.neko.gui.Page;
+import de.twometer.amongus.game.AmongUs;
 
 public class MainMenuPage extends BasePage {
 

@@ -13,6 +13,7 @@
             padding: 50px;
         }
 
+
         button {
             display: block;
             border: none;
@@ -26,6 +27,17 @@
             transition: all .4s;
             opacity: .65;
             background: linear-gradient(90deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 100%);
+        }
+
+        input {
+            font-family: "Dot Matrix";
+            color: white;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.5);
+            width: 500px;
+            padding: 10px 20px;
+            font-size: 40px;
+            margin: 5px 30px;
         }
 
         button:hover {
@@ -51,6 +63,9 @@
 <img src="img/Banner.png" width="500">
 <div class="btn-container">
     <p>
+        <input type="text" placeholder="Username">
+    </p>
+    <p>
         <button onclick="_remote.createGame()">Create Game</button>
     </p>
     <p>
@@ -67,4 +82,7 @@
     by Twometer
 </div>
 </body>
+<script>
+    function OnLoaded() {}
+</script>
 </html>

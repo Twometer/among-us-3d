@@ -1,6 +1,6 @@
 package de.twometer.amongus.gui;
 
-import de.twometer.amongus.AmongUs;
+import de.twometer.amongus.game.AmongUs;
 
 public class RoleRevealPage extends BasePage {
     public RoleRevealPage() {
