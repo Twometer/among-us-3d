@@ -65,6 +65,7 @@ public class AmongUs extends NekoApp {
         getGuiManager().registerGlobalJsObject("_api", new RemoteGuiApi());
         getGuiManager().showPage(new MainMenuPage());
         getGuiManager().showPage(new TaskPage(TaskType.ClearGarbage));
+        getGuiManager().showPage(new GameEndPage());
 
     }
 
