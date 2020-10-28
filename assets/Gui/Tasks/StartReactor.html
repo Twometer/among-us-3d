@@ -5,13 +5,126 @@
 <body>
 
 <div class="container">
-
+    <img class="abs background" src="img/simonSaysBase.png">
+    <img class="abs ctry" src="img/simonSaysScreen.png" l="50">
+    <div class="abs ctry" r="40" style="width: 155px;height: 155px">
+        <img class="btn " src="img/ssbutton1.png">
+        <img class="btn " src="img/ssbutton2.png">
+        <img class="btn " src="img/ssbutton3.png">
+        <img class="btn " src="img/ssbutton4.png">
+        <img class="btn " src="img/ssbutton5.png">
+        <img class="btn " src="img/ssbutton6.png">
+        <img class="btn " src="img/ssbutton7.png">
+        <img class="btn " src="img/ssbutton8.png">
+        <img class="btn " src="img/ssbutton9.png">
+    </div>
+    <canvas id="canvas" class="abs ctry" l="55" width="145" height="145"></canvas>
 </div>
 
-
 </body>
-<script>
-
-</script>
 <script src="scripts/base.js"></script>
+<script>
+    var userMayInput = false;
+
+    var sequence = [];
+    var progress = 1;
+
+    function regenSequence() {
+        sequence = [];
+        for (var i = 0; i < 5; i++)
+            sequence.push(Math.floor(Math.random() * 9));
+        console.log("Sequence generated", sequence);
+        nextUserButton = sequence[0];
+    }
+    regenSequence();
+
+    function sound(idx) {
+        _api.playSoundPitched('ReactorStartButton.ogg', 1 + (idx * 0.1));
+    }
+
+    var canvas = $('canvas');
+    var context = canvas.getContext('2d');
+
+
+    function drawRectForBtn(b) {
+        const padx = 8;
+        const pady = 7;
+        var x = (b%3)*45;
+        var y = Math.floor(b / 3) * 45;
+        context.fillRect(padx+x, pady + y, 40,40);
+    }
+
+    function clearcanvas() {
+        context.fillStyle = '#000000';
+        context.fillRect(0,0,canvas.width,canvas.height);
+    }
+
+    async function simon() {
+        userMayInput = false;
+        await delay(500);
+        for (var i = 0; i < progress; i++) {
+            var btn = sequence[i];
+            context.fillStyle = '#4E9FF2';
+            drawRectForBtn(btn);
+            sound(btn);
+            await delay(300);
+            clearcanvas();
+            await delay(100);
+        }
+        userMayInput = true;
+    }
+
+
+
+
+    var buttons = _('btn');
+    var btn_no = 0;
+    var nextUserButton = sequence[0];
+    var currentUserProgress = 0;
+    function toggleAllOpacities() {
+        for (var elem of buttons)
+            elem.style.opacity = elem.style.opacity == 0.5 ? 1.0 : 0.5;
+    }
+    for (const button of buttons) {
+        const btnIdx = btn_no;
+        button.onmousedown = function() { if(userMayInput) button.style.opacity = 0.45 }
+        button.onmouseup = function() { if(userMayInput) button.style.opacity = 1.0 }
+        button.onclick = function() {
+            if (!userMayInput) return;
+            if (nextUserButton != btnIdx) {
+                userMayInput = false;
+                _remote.close();
+                _api.playSound('ReactorStartFailed.ogg');
+                setInterval(toggleAllOpacities, 200);
+                return;
+            }
+            currentUserProgress++;
+            nextUserButton =sequence[currentUserProgress];
+
+            sound(btnIdx);
+           // console.log("Clicked on", btnIdx);
+
+            if (currentUserProgress == progress) {
+                currentUserProgress = 0;
+                nextUserButton = sequence[0];
+                progress++;
+
+                if (progress == 6) {
+                    userMayInput = false;
+                    _remote.taskComplete();
+                                        //console.log("task cleared");
+                    return;
+                }
+
+               // console.log("stage cleared");
+                simon();
+            }
+        }
+        btn_no++;
+    }
+
+    simon();
+
+    function OnLoaded() {}
+</script>
 </html>
