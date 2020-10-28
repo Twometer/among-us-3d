@@ -1,0 +1,140 @@
+<html>
+<head>
+    <link rel="stylesheet" href="styles/base.css">
+    <style>
+        .lcd {
+            font-family: "Dot Matrix";
+            color: #00e000;
+            font-size: 30px;
+        }
+
+        #btn {
+            background: rgba(0, 255, 0, 0.25);
+            border-radius: 3px;
+        }
+
+        .liquidfilter {
+            background-color: rgba(25, 0, 255, 0.45);
+            width: 30px;
+            height: 83px;
+            border-radius: 7px 7px 14px 14px;
+        }
+        .liquidfilter.red {
+            background-color: rgba(255, 0, 0, 0.45);
+        }
+        .anobtn {
+            width: 30px;
+            height: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img class="abs background" src="img/medBay_back.png">
+    <img class="abs ctrx" src="img/medBay_panelCenter.png" b="123">
+    <img class="abs ctrx" src="img/medBay_glassBack.png" b="160">
+
+    <img class="abs liquid d-none" src="img/medBay_liquid.png" l="110" t="200">
+    <div class="abs liquidfilter d-none" l="110" t="200"></div>
+
+    <img class="abs liquid d-none" src="img/medBay_liquid.png" l="173" t="200">
+    <div class="abs liquidfilter d-none" l="173" t="200"></div>
+
+    <img class="abs liquid d-none" src="img/medBay_liquid.png" l="236" t="200">
+    <div class="abs liquidfilter d-none" l="236" t="200"></div>
+
+    <img class="abs liquid d-none" src="img/medBay_liquid.png" l="299" t="200">
+    <div class="abs liquidfilter d-none" l="299" t="200"></div>
+
+    <img class="abs liquid d-none" src="img/medBay_liquid.png" l="362" t="200">
+    <div class="abs liquidfilter d-none" l="362" t="200"></div>
+
+    <img class="abs ctrx" src="img/medBay_glassFrontTestTubes.png" b="185">
+
+    <img class="abs ctrx" src="img/medBay_panelBottom.png" b="0">
+    <img id="dispenser" class="abs ani05" src="img/medBay_dispenser.png" t="50" l="30">
+    <img class="abs ctrx" src="img/medBay_panelTop.png" t="0">
+    <div id="lcd" class="abs lcd" b="20" l="116">PRESS TO START</div>
+    <div id="btn" class="abs" t="447" l="402" style="width:32px;height: 32px;"></div>
+    <div class="anobtn abs" l="109" t="399"></div>
+    <div class="anobtn abs" l="172" t="399"></div>
+    <div class="anobtn abs" l="235" t="399"></div>
+    <div class="anobtn abs" l="298" t="399"></div>
+    <div class="anobtn abs" l="361" t="399"></div>
+</div>
+
+
+</body>
+<script src="scripts/base.js"></script>
+<script>
+    var lcd = $('lcd');
+    var btn = $('btn');
+    var dispenser = $('dispenser');
+
+    var liquids = _('liquid');
+    var filters = _('liquidfilter');
+    var anoBtns = _('anobtn');
+
+    var l = 105;
+    var time = 59;
+    btn.onclick = async function() {
+        btn.onclick = null;
+
+        lcd.innerText = 'PLEASE WAIT 59s';
+
+        setInterval(() => {time--;lcd.innerText = 'PLEASE WAIT ' + time + 's';}, 1000);
+
+        _api.playSound('ScanStartup.ogg');
+        dispenser.style.left = l;
+        await delay(450);
+        for (var i = 0; i < 4; i++) {
+            await delay(150);
+            putLiquid(i);
+            await delay(150);
+            advanceDispenser();
+            await delay(450);
+        }
+        putLiquid(4);
+
+        await delay(1000);
+        dispenser.style.left = 30;
+        await delay(800);
+        _remote.close();
+    }
+
+    function putLiquid(i) {
+        liquids[i].style.display = 'block';
+        filters[i].style.display = 'block';
+        _api.playSound('ScanLiquid' + (i+1) + '.ogg');
+    }
+
+    function advanceDispenser() {
+        dispenser.style.left = (l += 63);
+    }
+
+    function setAnomaly(i) {
+        btn.style.background = 'none';
+        for (let i = 0; i < 5; i++) {
+        filters[i].show();
+        liquids[i].show();
+        }
+        filters[i].classList.add('red');
+        lcd.innerText = 'SELECT ANOMALY';
+        btn.onclick = null;
+
+
+        var n = 0;
+        for (var mybtn of anoBtns) {
+            const cn = n;
+            mybtn.onclick = function() {
+                if (cn == i) {
+                    _remote.taskComplete();
+                }
+            }
+            n++;
+        }
+    }
+
+</script>
+</html>

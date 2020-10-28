@@ -1,0 +1,39 @@
+<html>
+<head>
+    <link rel="stylesheet" href="styles/generic.css">
+    <link rel="stylesheet" href="styles/settings.css">
+</head>
+<body>
+    <h1>Settings</h1>
+    <div class="container">
+        <table>
+            <tr>
+                <th>Ambient Occlusion</th>
+                <td><input type="checkbox"/></td>
+            </tr>
+            <tr>
+                <th>AO Quality</th>
+                <td><input type="range" min="1" max="64" value="11" class="slider"></td>
+            </tr>
+            <tr>
+                <th>Bloom</th>
+                <td><input type="checkbox" checked/></td>
+            </tr>
+            <tr>
+                <th>Vignette</th>
+                <td><input type="checkbox"/></td>
+            </tr>
+            <tr>
+                <th>FXAA</th>
+                <td><input type="checkbox"/></td>
+            </tr>
+        </table>
+
+        <div class="button-panel">
+            <button onclick="_remote.apply()">Apply</button>
+            <button onclick="_remote.back()">Cancel</button>
+        </div>
+
+    </div>
+</body>
+</html>

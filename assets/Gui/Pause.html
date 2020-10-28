@@ -1,0 +1,66 @@
+<html>
+
+<head>
+    <style>
+        * {
+            font-family: 'In your face, Joffrey!';
+            text-align: center;
+            -webkit-user-select: none;
+        }
+
+        h1 {
+            color: white;
+            font-size: 60px;
+            margin: 15px 0;
+        }
+
+        .container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .menu-panel {
+            background: #56565688;
+            padding: 25px 45px;
+        }
+
+        button {
+
+            font-size: 50px;
+            border: 0 !important;
+            width: 270px;
+            height: 70px;
+            margin: 10px auto;
+            color: white;
+            transition: background-color .4s;
+            background: rgba(0, 0, 0, 0.65);
+        }
+
+        button:hover {
+            transition: background-color .4s;
+            background: rgba(0, 0, 0, 1.0);
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Pause menu</h1>
+    <div class="menu-panel">
+        <p>
+            <button>Back to game</button>
+        </p>
+        <p>
+            <button>Settings</button>
+        </p>
+        <p>
+            <button>Disconnect</button>
+        </p>
+    </div>
+</div>
+
+</body>
+</html>

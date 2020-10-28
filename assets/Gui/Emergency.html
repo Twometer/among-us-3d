@@ -1,0 +1,117 @@
+<html>
+<head>
+    <link rel="stylesheet" href="styles/generic.css">
+</head>
+<style>
+    .button-panel {
+        margin-top: 5px;
+    }
+
+    .container {
+        text-align: left;
+        overflow-y: hidden;
+    }
+
+    .player-items {
+        overflow-y: auto;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .player-item {
+        width: 40%;
+        padding: 0 10px;
+        margin: 10px;
+        height: 100px;
+        display: flex;
+        flex-flow: row;
+        justify-content: flex-start;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.65);;
+    }
+
+    .player-icon {
+        margin-left: 8px;
+        margin-right: 16px;
+    }
+
+    .player-name {
+        display: flex;
+        flex-flow: column;
+        justify-content: center;
+    }
+
+    .player-item-header {
+        font-size: 35px;
+        margin-bottom: 5px;
+    }
+
+    .player-item.dead {
+        background: rgba(45, 0, 0, 0.65);
+        color: gray;
+    }
+
+    .player-item.voted {
+        background: rgba(0, 85, 0, 0.45);
+    }
+</style>
+<body>
+
+<h1>Who is the impostor?</h1>
+<div class="container" style="height: 75%;display: flex;flex-flow:column;justify-content: space-between">
+    <div class="player-items">
+        <div class="player-item">
+            <img class="player-icon" src="img/PlayerIcon.png">
+            <div class="player-name">
+                <div class="player-item-header">xxxxxxxxxxxxx</div>
+                <div class="player-item-votes">
+                    <img src="img/VoteResults.png">
+                </div>
+            </div>
+            <img style="margin-left: auto;" src="img/Reported.png">
+        </div>
+
+        <div class="player-item">
+            <img class="player-icon" src="img/PlayerIcon.png">
+            <div class="player-name">
+                <div class="player-item-header">xxxxxxxxxxxxx</div>
+                <div class="player-item-votes">
+                    <img src="img/VoteResults.png">
+                </div>
+            </div>
+        </div>
+
+        <div class="player-item voted">
+            <img class="player-icon" src="img/PlayerIcon.png">
+            <div class="player-name">
+                <div class="player-item-header">xxxxxxxxxxxxx</div>
+                <div class="player-item-votes">
+                    <img src="img/VoteResults.png">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="player-item dead">
+            <img class="player-icon" src="img/PlayerIcon.png">
+            <div class="player-name">
+                <div class="player-item-header">xxxxxxxxxxxxx</div>
+                <div class="player-item-votes">
+
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+    <div class="button-panel">
+        <button style="width: 150px">Skip</button>
+        <img src="img/VoteResults.png">
+        <img src="img/VoteResults.png">
+        <span style="font-size: 50px; float:right;line-height: 70px">Voting ends in 59s</span>
+    </div>
+</div>
+
+</body>
+</html>
