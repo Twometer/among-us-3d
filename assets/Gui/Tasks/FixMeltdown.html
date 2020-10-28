@@ -21,7 +21,7 @@
     <div class="colorfill abs" t="15" b="0" l="0" r="0" style="background-color: orangered;"></div>
     <img class="abs ctrx bar d-none" src="img/reactorMeltdown_glowBar.png" t="0">
     <img class="background abs ctr" src="img/reactorMeltdown_handprintBase.png">
-    <div class="abs display" t="38" l="55" r="0">REACTOR MELTDOWN IN 29</div>
+    <div class="abs display" t="38" l="55" r="0">HOLD TO FIX MELTDOWN</div>
     <div class="abs" id="clicksurface" t="95" b="35" l="95" r="105"></div>
 </div>
 
@@ -43,7 +43,7 @@
         sfx();
     }
     document.onmouseup = function() {
-        display.innerText = "REACTOR MELTDOWN IN %D";
+        display.innerText = "HOLD TO FIX MELTDOWN";
         bar.hide();
         clearInterval(interval);
     }
