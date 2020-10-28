@@ -1,17 +1,105 @@
 <html>
 <head>
     <link rel="stylesheet" href="styles/base.css">
+
+    <style>
+        #dial {
+            transform: rotateZ(0deg);
+        }
+        .hint {
+            color: white;
+            font-family: "Dot Matrix";
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
+    <img class="abs background" src="img/comms_base.png">
+    <canvas class="abs" width="196" height="113" l="109" t="177" id="srccanvas"></canvas>
+    <canvas class="abs" width="196" height="113" l="347" t="176" id="dstcanvas"></canvas>
+    <div class="hint abs" l="113" t="177">NOISE</div>
+    <div class="hint abs" l="351" t="177">SIGNAL</div>
 
+    <img class="abs" t="173" l="108" src="img/comms_panelGlass.png">
+    <img class="abs" t="173" l="347" src="img/comms_panelGlass.png">
+    <img class="abs" id="dial" src="img/comms_dial.png" r="70" b="30">
 </div>
 
 
 </body>
+<script src="scripts/base.js"></script>
 <script>
+    var dial = $('dial');
+    var dragging = false;
+    var baseX;
+    var baseY;
+    var currentRot = 0;
+    var baseRot = 0;
+
+    var dstShift = Math.random();
+
+    var dst = $('dstcanvas').getContext('2d');
+    var src = $('srccanvas').getContext('2d');
+    var cw = 196;
+    var ch = 113;
+
+    dst.fillStyle = '#3F3002';
+    src.fillStyle = '#3F3002';
+
+    dst.strokeStyle = 'lime';
+    src.strokeStyle = 'lime';
+    var _dialVal = Math.random();
+    var rot = (_dialVal * 2-1)*115;
+    dial.style.transform = 'translateY(10px) rotateZ(' + rot + 'deg) translateY(-10px)';
+    currentRot = rot;
+    var time = 0;
+    function redraw() {
+        dst.fillRect(0,0,cw,ch);
+        src.fillRect(0,0,cw,ch);
+
+
+        var leftFreq = (-1.04);
+        var amp = _dialVal * 5 + 0.25;
+
+        for (var i = 0; i < cw; i++) {
+            var leftVal = Math.cos(i + time) * ch / 4 * Math.random() * amp;
+            var randomizerAmp = (_dialVal) * (Math.random());
+            var randomizerShift = (_dialVal) * (Math.random() * 10)
+            var rightVal = Math.cos(i/cw * 2 * Math.PI * 10 + time + randomizerShift) * ch / 4 + randomizerAmp;
+            src.strokeRect(i, ch/2 + leftVal, 1, 1);
+            dst.strokeRect(i, ch/2 + rightVal, 1, 1);
+            time += 0.001;
+        }
+
+    }
+    setInterval(redraw, 16);
+    var lock = false;
+    dial.onmousedown = function(e) {
+        if (lock) return;
+        dragging = true;
+        baseRot = currentRot;
+        baseX = e.getRealX();
+        baseY = e.getRealY();
+    }
+    document.onmousemove = function(e) {
+        if (dragging) {
+            var dx = e.getRealX() - baseX + baseRot;
+            currentRot = dx;
+            if (dx < -115) dx = -115;
+            if (dx > 115) dx = 115;
+            dial.style.transform = 'translateY(10px) rotateZ(' + dx + 'deg) translateY(-10px)';
+            _dialVal = ((dx + 115) / (2*115)) - dstShift;
+            //console.log(_dialVal, dstShift);
+        }
+    }
+    document.onmouseup = () => {
+        dragging = false;
+        if (Math.abs(_dialVal) < 0.07 && !lock) {
+            console.log("Complete");
+            lock = true;
+        }
+    }
 
 </script>
-<script src="scripts/base.js"></script>
 </html>
