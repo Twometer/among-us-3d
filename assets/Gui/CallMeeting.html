@@ -1,0 +1,46 @@
+<html>
+<head>
+    <link rel="stylesheet" href="Tasks/styles/base.css">
+    <style>
+        #bubble {
+            font-family: monospace;
+            font-size: 26px;
+            text-align: center;
+            color: #333;
+        }
+        #remaining {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img class="background abs" src="Tasks/img/meeting_base.png">
+    <img class="abs ctrx" src="Tasks/img/meeting_button.png" t="130" id="btn" style="transition: all 0.1s;">
+    <img class="abs ctrx" t="240" src="Tasks/img/meeting_baseFront.png">
+    <img class="abs" src="Tasks/img/meeting_open.png" l="323" t="30">
+    <img class="abs ctrx" src="Tasks/img/meeting_textBubble.png" b="30">
+    <div class="abs ctrx" id="bubble" b="45" style="width: 400px">
+        CREWMATE HAS<br>
+        <span id="remaining">1</span><br>
+        EMERGENCY MEETINGS LEFT
+    </div>
+</div>
+
+
+</body>
+<script src="Tasks/scripts/base.js"></script>
+<script>
+    var btn = $('btn');
+    btn.onmousedown = async function() {
+        btn.style.top = 145;
+        _api.playSound('EmergencyButton.ogg');
+        await delay(100);
+        _remote.callEmergency();
+    }
+    btn.onmouseup = function() {
+        btn.style.top = 130;
+    }
+</script>
+</html>
