@@ -1,0 +1,66 @@
+<html>
+<head>
+    <link rel="stylesheet" href="Tasks/styles/base.css">
+    <style>
+        #bubble {
+            font-family: "Dot Matrix";
+            font-size: 26px;
+            text-align: center;
+            color: #333;
+        }
+        #remaining {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img class="background abs" src="Tasks/img/meeting_base.png">
+    <img class="abs ctrx" src="Tasks/img/meeting_button.png" t="130" id="btn" style="transition: all 0.1s;">
+    <img class="abs ctrx" t="240" src="Tasks/img/meeting_baseFront.png">
+    <img class="abs" src="Tasks/img/meeting_open.png" l="323" t="30" id="lid-open">
+    <img class="abs ctrx d-none" src="Tasks/img/meeting_closed.png" t="128" id="lid-closed">
+    <img class="abs ctrx" src="Tasks/img/meeting_textBubble.png" b="30">
+    <div class="abs ctrx" id="bubble" b="45" style="width: 400px">
+        <span id="line1">CREWMATE HAS</span><br>
+        <span id="remaining">1</span><br>
+        <span id="line2">EMERGENCY MEETINGS LEFT</span>
+    </div>
+</div>
+
+
+</body>
+<script src="Tasks/scripts/base.js"></script>
+<script>
+
+
+    var btn = $('btn');
+    var closed = false;
+    function setClosed() {
+        closed = true;
+        btn.style.top = 140;
+        $('lid-open').hide();
+        $('lid-closed').show();
+        $('line1').innerText = 'CREWMATES MUST WAIT';
+        $('remaining').innerText = '10s';
+        $('line2').innerText = 'BEFORE NEXT EMERGENCY';
+    }
+
+    function OnLoaded() {
+        //setClosed();
+    }
+
+    btn.onmousedown = async function() {
+        if (closed) return;
+        btn.style.top = 145;
+        _api.playSound('EmergencyButton.ogg');
+        await delay(100);
+        _remote.callEmergency();
+    }
+    btn.onmouseup = function() {
+        if (closed) return;
+        btn.style.top = 130;
+    }
+</script>
+</html>

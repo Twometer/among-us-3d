@@ -1,0 +1,74 @@
+<html>
+<head>
+    <link rel="stylesheet" href="styles/base.css">
+
+</head>
+<body>
+
+<div class="container">
+    <img class="background abs" src="img/unlock_manifolds.png">
+    <div id="buttons" class="abs" t="98" l="81">
+    </div>
+    <img class="abs clickthru" src="img/reactorPanelGlass.png" t="95" l="80" >
+</div>
+
+
+</body>
+<script src="scripts/base.js"></script>
+<script>
+var buttonContainer = $('buttons');
+var buttons = ['01','02','03','04','05','06','07','08','09','10'];
+shuffle(buttons);
+var prev = 0;
+var pitch = 1.0;
+var buttonElements = [];
+for (var i = 0; i < 10; i++) {
+    var btnPath = 'img/reactorButton' + buttons[i] + '.png';
+    const elem = document.createElement('img');
+    elem.src = btnPath;
+    const n = Math.floor(buttons[i]);
+    elem.addEventListener('click', function() {
+
+        if (n < prev || n > prev + 1) {
+            _remote.close();
+            _api.playSound('ManifoldFail.ogg');
+            setAllOpacities();
+            setInterval(function() {
+                toggleAllOpacities();
+            }, 200);
+
+            return;
+        }
+        prev = n;
+
+        elem.style.opacity = 0.5;
+        if (n == 10)
+        {
+            _remote.taskComplete();
+            return;
+        }
+        _api.playSoundPitched('ManifoldKey.ogg', pitch);
+        pitch += 0.1;
+
+    });
+
+    buttonElements.push(elem);
+
+    buttonContainer.appendChild(elem);
+    buttonContainer.appendChild(document.createTextNode(' '));
+
+}
+
+function setAllOpacities() {
+for (var elem of buttonElements)
+        elem.style.opacity = 0.5;
+}
+
+function toggleAllOpacities() {
+for (var elem of buttonElements)
+        elem.style.opacity = elem.style.opacity == 0.5 ? 1.0 : 0.5;
+}
+
+
+</script>
+</html>

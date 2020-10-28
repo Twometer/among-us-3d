@@ -1,0 +1,91 @@
+<html>
+<head>
+    <style>
+        .rotate-slow {
+            animation: rotating 100s linear infinite;
+        }
+
+        .rotate {
+            animation: rotating 10s linear infinite;
+        }
+
+        @keyframes rotating {
+            from {
+                transform: translate(-50%,-50%) rotate(360deg);
+            }
+            to {
+                transform: translate(-50%,-50%) rotate(0deg);
+            }
+        }
+    </style>
+
+    <link rel="stylesheet" href="styles/base.css">
+</head>
+<body>
+
+<div class="container">
+    <img class="background abs" src="img/shield_screen.png">
+    <img id="gauge" class="abs ctr rotate-slow" src="img/shield_GaugeOff.png">
+
+    <img class="abs ctrx pnl" src="img/shield_Panel.png" t="45">
+    <img class="abs ctr pnl" src="img/shield_Panel.png">
+    <img class="abs ctrx pnl" src="img/shield_Panel.png" b="45">
+    <img class="abs pnl" src="img/shield_Panel.png" b="115" l="55">
+    <img class="abs pnl" src="img/shield_Panel.png" b="257" l="55">
+    <img class="abs pnl" src="img/shield_Panel.png" b="115" r="55">
+    <img class="abs pnl" src="img/shield_Panel.png" b="257" r="55">
+</div>
+
+
+</body>
+<script src="scripts/base.js"></script>
+<script>
+const panel_on = 'img/shield_Panel.png';
+const panel_off = 'img/shield_Panel_Off.png'
+var panels = _('pnl');
+var gauge = $('gauge');
+var complete = false;
+
+for (var i = 0; i <3 ;i ++)
+{
+var rand;
+do {
+rand = Math.floor(Math.random() * panels.length);
+} while (panels[rand].src.endsWith(panel_off));
+
+panels[rand].src = panel_off;
+}
+
+for (const panel of panels) {
+    panel.onclick = function() {
+    if (complete) return;
+        if (panel.src.endsWith(panel_off)){
+            panel.src = panel_on;
+            _api.playSound('ShieldOn.ogg');
+        }else {
+            panel.src = panel_off;
+            _api.playSound('ShieldOff.ogg');
+            }
+
+        checkIfAllOnline();
+    }
+}
+
+function checkIfAllOnline() {
+    for (const panel of panels) {
+        if (panel.src.endsWith(panel_off))
+            return;
+    }
+
+    // all online
+    gauge.src = 'img/shield_Gauge100.png';
+
+    gauge.classList.add('rotate');
+    complete = true;
+
+    _remote.taskComplete();
+}
+
+
+</script>
+</html>
