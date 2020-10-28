@@ -7,7 +7,11 @@ public class GameStateManager {
     private GameState state = GameState.Menus;
 
     public void changeState(GameState state) {
+        this.state = state;
+    }
 
+    public GameState getState() {
+        return state;
     }
 
 }
