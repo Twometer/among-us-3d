@@ -145,6 +145,7 @@
             return;
         leverpulls++;
 
+        _api.playSound('GarbagePull.ogg');
         cur_sound = _api.playSound('GarbageBegin.ogg');
         const prev = leverpulls;
         await delay(2000);
@@ -170,6 +171,7 @@
         pullingLever = false;
         floor = true;
         stopSounds();
+        _api.playSound('GarbageLetGo.ogg');
         _api.playSound('GarbageEnd.ogg');
     }
 
