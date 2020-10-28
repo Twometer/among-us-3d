@@ -60,7 +60,7 @@
 
 
         var leftFreq = (-1.04);
-        var amp = _dialVal * 5 + 0.25;
+        var amp = _dialVal * 5;
 
         for (var i = 0; i < cw; i++) {
             var leftVal = Math.cos(i + time) * ch / 4 * Math.random() * amp;
@@ -97,6 +97,7 @@
         dragging = false;
         if (Math.abs(_dialVal) < 0.07 && !lock) {
             console.log("Complete");
+            _dialVal = 0;
             lock = true;
         }
     }
