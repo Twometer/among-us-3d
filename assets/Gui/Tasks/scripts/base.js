@@ -44,10 +44,12 @@ function OnLoaded() {
         var b = a.getAttribute('b');
         var l = a.getAttribute('l');
         var r = a.getAttribute('r');
+        var rot = a.getAttribute('a');
         if (t != null) a.style.top = t;
         if (b != null) a.style.bottom = b;
         if (l != null) a.style.left = l;
         if (r != null) a.style.right = r;
+        if (rot != null) a.style.transform += 'rotateZ(' + rot + "deg)";
     }
     document.body.style.zoom = "150%";
     _baseW = container.getBoundingClientRect().right - container.getBoundingClientRect().left;
