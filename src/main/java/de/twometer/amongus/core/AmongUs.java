@@ -84,8 +84,14 @@ public class AmongUs extends NekoApp {
         getFxManager().getSsao().setActive(userSettings.isUseAO());
         getFxManager().getSsao().setSamples(userSettings.getAoSamples());
         getFxManager().getBloom().setActive(userSettings.isUseBloom());
-        if (userSettings.isUseFxaa()) getOverlayManager().addOverlay(new FXAAOverlay());
-        if (userSettings.isUseVignette()) getOverlayManager().addOverlay(new VignetteOverlay(20.0f, 0.15f));
+
+        getOverlayManager().removeOverlay(FXAAOverlay.class);
+        if (userSettings.isUseFxaa())
+            getOverlayManager().addOverlay(new FXAAOverlay());
+
+        getOverlayManager().removeOverlay(VignetteOverlay.class);
+        if (userSettings.isUseVignette())
+            getOverlayManager().addOverlay(new VignetteOverlay(20.0f, 0.15f));
     }
 
     public StateController getStateController() {

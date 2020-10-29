@@ -1,6 +1,7 @@
 package de.twometer.amongus.gui;
 
 import de.twometer.amongus.core.AmongUs;
+import de.twometer.neko.Neko;
 import de.twometer.neko.sound.SoundSource;
 
 public class CreditsPage extends BasePage {
@@ -20,6 +21,7 @@ public class CreditsPage extends BasePage {
     @Override
     public void onDomReady() {
         soundSource = AmongUs.get().getSoundFX().play("CreditsRoll.ogg").setGain(0.85f);
+        context.setElementText("nekoVersion", Neko.VERSION);
     }
 
     public void back() {

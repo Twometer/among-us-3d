@@ -26,7 +26,12 @@ public class MainMenuPage extends BasePage {
 
     public void joinGame(String gameCode) {
         Log.i("Game code: " + gameCode);
-        AmongUs.get().getGuiManager().showPage(new IngamePage());
+
+        if (gameCode.trim().length() == 0)  {
+            showError("Invalid game code!");
+        } else {
+            showLoading("Connecting...");
+        }
     }
 
     public void settings() {
@@ -39,6 +44,20 @@ public class MainMenuPage extends BasePage {
 
     public void credits() {
         AmongUs.get().getGuiManager().showPage(new CreditsPage());
+    }
+
+    private void showLoading(String msg) {
+        context.call("showDialog", "loading");
+        context.setElementText("loadingMessage", msg);
+    }
+
+    private void hideLoading(String msg) {
+        context.call("hideDialog", "loading");
+    }
+
+    private void showError(String msg) {
+        context.call("showDialog", "error");
+        context.setElementText("errorMessage",msg);
     }
 
 }

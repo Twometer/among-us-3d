@@ -95,8 +95,18 @@
 <div class="dialog" id="joinGame">
     <h1>Enter game code</h1>
     <input type="text" placeholder="Game code" maxlength="5" id="gamecode">
-    <button dialog="joinGame" onclick="doJoin()">Join</button>
-    <button class="close" dialog="joinGame">Cancel</button>
+    <div>
+        <button dialog="joinGame" onclick="doJoin()">Join</button>
+        <button class="close" dialog="joinGame">Cancel</button>
+    </div>
+</div>
+<div class="dialog" id="error">
+    <h1>Error</h1>
+    <div id="errorMessage">Error message</div>
+    <button class="close" dialog="error">ok</button>
+</div>
+<div class="dialog" id="loading">
+    <h1 id="loadingMessage">Loading</h1>
 </div>
 </body>
 <script src="script/dialog.js"></script>
@@ -123,5 +133,6 @@
         _remote.joinGame(document.getElementById('gamecode').value);
     }
     function OnLoaded() {}
+
 </script>
 </html>
