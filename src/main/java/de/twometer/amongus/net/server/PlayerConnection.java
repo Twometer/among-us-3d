@@ -6,4 +6,6 @@ public class PlayerConnection extends Connection {
 
     public int playerId;
 
+    public ServerSession session;
+
 }

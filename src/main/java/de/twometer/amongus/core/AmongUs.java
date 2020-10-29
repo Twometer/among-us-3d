@@ -3,6 +3,7 @@ package de.twometer.amongus.core;
 import de.twometer.amongus.gui.*;
 import de.twometer.amongus.gui.ApiGui;
 import de.twometer.amongus.io.FileSystem;
+import de.twometer.amongus.net.client.NetClient;
 import de.twometer.amongus.util.Config;
 import de.twometer.amongus.util.Scheduler;
 import de.twometer.amongus.util.UserSettings;
@@ -18,6 +19,7 @@ public class AmongUs extends NekoApp {
     private final StateController stateController = new StateController();
     private final Scheduler scheduler = new Scheduler();
     private final FileSystem fileSystem = new FileSystem();
+    private final NetClient client = new NetClient();
     private UserSettings userSettings;
 
     // Singleton
@@ -71,7 +73,8 @@ public class AmongUs extends NekoApp {
         getGuiManager().registerGlobalJsObject("_api", new ApiGui());
         getGuiManager().showPage(new MainMenuPage());
 
-        Log.i("Server IP: " + Config.get().getServerIp());
+        Log.i("Connecting to server: " + Config.get().getServerIp());
+        client.connect();
     }
 
     @Override
@@ -108,5 +111,9 @@ public class AmongUs extends NekoApp {
 
     public UserSettings getUserSettings() {
         return userSettings;
+    }
+
+    public NetClient getClient() {
+        return client;
     }
 }

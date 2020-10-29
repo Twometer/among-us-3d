@@ -25,6 +25,8 @@ public class NetClient extends Listener {
     }
 
     public void connect() {
+        if (client.isConnected())
+            return;
         if (connecting) {
             Log.d("Already connecting");
             return;
@@ -53,6 +55,7 @@ public class NetClient extends Listener {
             connect();
             if (!client.isConnected()) {
                 Log.e("Failed to send message");
+                callbackHandler.failAll();
                 return;
             }
             client.sendTCP(msg);
@@ -68,6 +71,7 @@ public class NetClient extends Listener {
     @Override
     public void disconnected(Connection connection) {
         Log.w("Connection lost");
+        callbackHandler.failAll();
     }
 
     @Override

@@ -1,5 +1,7 @@
 package de.twometer.amongus.net.client;
 
+import de.twometer.amongus.core.AmongUs;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -8,20 +10,27 @@ import java.util.function.Consumer;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class CallbackHandler {
 
-    private static class Callback<T> {
+    public static class Callback<T> {
         private final Consumer<T> consumer;
         private final Class<T> clazz;
+        private Runnable errorHandler;
 
         public Callback(Consumer<T> consumer, Class<T> clazz) {
             this.consumer = consumer;
             this.clazz = clazz;
         }
+
+        public void handleError(Runnable runnable) {
+            this.errorHandler = runnable;
+        }
     }
 
     private final List<Callback> callbacks = new CopyOnWriteArrayList<>();
 
-    public <T> void await(Class<T> clazz, Consumer<T> callback) {
-        callbacks.add(new Callback<>(callback, clazz));
+    public <T> Callback<T> await(Class<T> clazz, Consumer<T> callback) {
+        var cb = new Callback<>(callback, clazz);
+        callbacks.add(cb);
+        return cb;
     }
 
     public void handle(Object o) {
@@ -33,6 +42,14 @@ public class CallbackHandler {
             }
         }
         callbacks.removeAll(doneCallbacks);
+    }
+
+    public void failAll() {
+        for (var cb : callbacks)
+            if (cb.errorHandler != null) {
+                AmongUs.get().getScheduler().runLater(0, cb.errorHandler); // Run on UI thread
+            }
+        callbacks.clear();
     }
 
 }

@@ -1,6 +1,7 @@
 package de.twometer.amongus.gui;
 
 import de.twometer.amongus.core.AmongUs;
+import de.twometer.amongus.net.NetMessage;
 import de.twometer.neko.util.Log;
 
 public class MainMenuPage extends BasePage {
@@ -16,34 +17,48 @@ public class MainMenuPage extends BasePage {
     }
 
     public void updateUsername(String user) {
-        AmongUs.get().getUserSettings().setUsername(user.trim());
-        AmongUs.get().getUserSettings().save();
+        amongUs.getUserSettings().setUsername(user.trim());
+        amongUs.getUserSettings().save();
     }
 
     public void createGame() {
-        AmongUs.get().getGuiManager().showPage(new CustomizePage());
+        amongUs.getGuiManager().showPage(new CustomizePage());
     }
 
     public void joinGame(String gameCode) {
         Log.i("Game code: " + gameCode);
 
-        if (gameCode.trim().length() == 0)  {
+        if (gameCode.trim().length() == 0) {
             showError("Invalid game code!");
         } else {
-            showLoading("Connecting...");
+            showLoading("Joining...");
+            amongUs.getClient().sendMessage(new NetMessage.SessionJoin(amongUs.getUserSettings().getUsername(), gameCode))
+                    .await(NetMessage.SessionJoined.class, r -> {
+                        if (r.result == NetMessage.SessionJoined.Result.InvalidUsername)
+                            showError("Invalid username!");
+                        else if (r.result == NetMessage.SessionJoined.Result.LobbyFull)
+                            showError("Sorry, this lobby is full!");
+                        else if (r.result == NetMessage.SessionJoined.Result.UsernameTaken)
+                            showError("Sorry, your username is already taken.");
+                        else if (r.result == NetMessage.SessionJoined.Result.Other)
+                            showError("An unknown error occurred joining a session.");
+                        else
+                            amongUs.getGuiManager().showPage(new LobbyPage());
+                    })
+                    .handleError(this::networkError);
         }
     }
 
     public void settings() {
-        AmongUs.get().getGuiManager().showPage(new SettingsPage());
+        amongUs.getGuiManager().showPage(new SettingsPage());
     }
 
     public void quit() {
-        AmongUs.get().getWindow().close();
+        amongUs.getWindow().close();
     }
 
     public void credits() {
-        AmongUs.get().getGuiManager().showPage(new CreditsPage());
+        amongUs.getGuiManager().showPage(new CreditsPage());
     }
 
     private void showLoading(String msg) {
@@ -51,13 +66,18 @@ public class MainMenuPage extends BasePage {
         context.setElementText("loadingMessage", msg);
     }
 
-    private void hideLoading(String msg) {
+    private void hideLoading() {
         context.call("hideDialog", "loading");
     }
 
+    private void networkError() {
+        showError("Can't connect to the server");
+    }
+
     private void showError(String msg) {
+        hideLoading();
         context.call("showDialog", "error");
-        context.setElementText("errorMessage",msg);
+        context.setElementText("errorMessage", msg);
     }
 
 }

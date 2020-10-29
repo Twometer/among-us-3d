@@ -5,11 +5,14 @@ import de.twometer.neko.gui.Page;
 
 public abstract class BasePage extends Page {
 
+    protected final AmongUs amongUs;
+
     private final Page previous;
 
     public BasePage(String path) {
         super(path);
-        previous = AmongUs.get().getGuiManager().getCurrentPage();
+        amongUs = AmongUs.get();
+        previous = amongUs.getGuiManager().getCurrentPage();
     }
 
     protected final void goBack() {
