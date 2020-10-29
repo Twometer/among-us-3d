@@ -1,15 +1,17 @@
-package de.twometer.amongus.game;
+package de.twometer.amongus.core;
 
 import de.twometer.amongus.gui.*;
 import de.twometer.amongus.gui.ApiGui;
+import de.twometer.amongus.util.Config;
 import de.twometer.amongus.util.Scheduler;
 import de.twometer.neko.core.NekoApp;
 import de.twometer.neko.render.filter.FrustumCullingFilter;
+import de.twometer.neko.util.Log;
 
 public class AmongUs extends NekoApp {
 
     // Game services
-    private final GameStateManager gameStateManager = new GameStateManager();
+    private final StateController stateController = new StateController();
     private final Scheduler scheduler = new Scheduler();
 
     // Singleton
@@ -58,6 +60,8 @@ public class AmongUs extends NekoApp {
         // UI
         getGuiManager().registerGlobalJsObject("_api", new ApiGui());
         getGuiManager().showPage(new MainMenuPage());
+
+        Log.i("Server IP: " + Config.get().getServerIp());
     }
 
     @Override
@@ -66,11 +70,12 @@ public class AmongUs extends NekoApp {
         scheduler.update();
     }
 
-    public GameStateManager getGameStateManager() {
-        return gameStateManager;
+    public StateController getStateController() {
+        return stateController;
     }
 
     public Scheduler getScheduler() {
         return scheduler;
     }
+
 }

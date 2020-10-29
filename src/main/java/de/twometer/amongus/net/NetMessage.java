@@ -16,6 +16,11 @@ public final class NetMessage {
 
     private static final Class<?>[] classes = new Class<?>[]{
             // Messages
+            Handshake.class,
+            HandshakeReply.class,
+            HandshakeReply.Result.class,
+            Ping.class,
+            Pong.class,
             SessionCreate.class,
             SessionCreated.class,
             SessionCreated.Result.class,
@@ -26,8 +31,9 @@ public final class NetMessage {
             OnPlayerLeave.class,
             ColorChange.class,
             ColorChanged.class,
-            GameCustomize.class,
-            GameCustomized.class,
+            SessionConfigure.class,
+            SessionConfigured.class,
+            OnSessionUpdate.class,
             OnPlayerUpdate.class,
             PositionChange.class,
             StartGame.class,
@@ -57,6 +63,7 @@ public final class NetMessage {
             TaskStage.class,
             TaskType.class,
             Sabotage.class,
+            SessionConfig.class,
 
             // Basics
             ArrayList.class,
@@ -69,6 +76,25 @@ public final class NetMessage {
             kryo.register(clazz);
     }
 
+    // Connection management
+    public static class Handshake {
+        public int protocolVer;
+        public String appVer;
+    }
+    public static class HandshakeReply {
+        public enum Result {
+            OK,
+            TooOld,
+            TooNew
+        }
+        public Result result;
+    }
+
+    public static class Ping {
+    }
+    public static class Pong {
+    }
+
     // Session creation
     public static class SessionCreate {
     }
@@ -79,6 +105,7 @@ public final class NetMessage {
             MatchmakerFull,
             Other
         }
+
         public Result result;
         public String code;
     }
@@ -122,16 +149,16 @@ public final class NetMessage {
         public boolean ok;
     }
 
-    public static class GameCustomize {
-        public int impostorCount;
-        public float playerVision;
-        public float impostorVision;
-        public float playerSpeed;
-        public int votingTime;
+    public static class SessionConfigure {
+        public SessionConfig config;
     }
 
-    public static class GameCustomized {
+    public static class SessionConfigured {
         public boolean ok;
+    }
+
+    public static class OnSessionUpdate {
+        public SessionConfig config;
     }
 
     public static class OnPlayerUpdate {

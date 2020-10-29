@@ -1,6 +1,6 @@
 package de.twometer.amongus.gui;
 
-import de.twometer.amongus.game.AmongUs;
+import de.twometer.amongus.core.AmongUs;
 import de.twometer.amongus.model.PlayerColor;
 
 public class CustomizePage extends BasePage {

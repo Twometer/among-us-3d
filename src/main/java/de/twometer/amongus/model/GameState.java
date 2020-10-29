@@ -4,5 +4,6 @@ public enum GameState {
     Menus,
     Lobby,
     Ingame,
-    Emergency
+    Emergency,
+    End
 }

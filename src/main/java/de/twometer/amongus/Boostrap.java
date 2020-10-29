@@ -1,11 +1,11 @@
 package de.twometer.amongus;
 
-import de.twometer.amongus.game.AmongUs;
-import de.twometer.amongus.server.Server;
+import de.twometer.amongus.core.AmongUs;
+import de.twometer.amongus.net.server.AmongUsServer;
 
 public final class Boostrap {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         System.out.println("    ___                                   __  __        _____ ____ \n" +
                 "   /   |  ____ ___  ____  ____  ____ _   / / / /____   |__  // __ \\\n" +
                 "  / /| | / __ `__ \\/ __ \\/ __ \\/ __ `/  / / / / ___/    /_ </ / / /\n" +
@@ -14,7 +14,7 @@ public final class Boostrap {
                 "                             /____/                                \n\n");
 
         if (args.length > 0 && args[0].equals("--server")) {
-            Server.launch();
+            (new AmongUsServer()).launch();
         } else {
             AmongUs.launch();
         }

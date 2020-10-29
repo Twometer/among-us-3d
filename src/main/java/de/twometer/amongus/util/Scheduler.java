@@ -11,13 +11,13 @@ public class Scheduler {
 
         private final Runnable runnable;
 
-        public Task(long time, Runnable runnable) {
+        private Task(long time, Runnable runnable) {
             this.time = time;
             this.runnable = runnable;
         }
     }
 
-    private List<Task> tasks = new CopyOnWriteArrayList<>();
+    private final List<Task> tasks = new CopyOnWriteArrayList<>();
 
     public void runLater(long delay, Runnable runnable) {
         tasks.add(new Task(System.currentTimeMillis() + delay, runnable));

@@ -1,4 +1,4 @@
-package de.twometer.amongus.server;
+package de.twometer.amongus.net.server;
 
 import java.util.Random;
 
