@@ -19,8 +19,6 @@ public final class NetMessage {
             Handshake.class,
             HandshakeReply.class,
             HandshakeReply.Result.class,
-            Ping.class,
-            Pong.class,
             SessionCreate.class,
             SessionCreated.class,
             SessionCreated.Result.class,
@@ -88,11 +86,6 @@ public final class NetMessage {
             TooNew
         }
         public Result result;
-    }
-
-    public static class Ping {
-    }
-    public static class Pong {
     }
 
     // Session creation

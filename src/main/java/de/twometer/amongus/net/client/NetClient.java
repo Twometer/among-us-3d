@@ -2,7 +2,6 @@ package de.twometer.amongus.net.client;
 
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
-import com.esotericsoftware.kryonet.FrameworkMessage;
 import com.esotericsoftware.kryonet.Listener;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.amongus.util.Config;
@@ -16,6 +15,7 @@ public class NetClient extends Listener {
 
     private final Client client = new Client();
     private final NetHandler handler = new NetHandler(this);
+    private final CallbackHandler callbackHandler = new CallbackHandler();
     private final Executor executor = Executors.newSingleThreadExecutor();
 
     private volatile boolean connecting = false;
@@ -48,7 +48,7 @@ public class NetClient extends Listener {
         client.close();
     }
 
-    public void sendMessage(Object msg) {
+    public CallbackHandler sendMessage(Object msg) {
         executor.execute(() -> {
             connect();
             if (!client.isConnected()) {
@@ -57,6 +57,7 @@ public class NetClient extends Listener {
             }
             client.sendTCP(msg);
         });
+        return callbackHandler;
     }
 
     @Override
@@ -72,6 +73,7 @@ public class NetClient extends Listener {
     @Override
     public void received(Connection connection, Object o) {
         handler.handle(o);
+        callbackHandler.handle(o);
     }
 
     public boolean isConnected() {
