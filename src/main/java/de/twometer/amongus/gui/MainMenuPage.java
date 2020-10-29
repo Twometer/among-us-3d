@@ -8,6 +8,17 @@ public class MainMenuPage extends BasePage {
         super("MainMenu.html");
     }
 
+    @Override
+    public void onDomReady() {
+        super.onDomReady();
+        context.setElementProperty("username", "value", AmongUs.get().getUserSettings().getUsername());
+    }
+
+    public void updateUsername(String user) {
+        AmongUs.get().getUserSettings().setUsername(user.trim());
+        AmongUs.get().getUserSettings().save();
+    }
+
     public void createGame() {
         AmongUs.get().getGuiManager().showPage(new CustomizePage());
     }

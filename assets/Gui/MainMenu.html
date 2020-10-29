@@ -1,7 +1,7 @@
 <html>
 <head>
     <style>
-        * {
+        :not(input) {
             -webkit-user-select: none;
         }
 
@@ -63,7 +63,7 @@
 <img src="img/Banner.png" width="500">
 <div class="btn-container">
     <p>
-        <input type="text" placeholder="Username">
+        <input oninput="_remote.updateUsername(this.value)" type="text" placeholder="Username" maxlength="12" id="username">
     </p>
     <p>
         <button onclick="_remote.createGame()">Create Game</button>
