@@ -51,8 +51,6 @@ public class CustomizePage extends BasePage {
                     // Join the session
                     showLoading("Joining...");
                     sendJoinMessage(created.code, () -> {
-                        AmongUs.get().setSession(new ClientSession(created.code));
-
                         // Configure the session
                         showLoading("Configuring session...");
                         amongUs.getClient().sendMessage(new NetMessage.SessionConfigure(config))

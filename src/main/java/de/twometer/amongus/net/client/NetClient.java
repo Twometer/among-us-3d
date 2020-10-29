@@ -77,8 +77,8 @@ public class NetClient extends Listener {
 
     @Override
     public void received(Connection connection, Object o) {
-        handler.handle(o);
         callbackHandler.handle(o);
+        handler.handle(o);
         Events.post(o);
     }
 

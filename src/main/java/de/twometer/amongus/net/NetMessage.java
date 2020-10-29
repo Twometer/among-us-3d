@@ -154,6 +154,8 @@ public final class NetMessage {
 
         public int playerId;
         public Result result;
+        public String gameCode;
+        public int host;
 
         public SessionJoined() {
         }
@@ -162,9 +164,11 @@ public final class NetMessage {
             this.result = result;
         }
 
-        public SessionJoined(int playerId, Result result) {
+        public SessionJoined(int playerId, String gameCode, Result result, int host) {
             this.playerId = playerId;
+            this.gameCode = gameCode;
             this.result = result;
+            this.host = host;
         }
     }
 

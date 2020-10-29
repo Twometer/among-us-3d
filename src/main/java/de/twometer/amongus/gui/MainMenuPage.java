@@ -34,7 +34,6 @@ public class MainMenuPage extends BasePage {
         } else {
             showLoading("Joining...");
             sendJoinMessage(gameCode, () -> {
-                AmongUs.get().setSession(new ClientSession(gameCode));
                 amongUs.getGuiManager().showPage(new LobbyPage());
             });
         }

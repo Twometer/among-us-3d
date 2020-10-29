@@ -50,7 +50,8 @@
 
 <h1>Game Code: <span id="gamecode"></span></h1>
 <div class="container" style="height: 75%;display: flex;flex-flow:column;justify-content: space-between">
-    <div class="player-items">
+    <div class="player-items" id="playerContainer">
+        <!--
         <div class="player-item">
             <img class="player-icon" src="img/PlayerIcon.png">
             <div class="player-item-header">xxxxxxxxxxxxx</div>
@@ -67,15 +68,37 @@
             <img class="player-icon" src="img/PlayerIcon.png">
             <div class="player-item-header">xxxxxxxxxxxxx</div>
         </div>
-
+-->
 
     </div>
     <div class="button-panel">
-        <button onclick="_remote.start()">Start</button>
+        <button onclick="_remote.start()" id="startBtn">Start</button>
         <button onclick="_remote.customize()">Customize</button>
         <button onclick="_remote.disconnect()">Leave</button>
     </div>
 </div>
 
 </body>
+
+<script>
+    function iAintHost(host) {
+        document.getElementById('startBtn').style.display = 'none';
+    }
+
+    var container = document.getElementById('playerContainer');
+    function addPlayer(id, username, color) {
+        var item = document.createElement('div');
+        item.classList.add('player-item');
+        item.innerHTML = '<img class="player-icon" src="img/PlayerIcon.png"><div class="player-item-header">' + username + '</div>'
+        item.setAttribute('id', id);
+        container.appendChild(item);
+    }
+
+    function removePlayer(id) {
+        var element = document.getElementById(id);
+        element.parentNode.removeChild(element);
+    }
+
+</script>
+
 </html>

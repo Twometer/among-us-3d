@@ -74,18 +74,28 @@ public class AmongUsServer extends Listener {
             var session = getSession(m.code);
             if (session == null)
                 p.sendTCP(new NetMessage.SessionJoined(NetMessage.SessionJoined.Result.InvalidGameCode));
-            else if (m.username.trim().length() == 0)
+            else if (m.username == null || m.username.trim().length() == 0)
                 p.sendTCP(new NetMessage.SessionJoined(NetMessage.SessionJoined.Result.InvalidUsername));
             else if (session.isUsernameTaken(m.username))
                 p.sendTCP(new NetMessage.SessionJoined(NetMessage.SessionJoined.Result.UsernameTaken));
             else if (session.isFull())
                 p.sendTCP(new NetMessage.SessionJoined(NetMessage.SessionJoined.Result.LobbyFull));
             else {
-                p.sendTCP(new NetMessage.SessionJoined(p.player.id, NetMessage.SessionJoined.Result.Success));
-                session.handleJoin(p);
-                for (var player : p.session.getPlayers())
+                // Configure the player object
+                p.session = session;
+                p.player.username = m.username;
+
+                // Send join success message
+                p.sendTCP(new NetMessage.SessionJoined(p.player.id, session.getGameCode(), NetMessage.SessionJoined.Result.Success, p.session.getHost()));
+
+                // Send list of currently online players
+                for (var player : session.getPlayers())
                     p.sendTCP(new NetMessage.OnPlayerJoin(player.getId(), player.getUsername(), player.getColor()));
 
+                // Send session config
+                p.sendTCP(new NetMessage.OnSessionUpdate(session.getConfig()));
+
+                // Broadcast that they joined
                 p.session.addPlayer(p);
                 p.session.broadcast(new NetMessage.OnPlayerJoin(p.player.id, p.player.username, p.session.getRandomFreeColor()));
             }

@@ -4,8 +4,8 @@ public class ClientSession extends Session<Player> {
 
     private int myPlayerId;
 
-    public ClientSession(String gameCode) {
-        super(gameCode, -1);
+    public ClientSession(String gameCode, int host) {
+        super(gameCode, host);
     }
 
     public void setMyPlayerId(int myPlayerId) {

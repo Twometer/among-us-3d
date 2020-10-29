@@ -42,6 +42,17 @@ public abstract class Session<P extends PlayerBehavior> {
         players.add(player);
     }
 
+    public void removePlayer(int id) {
+        players.removeIf(p -> p.getId() == id);
+    }
+
+    public P getPlayer(int id) {
+        for (var player : players)
+            if (player.getId() == id)
+                return player;
+        throw new IllegalArgumentException("Unknown player id " + id);
+    }
+
     public boolean isColorAvailable(PlayerColor color) {
         for (var player : players)
             if (player.getColor() == color)

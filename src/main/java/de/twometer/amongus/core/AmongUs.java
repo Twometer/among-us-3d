@@ -21,7 +21,7 @@ public class AmongUs extends NekoApp {
     private final StateController stateController = new StateController();
     private final Scheduler scheduler = new Scheduler();
     private final FileSystem fileSystem = new FileSystem();
-    private final NetClient client = new NetClient();
+    private NetClient client;
     private UserSettings userSettings;
     private ClientSession session;
 
@@ -77,6 +77,7 @@ public class AmongUs extends NekoApp {
         getGuiManager().showPage(new MainMenuPage());
 
         Log.i("Connecting to server: " + Config.get().getServerIp());
+        client = new NetClient();
         client.connect();
     }
 

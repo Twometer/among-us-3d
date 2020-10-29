@@ -18,14 +18,4 @@ public class ServerSession extends Session<PlayerConnection> {
             player.sendTCP(message);
     }
 
-    public void handleJoin(PlayerConnection c) {
-        c.session = this;
-    }
-
-    @Override
-    public void addPlayer(PlayerConnection player) {
-        super.addPlayer(player);
-        player.session = this;
-    }
-
 }
