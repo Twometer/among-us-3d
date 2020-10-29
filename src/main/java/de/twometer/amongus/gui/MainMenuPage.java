@@ -1,6 +1,7 @@
 package de.twometer.amongus.gui;
 
 import de.twometer.amongus.core.AmongUs;
+import de.twometer.neko.util.Log;
 
 public class MainMenuPage extends BasePage {
 
@@ -23,7 +24,8 @@ public class MainMenuPage extends BasePage {
         AmongUs.get().getGuiManager().showPage(new CustomizePage());
     }
 
-    public void joinGame() {
+    public void joinGame(String gameCode) {
+        Log.i("Game code: " + gameCode);
         AmongUs.get().getGuiManager().showPage(new IngamePage());
     }
 

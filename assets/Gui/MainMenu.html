@@ -14,7 +14,7 @@
         }
 
 
-        button {
+        button.mainmenu {
             display: block;
             border: none;
             color: white;
@@ -33,7 +33,7 @@
             font-family: "Dot Matrix";
             color: white;
             background: transparent;
-            border: 1px solid rgba(255,255,255,0.5);
+            border: 1px solid rgba(255, 255, 255, 0.5);
             width: 500px;
             padding: 10px 20px;
             font-size: 40px;
@@ -57,32 +57,71 @@
             font-size: 25px;
             cursor: pointer !important;
         }
+
+        #gamecode {
+            text-align: center;
+        }
     </style>
 </head>
+<link rel="stylesheet" href="styles/dialog.css">
 <body>
 <img src="img/Banner.png" width="500">
 <div class="btn-container">
     <p>
-        <input oninput="_remote.updateUsername(this.value)" type="text" placeholder="Username" maxlength="12" id="username">
+        <input oninput="_remote.updateUsername(this.value)" type="text" placeholder="Username" maxlength="12"
+               id="username">
     </p>
     <p>
-        <button onclick="_remote.createGame()">Create Game</button>
+        <button class="mainmenu" onclick="createGame()">Create Game</button>
     </p>
     <p>
-        <button onclick="_remote.joinGame()">Join Game</button>
+        <button class="mainmenu" onclick="joinGame()">Join Game</button>
     </p>
     <p>
-        <button onclick="_remote.settings()">Settings</button>
+        <button class="mainmenu" onclick="_remote.settings()">Settings</button>
     </p>
     <p>
-        <button onclick="_remote.quit()">Quit</button>
+        <button class="mainmenu" onclick="_remote.quit()">Quit</button>
     </p>
 </div>
 <div class="credits-container" onclick="_remote.credits()">
     by Twometer
 </div>
+<div class="dialog" id="chooseUsername">
+    <h1>Can't join</h1>
+    <div>Please choose a username first!</div>
+    <button class="close" dialog="chooseUsername">Ok</button>
+</div>
+<div class="dialog" id="joinGame">
+    <h1>Enter game code</h1>
+    <input type="text" placeholder="Game code" maxlength="5" id="gamecode">
+    <button dialog="joinGame" onclick="doJoin()">Join</button>
+    <button class="close" dialog="joinGame">Cancel</button>
+</div>
 </body>
+<script src="script/dialog.js"></script>
 <script>
+    var username = document.getElementById('username');
+    function createGame() {
+        if (username.value.trim() == '')
+        {
+            showDialog('chooseUsername');
+            return;
+        }
+        _remote.createGame();
+    }
+    function joinGame() {
+        if (username.value.trim() == '')
+        {
+            showDialog('chooseUsername');
+            return;
+        }
+        showDialog('joinGame');
+    }
+    function doJoin() {
+        hideDialog('joinGame');
+        _remote.joinGame(document.getElementById('gamecode').value);
+    }
     function OnLoaded() {}
 </script>
 </html>
