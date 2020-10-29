@@ -46,6 +46,9 @@ public class NetHandler {
                 amongUs.setSession(new ClientSession(joined.gameCode, joined.host));
                 amongUs.getSession().setMyPlayerId(joined.playerId);
             }
+        } else if (o instanceof NetMessage.OnHostChanged) {
+            var changed = (NetMessage.OnHostChanged)o;
+            amongUs.getSession().setHost(changed.id);
         }
     }
 

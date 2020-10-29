@@ -58,7 +58,7 @@ public class CustomizePage extends BasePage {
 
                                     // Configure the player
                                     showLoading("Configuring player...");
-                                    amongUs.getClient().sendMessage(new NetMessage.ColorChange())
+                                    amongUs.getClient().sendMessage(new NetMessage.ColorChange(color))
                                             .await(NetMessage.ColorChanged.class, changed -> {
 
                                                 // Finally, let's go to the lobby

@@ -33,6 +33,7 @@ public final class NetMessage {
             SessionConfigured.class,
             OnSessionUpdate.class,
             OnPlayerUpdate.class,
+            OnHostChanged.class,
             PositionChange.class,
             StartGame.class,
             OnGameStart.class,
@@ -267,6 +268,17 @@ public final class NetMessage {
             this.id = id;
             this.color = color;
             this.role = role;
+        }
+    }
+
+    public static class OnHostChanged {
+        public int id;
+
+        public OnHostChanged() {
+        }
+
+        public OnHostChanged(int id) {
+            this.id = id;
         }
     }
 

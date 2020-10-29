@@ -3,6 +3,7 @@ package de.twometer.amongus.net.server;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
+import de.twometer.amongus.model.PlayerRole;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.amongus.util.AsyncScheduler;
 import de.twometer.amongus.util.Config;
@@ -57,8 +58,24 @@ public class AmongUsServer extends Listener {
     }
 
     @Override
-    public void disconnected(Connection connection) {
-        var playerId = ((PlayerConnection) connection).getId();
+    public void disconnected(Connection c) {
+        var connection = ((PlayerConnection) c);
+        if (connection.session != null) {
+            connection.session.removePlayer(connection.player.id);
+            connection.session.broadcast(new NetMessage.OnPlayerLeave(connection.player.id));
+
+            if (connection.session.getHost() == connection.player.id) {
+                Log.i("Host left, finding new host");
+                connection.session.findNewHost();
+                connection.session.broadcast(new NetMessage.OnHostChanged(connection.session.getHost()));
+            }
+
+            if (connection.session.getPlayers().size() == 0) {
+                Log.i("Session is empty, deleting it.");
+                sessions.remove(connection.session.getGameCode());
+            }
+        }
+        var playerId = connection.getId();
         Log.i("#" + playerId + " disconnected. " + connectedClients.decrementAndGet() + " clients online.");
     }
 
@@ -84,6 +101,8 @@ public class AmongUsServer extends Listener {
                 // Configure the player object
                 p.session = session;
                 p.player.username = m.username;
+                p.player.role = PlayerRole.Crewmate;
+                p.player.color = p.session.getRandomFreeColor();
 
                 // Send join success message
                 p.sendTCP(new NetMessage.SessionJoined(p.player.id, session.getGameCode(), NetMessage.SessionJoined.Result.Success, p.session.getHost()));
@@ -97,7 +116,10 @@ public class AmongUsServer extends Listener {
 
                 // Broadcast that they joined
                 p.session.addPlayer(p);
-                p.session.broadcast(new NetMessage.OnPlayerJoin(p.player.id, p.player.username, p.session.getRandomFreeColor()));
+                p.session.broadcast(new NetMessage.OnPlayerJoin(p.player.id, p.player.username, p.player.color));
+
+                // Init client side player object
+                p.sendTCP(new NetMessage.OnPlayerUpdate(p.player.id, p.player.color, p.player.role));
             }
         });
         handlers.register(NetMessage.SessionCreate.class, (p, m) -> {

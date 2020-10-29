@@ -81,8 +81,8 @@
 </body>
 
 <script>
-    function iAintHost(host) {
-        document.getElementById('startBtn').style.display = 'none';
+    function setIsHost(host) {
+        document.getElementById('startBtn').style.display = host ? 'inline-block' : 'none';
     }
 
     var container = document.getElementById('playerContainer');

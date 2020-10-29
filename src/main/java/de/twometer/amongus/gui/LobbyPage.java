@@ -1,7 +1,6 @@
 package de.twometer.amongus.gui;
 
 import de.twometer.amongus.net.NetMessage;
-import de.twometer.neko.event.Events;
 import org.greenrobot.eventbus.Subscribe;
 
 public class LobbyPage extends BasePage {
@@ -18,10 +17,12 @@ public class LobbyPage extends BasePage {
         for (var player : amongUs.getSession().getPlayers()) {
             addPlayer(player.id, player.username, player.color.name());
         }
-        Events.register(this);
 
-        if (amongUs.getSession().getMyself().getId() != amongUs.getSession().getHost())
-            context.call("iAintHost");
+        updateHost();
+    }
+
+    private void updateHost() {
+        context.call("setIsHost", amongUs.getSession().getMyself().getId() == amongUs.getSession().getHost());
     }
 
     public void start() {
@@ -39,16 +40,25 @@ public class LobbyPage extends BasePage {
 
     @Subscribe
     public void onJoin(NetMessage.OnPlayerJoin join) {
-        addPlayer(join.id, join.username, join.color.name());
+        runOnUiThread(() -> addPlayer(join.id, join.username, join.color.name()));
     }
 
     @Subscribe
     public void onLeave(NetMessage.OnPlayerLeave leave) {
-        context.call("removePlayer", leave.id);
+        runOnUiThread(() -> context.call("removePlayer", leave.id));
+    }
+
+    @Subscribe
+    public void onHostChanged(NetMessage.OnHostChanged changed) {
+        runOnUiThread(this::updateHost);
     }
 
     private void addPlayer(int id, String username, String color) {
         context.call("addPlayer", id, username, color);
     }
 
+    @Override
+    protected boolean usesEvents() {
+        return true;
+    }
 }

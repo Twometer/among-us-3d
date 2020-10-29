@@ -4,8 +4,10 @@ import com.google.gson.Gson;
 import de.twometer.amongus.core.AmongUs;
 import de.twometer.amongus.model.ClientSession;
 import de.twometer.amongus.net.NetMessage;
+import de.twometer.neko.event.Events;
 import de.twometer.neko.gui.Page;
 import de.twometer.neko.util.Log;
+import org.greenrobot.eventbus.EventBus;
 
 public abstract class BasePage extends Page {
 
@@ -19,6 +21,11 @@ public abstract class BasePage extends Page {
         super(path);
         amongUs = AmongUs.get();
         previous = amongUs.getGuiManager().getCurrentPage();
+        if (usesEvents()) Events.register(this);
+    }
+
+    protected boolean usesEvents() {
+        return false;
     }
 
     protected final void goBack() {
@@ -29,6 +36,7 @@ public abstract class BasePage extends Page {
     public void onUnload() {
         super.onUnload();
         ApiGui.reset();
+        if (usesEvents()) Events.unregister(this);
     }
 
     protected final void showLoading(String msg) {
@@ -61,7 +69,13 @@ public abstract class BasePage extends Page {
                         showError("Sorry, your username is already taken.");
                     else if (r.result == NetMessage.SessionJoined.Result.Other)
                         showError("An unknown error occurred joining a session.");
+                    else if (r.result == NetMessage.SessionJoined.Result.InvalidGameCode)
+                        showError("Sorry, that game does not exist.");
                     else done.run();
                 }).handleError(this::networkError);
+    }
+
+    protected final void runOnUiThread(Runnable runnable) {
+        AmongUs.get().getScheduler().run(runnable);
     }
 }

@@ -3,6 +3,7 @@ package de.twometer.amongus.net.client;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
+import de.twometer.amongus.core.AmongUs;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.amongus.util.Config;
 import de.twometer.neko.event.Events;
@@ -48,6 +49,7 @@ public class NetClient extends Listener {
     }
 
     public void disconnect() {
+        AmongUs.get().setSession(null);
         client.close();
     }
 

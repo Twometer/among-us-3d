@@ -7,7 +7,7 @@ public abstract class Session<P extends PlayerBehavior> {
 
     private final String gameCode;
 
-    private final int host;
+    private int host;
 
     protected final List<P> players = new ArrayList<>();
 
@@ -20,6 +20,10 @@ public abstract class Session<P extends PlayerBehavior> {
 
     public String getGameCode() {
         return gameCode;
+    }
+
+    public void setHost(int host) {
+        this.host = host;
     }
 
     public int getHost() {

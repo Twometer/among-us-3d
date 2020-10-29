@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'de.twometer.neko:neko-engine:1.0.3'
+    implementation 'de.twometer.neko:neko-engine:1.1.0'
 
     testCompile 'junit:junit:4.12'
 }
