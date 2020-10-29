@@ -4,20 +4,20 @@ import de.twometer.neko.render.Color;
 
 public enum PlayerColor {
     Red(fromHex("#FF0000")),
-    DarkRed(fromHex("#660000")),
-    Green(fromHex("#004200")),
+    DarkRed(fromHex("#540000")),
+    Green(fromHex("#006836")),
     Lime(fromHex("#00FF00")),
     Blue(fromHex("#0000FF")),
-    LightBlue(fromHex("#0071FF")),
-    Cyan(fromHex("#00FAFF")),
+    LightBlue(fromHex("#3287FF")),
+    Cyan(fromHex("#00FFFA")),
     Yellow(fromHex("#FFB100")),
     Orange(fromHex("#FF6100")),
     Pink(fromHex("#FF00D1")),
-    Purple(fromHex("#5700D5")),
+    Purple(fromHex("#6400B7")),
     Brown(fromHex("#612500")),
     White(fromHex("#ffffff")),
     Black(fromHex("#000000")),
-    Gray(fromHex("#3a3a3a"));
+    Gray(fromHex("#494949"));
 
 
     private final Color value;
