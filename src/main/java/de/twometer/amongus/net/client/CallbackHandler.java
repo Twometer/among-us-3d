@@ -33,21 +33,21 @@ public class CallbackHandler {
         return cb;
     }
 
-    public void handle(Object o) {
+    void handle(Object o) {
         var doneCallbacks = new ArrayList<Callback>();
         for (var cb : callbacks) {
             if (cb.clazz == o.getClass()) {
-                cb.consumer.accept(o);
+                AmongUs.get().getScheduler().run(() -> cb.consumer.accept(o));
                 doneCallbacks.add(cb);
             }
         }
         callbacks.removeAll(doneCallbacks);
     }
 
-    public void failAll() {
+    void failAll() {
         for (var cb : callbacks)
             if (cb.errorHandler != null) {
-                AmongUs.get().getScheduler().runLater(0, cb.errorHandler); // Run on UI thread
+                AmongUs.get().getScheduler().run(cb.errorHandler); // Run on UI thread
             }
         callbacks.clear();
     }

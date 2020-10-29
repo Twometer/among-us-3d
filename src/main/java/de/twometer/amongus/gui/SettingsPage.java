@@ -1,12 +1,9 @@
 package de.twometer.amongus.gui;
 
-import com.google.gson.Gson;
 import de.twometer.amongus.core.AmongUs;
 import de.twometer.amongus.util.UserSettings;
 
 public class SettingsPage extends BasePage {
-
-    private final Gson gson = new Gson();
 
     public SettingsPage() {
         super("Settings.html");

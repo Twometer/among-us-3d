@@ -38,6 +38,10 @@ public class Scheduler {
 
     private final List<Task> tasks = new CopyOnWriteArrayList<>();
 
+    public Task run(Runnable runnable) {
+        return runLater(0, runnable);
+    }
+
     public Task runLater(long delay, Runnable runnable) {
         var task = new Task(System.currentTimeMillis() + delay, runnable);
         tasks.add(task);

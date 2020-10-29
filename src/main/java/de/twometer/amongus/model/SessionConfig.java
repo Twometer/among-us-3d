@@ -3,8 +3,8 @@ package de.twometer.amongus.model;
 public class SessionConfig {
 
     private int impostorCount = 1;
-    private float playerVision = 0.85f;
-    private float impostorVision = 1.25f;
+    private float playerVision = 0.8f;
+    private float impostorVision = 1.2f;
     private float playerSpeed = 1.0f;
     private int votingTime = 60;
     private boolean confirmEjects = true;

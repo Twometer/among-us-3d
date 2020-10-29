@@ -1,11 +1,18 @@
 package de.twometer.amongus.gui;
 
-import de.twometer.neko.gui.Page;
-
 public class LobbyPage extends BasePage {
 
-    public LobbyPage() {
+    private String code;
+
+    public LobbyPage(String code) {
         super("Lobby.html");
+        this.code = code;
+    }
+
+    @Override
+    public void onDomReady() {
+        super.onDomReady();
+        context.setElementText("gamecode", code);
     }
 
     public void start() {

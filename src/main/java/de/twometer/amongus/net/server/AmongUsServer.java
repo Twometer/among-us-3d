@@ -9,7 +9,6 @@ import de.twometer.amongus.util.Config;
 import de.twometer.neko.util.Log;
 
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -53,7 +52,7 @@ public class AmongUsServer extends Listener {
     @Override
     public void connected(Connection connection) {
         var playerId = newId();
-        ((PlayerConnection) connection).playerId = playerId;
+        ((PlayerConnection) connection).player.id = playerId;
         Log.i(connection.getRemoteAddressTCP().toString() + " (#" + playerId + ") connected. " + connectedClients.incrementAndGet() + " clients online.");
     }
 
@@ -70,20 +69,45 @@ public class AmongUsServer extends Listener {
     }
 
     private void registerHandlers() {
-        handlers.register(NetMessage.SessionJoin.class, (c, p) -> {
-            var session = getSession(p.code);
+        handlers.register(NetMessage.SessionJoin.class, (p, m) -> {
+            var session = getSession(m.code);
             if (session == null)
-                c.sendTCP(new NetMessage.SessionJoined(NetMessage.SessionJoined.Result.InvalidGameCode));
-            else if (p.username.trim().length() == 0)
-                c.sendTCP(new NetMessage.SessionJoined(NetMessage.SessionJoined.Result.InvalidUsername));
-            else if (session.isUsernameTaken(p.username))
-                c.sendTCP(new NetMessage.SessionJoined(NetMessage.SessionJoined.Result.UsernameTaken));
+                p.sendTCP(new NetMessage.SessionJoined(NetMessage.SessionJoined.Result.InvalidGameCode));
+            else if (m.username.trim().length() == 0)
+                p.sendTCP(new NetMessage.SessionJoined(NetMessage.SessionJoined.Result.InvalidUsername));
+            else if (session.isUsernameTaken(m.username))
+                p.sendTCP(new NetMessage.SessionJoined(NetMessage.SessionJoined.Result.UsernameTaken));
             else if (session.isFull())
-                c.sendTCP(new NetMessage.SessionJoined(NetMessage.SessionJoined.Result.LobbyFull));
+                p.sendTCP(new NetMessage.SessionJoined(NetMessage.SessionJoined.Result.LobbyFull));
             else {
-                c.sendTCP(new NetMessage.SessionJoined(NetMessage.SessionJoined.Result.Success));
-                session.join(c);
+                p.sendTCP(new NetMessage.SessionJoined(NetMessage.SessionJoined.Result.Success));
+                session.join(p);
             }
+        });
+        handlers.register(NetMessage.SessionCreate.class, (p, m) -> {
+            var code = CodeGenerator.newGameCode();
+            var session = new ServerSession(code, p.player.id);
+            sessions.put(code, session);
+            p.sendTCP(new NetMessage.SessionCreated(NetMessage.SessionCreated.Result.Ok, code));
+        });
+        handlers.register(NetMessage.SessionConfigure.class, (p, m) -> {
+            if (p.session == null) return;
+            if (p.session.getHost() != p.player.id) return;
+            p.session.configure(m.config);
+            p.sendTCP(new NetMessage.SessionConfigured(true));
+        });
+        handlers.register(NetMessage.ColorChange.class, (p, m) -> {
+            if (p.session == null) return;
+            if (p.session.isColorAvailable(m.newColor)) {
+                p.player.color = m.newColor;
+                p.sendTCP(new NetMessage.ColorChanged(true));
+                p.session.broadcast(new NetMessage.OnPlayerUpdate(
+                        p.player.id,
+                        p.player.color,
+                        p.player.role
+                ));
+            } else
+                p.sendTCP(new NetMessage.ColorChanged(false));
         });
     }
 

@@ -5,6 +5,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.amongus.util.Config;
+import de.twometer.neko.event.Events;
 import de.twometer.neko.util.Log;
 
 import java.io.IOException;
@@ -78,6 +79,7 @@ public class NetClient extends Listener {
     public void received(Connection connection, Object o) {
         handler.handle(o);
         callbackHandler.handle(o);
+        Events.post(o);
     }
 
     public boolean isConnected() {

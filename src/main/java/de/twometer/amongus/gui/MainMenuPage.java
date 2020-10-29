@@ -32,20 +32,7 @@ public class MainMenuPage extends BasePage {
             showError("Invalid game code!");
         } else {
             showLoading("Joining...");
-            amongUs.getClient().sendMessage(new NetMessage.SessionJoin(amongUs.getUserSettings().getUsername(), gameCode))
-                    .await(NetMessage.SessionJoined.class, r -> {
-                        if (r.result == NetMessage.SessionJoined.Result.InvalidUsername)
-                            showError("Invalid username!");
-                        else if (r.result == NetMessage.SessionJoined.Result.LobbyFull)
-                            showError("Sorry, this lobby is full!");
-                        else if (r.result == NetMessage.SessionJoined.Result.UsernameTaken)
-                            showError("Sorry, your username is already taken.");
-                        else if (r.result == NetMessage.SessionJoined.Result.Other)
-                            showError("An unknown error occurred joining a session.");
-                        else
-                            amongUs.getGuiManager().showPage(new LobbyPage());
-                    })
-                    .handleError(this::networkError);
+            sendJoinMessage(gameCode, () -> amongUs.getGuiManager().showPage(new LobbyPage(gameCode)));
         }
     }
 
@@ -59,25 +46,6 @@ public class MainMenuPage extends BasePage {
 
     public void credits() {
         amongUs.getGuiManager().showPage(new CreditsPage());
-    }
-
-    private void showLoading(String msg) {
-        context.call("showDialog", "loading");
-        context.setElementText("loadingMessage", msg);
-    }
-
-    private void hideLoading() {
-        context.call("hideDialog", "loading");
-    }
-
-    private void networkError() {
-        showError("Can't connect to the server");
-    }
-
-    private void showError(String msg) {
-        hideLoading();
-        context.call("showDialog", "error");
-        context.setElementText("errorMessage", msg);
     }
 
 }
