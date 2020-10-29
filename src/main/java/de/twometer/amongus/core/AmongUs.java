@@ -2,10 +2,14 @@ package de.twometer.amongus.core;
 
 import de.twometer.amongus.gui.*;
 import de.twometer.amongus.gui.ApiGui;
+import de.twometer.amongus.io.FileSystem;
 import de.twometer.amongus.util.Config;
 import de.twometer.amongus.util.Scheduler;
+import de.twometer.amongus.util.UserSettings;
 import de.twometer.neko.core.NekoApp;
 import de.twometer.neko.render.filter.FrustumCullingFilter;
+import de.twometer.neko.render.overlay.FXAAOverlay;
+import de.twometer.neko.render.overlay.VignetteOverlay;
 import de.twometer.neko.util.Log;
 
 public class AmongUs extends NekoApp {
@@ -13,6 +17,8 @@ public class AmongUs extends NekoApp {
     // Game services
     private final StateController stateController = new StateController();
     private final Scheduler scheduler = new Scheduler();
+    private final FileSystem fileSystem = new FileSystem();
+    private UserSettings userSettings;
 
     // Singleton
     private static AmongUs instance;
@@ -34,6 +40,12 @@ public class AmongUs extends NekoApp {
 
     @Override
     protected void onInitialize() {
+        // Config
+        Log.i("Loading configuration...");
+        fileSystem.initialize();
+        userSettings = fileSystem.load(UserSettings.FILE_NAME, UserSettings.class, new UserSettings());
+        userSettings.save();
+
         // Window
         getWindow().setCursorVisible(false);
         getWindow().setIcon("Icon.png");
@@ -41,9 +53,7 @@ public class AmongUs extends NekoApp {
         getRenderManager().addModelFilter(new FrustumCullingFilter());
 
         // Visual effects
-        getFxManager().getSsao().setActive(true);
-        getFxManager().getSsao().setSamples(12);
-        getFxManager().getBloom().setActive(true);
+        reloadFxConfig();
 
         // Base map
         /*var skeld = ModelLoader.loadModel("TheSkeld.obj");
@@ -70,6 +80,14 @@ public class AmongUs extends NekoApp {
         scheduler.update();
     }
 
+    public void reloadFxConfig() {
+        getFxManager().getSsao().setActive(userSettings.isUseAO());
+        getFxManager().getSsao().setSamples(userSettings.getAoSamples());
+        getFxManager().getBloom().setActive(userSettings.isUseBloom());
+        if (userSettings.isUseFxaa()) getOverlayManager().addOverlay(new FXAAOverlay());
+        if (userSettings.isUseVignette()) getOverlayManager().addOverlay(new VignetteOverlay(20.0f, 0.15f));
+    }
+
     public StateController getStateController() {
         return stateController;
     }
@@ -78,4 +96,11 @@ public class AmongUs extends NekoApp {
         return scheduler;
     }
 
+    public FileSystem getFileSystem() {
+        return fileSystem;
+    }
+
+    public UserSettings getUserSettings() {
+        return userSettings;
+    }
 }
