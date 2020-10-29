@@ -1,6 +1,7 @@
 package de.twometer.amongus.gui;
 
 import de.twometer.amongus.core.AmongUs;
+import de.twometer.amongus.model.ClientSession;
 import de.twometer.amongus.model.PlayerColor;
 import de.twometer.amongus.model.SessionConfig;
 import de.twometer.amongus.net.NetMessage;
@@ -50,6 +51,7 @@ public class CustomizePage extends BasePage {
                     // Join the session
                     showLoading("Joining...");
                     sendJoinMessage(created.code, () -> {
+                        AmongUs.get().setSession(new ClientSession(created.code));
 
                         // Configure the session
                         showLoading("Configuring session...");
@@ -62,7 +64,7 @@ public class CustomizePage extends BasePage {
                                             .await(NetMessage.ColorChanged.class, changed -> {
 
                                                 // Finally, let's go to the lobby
-                                                AmongUs.get().getGuiManager().showPage(new LobbyPage(created.code));
+                                                AmongUs.get().getGuiManager().showPage(new LobbyPage());
 
                                             }).handleError(this::networkError);
 

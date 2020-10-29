@@ -58,7 +58,8 @@ public class AmongUsServer extends Listener {
 
     @Override
     public void disconnected(Connection connection) {
-        Log.i(connection.getRemoteAddressTCP().toString() + " disconnected. " + connectedClients.decrementAndGet() + " clients online.");
+        var playerId = ((PlayerConnection) connection).getId();
+        Log.i("#" + playerId + " disconnected. " + connectedClients.decrementAndGet() + " clients online.");
     }
 
     @Override
@@ -80,8 +81,13 @@ public class AmongUsServer extends Listener {
             else if (session.isFull())
                 p.sendTCP(new NetMessage.SessionJoined(NetMessage.SessionJoined.Result.LobbyFull));
             else {
-                p.sendTCP(new NetMessage.SessionJoined(NetMessage.SessionJoined.Result.Success));
-                session.join(p);
+                p.sendTCP(new NetMessage.SessionJoined(p.player.id, NetMessage.SessionJoined.Result.Success));
+                session.handleJoin(p);
+                for (var player : p.session.getPlayers())
+                    p.sendTCP(new NetMessage.OnPlayerJoin(player.getId(), player.getUsername(), player.getColor()));
+
+                p.session.addPlayer(p);
+                p.session.broadcast(new NetMessage.OnPlayerJoin(p.player.id, p.player.username, p.session.getRandomFreeColor()));
             }
         });
         handlers.register(NetMessage.SessionCreate.class, (p, m) -> {
@@ -93,7 +99,7 @@ public class AmongUsServer extends Listener {
         handlers.register(NetMessage.SessionConfigure.class, (p, m) -> {
             if (p.session == null) return;
             if (p.session.getHost() != p.player.id) return;
-            p.session.configure(m.config);
+            p.session.setConfig(m.config);
             p.sendTCP(new NetMessage.SessionConfigured(true));
         });
         handlers.register(NetMessage.ColorChange.class, (p, m) -> {

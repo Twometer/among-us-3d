@@ -1,6 +1,7 @@
 package de.twometer.amongus.gui;
 
 import de.twometer.amongus.core.AmongUs;
+import de.twometer.amongus.model.ClientSession;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.neko.util.Log;
 
@@ -32,7 +33,10 @@ public class MainMenuPage extends BasePage {
             showError("Invalid game code!");
         } else {
             showLoading("Joining...");
-            sendJoinMessage(gameCode, () -> amongUs.getGuiManager().showPage(new LobbyPage(gameCode)));
+            sendJoinMessage(gameCode, () -> {
+                AmongUs.get().setSession(new ClientSession(gameCode));
+                amongUs.getGuiManager().showPage(new LobbyPage());
+            });
         }
     }
 

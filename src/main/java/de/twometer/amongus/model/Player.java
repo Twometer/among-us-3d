@@ -4,7 +4,7 @@ import org.joml.Vector3f;
 
 import java.util.List;
 
-public class Player {
+public class Player implements PlayerBehavior {
 
     public int id;
 
@@ -12,7 +12,7 @@ public class Player {
 
     public Vector3f position;
 
-    public float location;
+    public float rotation;
 
     public PlayerRole role;
 
@@ -20,4 +20,19 @@ public class Player {
 
     public List<PlayerTask> tasks;
 
+    public int getId() {
+        return id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public PlayerRole getRole() {
+        return role;
+    }
+
+    public PlayerColor getColor() {
+        return color;
+    }
 }

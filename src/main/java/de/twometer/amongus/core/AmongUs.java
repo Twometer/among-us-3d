@@ -1,8 +1,10 @@
 package de.twometer.amongus.core;
 
-import de.twometer.amongus.gui.*;
 import de.twometer.amongus.gui.ApiGui;
+import de.twometer.amongus.gui.LoadingPage;
+import de.twometer.amongus.gui.MainMenuPage;
 import de.twometer.amongus.io.FileSystem;
+import de.twometer.amongus.model.ClientSession;
 import de.twometer.amongus.net.client.NetClient;
 import de.twometer.amongus.util.Config;
 import de.twometer.amongus.util.Scheduler;
@@ -21,6 +23,7 @@ public class AmongUs extends NekoApp {
     private final FileSystem fileSystem = new FileSystem();
     private final NetClient client = new NetClient();
     private UserSettings userSettings;
+    private ClientSession session;
 
     // Singleton
     private static AmongUs instance;
@@ -115,5 +118,13 @@ public class AmongUs extends NekoApp {
 
     public NetClient getClient() {
         return client;
+    }
+
+    public ClientSession getSession() {
+        return session;
+    }
+
+    public void setSession(ClientSession session) {
+        this.session = session;
     }
 }

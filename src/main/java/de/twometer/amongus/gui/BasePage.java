@@ -2,6 +2,7 @@ package de.twometer.amongus.gui;
 
 import com.google.gson.Gson;
 import de.twometer.amongus.core.AmongUs;
+import de.twometer.amongus.model.ClientSession;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.neko.gui.Page;
 
@@ -59,8 +60,10 @@ public abstract class BasePage extends Page {
                         showError("Sorry, your username is already taken.");
                     else if (r.result == NetMessage.SessionJoined.Result.Other)
                         showError("An unknown error occurred joining a session.");
-                    else
+                    else {
                         done.run();
+                        AmongUs.get().getSession().setMyPlayerId(r.playerId);
+                    }
                 }).handleError(this::networkError);
     }
 }

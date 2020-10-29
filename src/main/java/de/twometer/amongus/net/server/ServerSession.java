@@ -1,46 +1,31 @@
 package de.twometer.amongus.net.server;
 
 import de.twometer.amongus.model.PlayerColor;
-import de.twometer.amongus.model.SessionConfig;
+import de.twometer.amongus.model.Session;
 
-public class ServerSession {
-
-    private String gameCode;
-
-    private SessionConfig config;
-
-    private final int host;
+public class ServerSession extends Session<PlayerConnection> {
 
     public ServerSession(String gameCode, int host) {
-        this.gameCode = gameCode;
-        this.host = host;
+        super(gameCode, host);
     }
 
-    public void configure(SessionConfig config) {
-        this.config = config;
-    }
-
-    public void join(PlayerConnection c) {
-        c.session = this;
-    }
-
-    public boolean isColorAvailable(PlayerColor color) {
-        return true;
+    public PlayerColor getRandomFreeColor() {
+        return PlayerColor.Red;
     }
 
     public void broadcast(Object message) {
-
+        for (var player : players)
+            player.sendTCP(message);
     }
 
-    public boolean isFull() {
-        return false;
+    public void handleJoin(PlayerConnection c) {
+        c.session = this;
     }
 
-    public boolean isUsernameTaken(String username) {
-        return false;
+    @Override
+    public void addPlayer(PlayerConnection player) {
+        super.addPlayer(player);
+        player.session = this;
     }
 
-    public int getHost() {
-        return host;
-    }
 }

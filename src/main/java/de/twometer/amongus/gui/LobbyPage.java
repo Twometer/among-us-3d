@@ -1,18 +1,17 @@
 package de.twometer.amongus.gui;
 
+import de.twometer.amongus.core.AmongUs;
+
 public class LobbyPage extends BasePage {
 
-    private String code;
-
-    public LobbyPage(String code) {
+    public LobbyPage() {
         super("Lobby.html");
-        this.code = code;
     }
 
     @Override
     public void onDomReady() {
         super.onDomReady();
-        context.setElementText("gamecode", code);
+        context.setElementText("gamecode", AmongUs.get().getSession().getGameCode());
     }
 
     public void start() {
