@@ -1,5 +1,6 @@
 package de.twometer.amongus.game;
 
+import de.twometer.neko.render.Color;
 import de.twometer.neko.render.model.ModelBase;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -38,6 +39,14 @@ public abstract class GameObject {
     }
 
     public void onClick() {
+    }
+
+    public boolean isHighlighted() {
+        return true;
+    }
+
+    public Color getHighlightColor() {
+        return Color.WHITE;
     }
 
 }

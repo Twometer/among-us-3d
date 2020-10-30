@@ -1,12 +1,14 @@
 package de.twometer.amongus.render;
 
+import de.twometer.neko.api.Dimensions;
 import de.twometer.neko.api.Inject;
 import de.twometer.neko.api.UniformInject;
 import de.twometer.neko.gl.Shader;
 import de.twometer.neko.gl.Uniform;
+import de.twometer.neko.render.Color;
 import org.joml.Matrix4f;
 
-public class PickShader extends Shader {
+public class UnshadedShader extends Shader {
 
     @Inject(UniformInject.ViewMatrix)
     public Uniform<Matrix4f> viewMatrix;
@@ -16,10 +18,11 @@ public class PickShader extends Shader {
 
     public Uniform<Matrix4f> modelMatrix;
 
-    public Uniform<Integer> modelId;
+    @Dimensions(3)
+    public Uniform<Color> color;
 
-    public PickShader() {
-        super("Pick");
+    public UnshadedShader() {
+        super("Unshaded");
     }
 
 }

@@ -1,6 +1,7 @@
 package de.twometer.amongus.render;
 
 import de.twometer.amongus.core.AmongUs;
+import de.twometer.neko.render.Color;
 import de.twometer.neko.render.model.ModelPart;
 import de.twometer.neko.render.shading.IShadingStrategy;
 import de.twometer.neko.res.cache.ShaderProvider;
@@ -19,9 +20,10 @@ public class PickShadingStrategy implements IShadingStrategy {
 
         var tag = modelPart.getTag();
         var id = canInteract ? (int) tag : 0;
-        var shader = shaderProvider.getShader(PickShader.class);
+        var shader = shaderProvider.getShader(UnshadedShader.class);
         shader.bind();
-        shader.modelId.set(id);
+        var id_f = id / 255.0f;
+        shader.color.set(new Color(id_f, 0, 0));
         shader.modelMatrix.set(modelPart.getTransform().getMatrix());
         return true;
     }
