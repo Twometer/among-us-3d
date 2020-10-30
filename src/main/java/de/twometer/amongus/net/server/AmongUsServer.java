@@ -4,13 +4,21 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import de.twometer.amongus.model.PlayerRole;
+import de.twometer.amongus.model.PlayerTask;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.amongus.util.AsyncScheduler;
 import de.twometer.amongus.util.Config;
+import de.twometer.amongus.util.RandomUtil;
 import de.twometer.neko.util.Log;
+import de.twometer.neko.util.MathF;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -28,7 +36,7 @@ public class AmongUsServer extends Listener {
     private final AsyncScheduler scheduler = new AsyncScheduler();
     private final AtomicInteger connectedClients = new AtomicInteger();
     private final AtomicInteger idCounter = new AtomicInteger();
-
+    private final Random random = new Random();
 
     public AmongUsServer() {
         NetMessage.registerAll(server.getKryo());
@@ -139,14 +147,76 @@ public class AmongUsServer extends Listener {
             if (p.session.isColorAvailable(m.newColor)) {
                 p.player.color = m.newColor;
                 p.sendTCP(new NetMessage.ColorChanged(true));
-                p.session.broadcast(new NetMessage.OnPlayerUpdate(
-                        p.player.id,
-                        p.player.color,
-                        p.player.role
-                ));
+                broadcastPlayerUpdate(p);
             } else
                 p.sendTCP(new NetMessage.ColorChanged(false));
         });
+        handlers.register(NetMessage.StartGame.class, (p, m) -> {
+            if (p.session == null) return;
+            if (p.session.getHost() != p.player.id) return;
+
+            // Choose impostors
+            var playerCount = p.session.getPlayers().size();
+            int preferredImpostors = p.session.getConfig().getImpostorCount();
+            int maxImpostors = 3;
+            if (playerCount < 6) maxImpostors = 1;
+            else if (playerCount < 9) maxImpostors = 2;
+
+            var impostors = Math.min(preferredImpostors, maxImpostors);
+            for (var i = 0; i < impostors; i++) {
+                var imp = randomImpostor(p.session);
+                imp.player.role = PlayerRole.Impostor;
+                broadcastPlayerUpdate(imp);
+            }
+
+            // Assign spawn locations
+            var center = new Vector3f(28.09f, 0.0f, -22.46f);
+            var radius = 1.7f;
+            var angleOffset = (2.0f * Math.PI) / playerCount;
+            var angle = 0f;
+            for (var player : p.session.getPlayers()) {
+                var position = new Vector3f(
+                        center.x + MathF.sin(angle) * radius,
+                        center.y,
+                        center.z + MathF.cos(angle) * radius
+                );
+                p.session.broadcast(new NetMessage.PositionChange(player.getId(), position, 0));
+                angle += angleOffset;
+            }
+
+            // Assign tasks and start game
+            var commonTask = TaskGenerator.newCommonTask();
+            for (var player : p.session.getPlayers()) {
+                var list = new ArrayList<PlayerTask>();
+                list.add(commonTask);
+
+                for (var i = 0; i < p.session.getConfig().getShortTasks(); i++)
+                    list.add(TaskGenerator.newShortTask());
+
+                for (var i = 0; i < p.session.getConfig().getLongTasks(); i++)
+                    list.add(TaskGenerator.newLongTask());
+
+                Collections.shuffle(list);
+
+                player.sendTCP(new NetMessage.OnGameStart(list));
+            }
+        });
+    }
+
+    private void broadcastPlayerUpdate(PlayerConnection p) {
+        p.session.broadcast(new NetMessage.OnPlayerUpdate(
+                p.player.id,
+                p.player.color,
+                p.player.role
+        ));
+    }
+
+    private PlayerConnection randomImpostor(ServerSession session) {
+        PlayerConnection player;
+        do {
+            player = RandomUtil.getRandomItem(session.getPlayers());
+        } while (player.player.role == PlayerRole.Impostor); // Don't select impostors twice
+        return player;
     }
 
     private int newId() {

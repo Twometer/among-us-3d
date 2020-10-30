@@ -4,9 +4,12 @@ import java.util.Objects;
 
 public class TaskStage {
 
-    private final Location location;
+    private Location location;
 
-    private final TaskType taskType;
+    private TaskType taskType;
+
+    private TaskStage() {
+    }
 
     public TaskStage(Location location, TaskType taskType) {
         this.location = location;

@@ -2,6 +2,7 @@ package de.twometer.amongus.net.server;
 
 import de.twometer.amongus.model.PlayerColor;
 import de.twometer.amongus.model.Session;
+import de.twometer.amongus.util.RandomUtil;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,7 +19,7 @@ public class ServerSession extends Session<PlayerConnection> {
 
     public void findNewHost() {
         if (getPlayers().size() > 0) {
-            var newHost = getPlayers().get(random.nextInt(getPlayers().size()));
+            var newHost = RandomUtil.getRandomItem(getPlayers());
             setHost(newHost.player.id);
         }
     }

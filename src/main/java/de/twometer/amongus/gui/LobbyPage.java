@@ -26,7 +26,7 @@ public class LobbyPage extends BasePage {
     }
 
     public void start() {
-
+        amongUs.getClient().sendMessage(new NetMessage.StartGame());
     }
 
     public void customize() {
@@ -36,6 +36,11 @@ public class LobbyPage extends BasePage {
     public void disconnect() {
         amongUs.getClient().disconnect();
         amongUs.getGuiManager().showPage(new MainMenuPage());
+    }
+
+    @Subscribe
+    public void onStart(NetMessage.OnGameStart start) {
+        runOnUiThread(() -> amongUs.getGuiManager().showPage(new RoleRevealPage()));
     }
 
     @Subscribe

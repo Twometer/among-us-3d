@@ -1,7 +1,5 @@
 package de.twometer.amongus.gui;
 
-import de.twometer.neko.gui.Page;
-
 public class IngamePage extends BasePage {
 
     public IngamePage() {
@@ -12,4 +10,5 @@ public class IngamePage extends BasePage {
     public boolean isCursorVisible() {
         return false;
     }
+
 }

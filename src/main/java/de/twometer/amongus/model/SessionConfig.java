@@ -9,6 +9,9 @@ public class SessionConfig {
     private int votingTime = 60;
     private boolean confirmEjects = true;
     private int emergencyMeetings = 1;
+    private int commonTasks = 1;
+    private int shortTasks = 2;
+    private int longTasks = 2;
 
     public int getImpostorCount() {
         return impostorCount;
@@ -66,4 +69,27 @@ public class SessionConfig {
         this.emergencyMeetings = emergencyMeetings;
     }
 
+    public int getCommonTasks() {
+        return commonTasks;
+    }
+
+    public void setCommonTasks(int commonTasks) {
+        this.commonTasks = commonTasks;
+    }
+
+    public int getShortTasks() {
+        return shortTasks;
+    }
+
+    public void setShortTasks(int shortTasks) {
+        this.shortTasks = shortTasks;
+    }
+
+    public int getLongTasks() {
+        return longTasks;
+    }
+
+    public void setLongTasks(int longTasks) {
+        this.longTasks = longTasks;
+    }
 }

@@ -1,7 +1,7 @@
 package de.twometer.amongus.model;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class Session<P extends PlayerBehavior> {
 
@@ -9,9 +9,11 @@ public abstract class Session<P extends PlayerBehavior> {
 
     private int host;
 
-    protected final List<P> players = new ArrayList<>();
+    protected final List<P> players = new CopyOnWriteArrayList<>();
 
     private SessionConfig config;
+
+    public float taskProgress;
 
     public Session(String gameCode, int host) {
         this.gameCode = gameCode;

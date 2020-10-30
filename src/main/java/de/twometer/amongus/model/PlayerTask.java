@@ -52,6 +52,11 @@ public class PlayerTask {
 
         private final PlayerTask task = new PlayerTask();
 
+        public Builder addStage(Location location, TaskType type) {
+            addStage(new TaskStage(location, type));
+            return this;
+        }
+
         public Builder addStage(TaskStage stage) {
             task.stages.add(stage);
             return this;

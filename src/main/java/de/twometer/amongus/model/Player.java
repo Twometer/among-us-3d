@@ -20,6 +20,8 @@ public class Player implements PlayerBehavior {
 
     public List<PlayerTask> tasks;
 
+    public boolean alive;
+
     public int getId() {
         return id;
     }
