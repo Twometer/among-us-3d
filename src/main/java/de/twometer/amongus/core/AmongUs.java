@@ -2,11 +2,13 @@ package de.twometer.amongus.core;
 
 import de.twometer.amongus.game.GameObject;
 import de.twometer.amongus.game.GameObjectDecoder;
+import de.twometer.amongus.game.PlayerGameObject;
 import de.twometer.amongus.gui.ApiGui;
 import de.twometer.amongus.gui.LoadingPage;
 import de.twometer.amongus.gui.MainMenuPage;
 import de.twometer.amongus.io.FileSystem;
 import de.twometer.amongus.model.ClientSession;
+import de.twometer.amongus.model.Player;
 import de.twometer.amongus.net.client.NetClient;
 import de.twometer.amongus.physics.CollidingPlayerController;
 import de.twometer.amongus.util.Config;
@@ -22,9 +24,11 @@ import de.twometer.neko.render.overlay.VignetteOverlay;
 import de.twometer.neko.res.ModelLoader;
 import de.twometer.neko.res.TextureLoader;
 import de.twometer.neko.util.Log;
+import org.joml.Vector3f;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class AmongUs extends NekoApp {
@@ -87,6 +91,9 @@ public class AmongUs extends NekoApp {
                 .collect(Collectors.toList());
 
         getScene().addModel(skeld);
+
+        for (var obj : gameObjects)
+            obj.onAdded();
 
         // Sky
         var skyboxCubemap = TextureLoader.loadCubemap("Sky/right.png", "Sky/left.png", "Sky/top.png", "Sky/bottom.png", "Sky/front.png", "Sky/back.png");
@@ -154,5 +161,17 @@ public class AmongUs extends NekoApp {
 
     public void setSession(ClientSession session) {
         this.session = session;
+    }
+
+    public void addGameObject(GameObject object) {
+        gameObjects.add(object);
+        object.onAdded();
+    }
+
+    public void removeGameObjects(Predicate<GameObject> selector) {
+        for (var obj : gameObjects)
+            if (selector.test(obj))
+                obj.onRemoved();
+        gameObjects.removeIf(selector);
     }
 }

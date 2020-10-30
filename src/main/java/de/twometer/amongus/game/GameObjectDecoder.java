@@ -5,7 +5,6 @@ import de.twometer.amongus.model.Location;
 import de.twometer.amongus.model.TaskType;
 import de.twometer.amongus.model.ToolType;
 import de.twometer.neko.render.model.ModelBase;
-import de.twometer.neko.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;

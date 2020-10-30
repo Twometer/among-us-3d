@@ -290,6 +290,11 @@ public final class NetMessage {
         public PositionChange() {
         }
 
+        public PositionChange(Vector3f position, float rotation) {
+            this.position = position;
+            this.rotation = rotation;
+        }
+
         public PositionChange(int playerId, Vector3f position, float rotation) {
             this.playerId = playerId;
             this.position = position;

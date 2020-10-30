@@ -27,6 +27,12 @@ public abstract class GameObject {
 
     public abstract boolean canInteract();
 
+    public void onAdded() {
+    }
+
+    public void onRemoved() {
+    }
+
     public void onUpdate() {
     }
 

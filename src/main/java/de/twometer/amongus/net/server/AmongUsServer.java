@@ -90,7 +90,7 @@ public class AmongUsServer extends Listener {
     @Override
     public void received(Connection c, Object o) {
         var connection = (PlayerConnection) c;
-        Log.d("Incoming message: " + o.toString());
+        //Log.d("Incoming message: " + o.toString());
         handlers.handle(connection, o);
     }
 
@@ -200,6 +200,11 @@ public class AmongUsServer extends Listener {
 
                 player.sendTCP(new NetMessage.OnGameStart(list));
             }
+        });
+        handlers.register(NetMessage.PositionChange.class, (p, m) -> {
+            if (p.session == null) return;
+            m.playerId = p.player.id;
+            p.session.broadcastExcept(m, m.playerId);
         });
     }
 

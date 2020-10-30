@@ -2,7 +2,6 @@ package de.twometer.amongus.game;
 
 import de.twometer.amongus.model.Location;
 import de.twometer.neko.render.model.ModelBase;
-import de.twometer.neko.util.Log;
 
 public class DoorGameObject extends GameObject {
 

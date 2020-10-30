@@ -1,5 +1,7 @@
 package de.twometer.amongus.physics;
 
+import de.twometer.amongus.core.AmongUs;
+import de.twometer.amongus.net.NetMessage;
 import de.twometer.neko.core.IPlayerController;
 import de.twometer.neko.gl.Window;
 import de.twometer.neko.render.Camera;
@@ -53,6 +55,8 @@ public abstract class BasePlayerController implements IPlayerController {
 
         if (camera.getAngle().y > 90) camera.getAngle().y = 90f;
         if (camera.getAngle().y < -90) camera.getAngle().y = -90f;
+
+        AmongUs.get().getClient().sendMessage(new NetMessage.PositionChange(camera.getPosition(), MathF.toRadians(camera.getAngle().x)));
     }
 
     boolean mayFly() {

@@ -22,7 +22,7 @@ public class LobbyPage extends BasePage {
     }
 
     private void updateHost() {
-        context.call("setIsHost", amongUs.getSession().getMyself().getId() == amongUs.getSession().getHost());
+        context.call("setIsHost", amongUs.getSession().getMyPlayerId() == amongUs.getSession().getHost());
     }
 
     public void start() {

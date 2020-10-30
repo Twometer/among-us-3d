@@ -4,6 +4,7 @@ import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import de.twometer.amongus.core.AmongUs;
+import de.twometer.amongus.game.PlayerGameObject;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.amongus.util.Config;
 import de.twometer.neko.event.Events;
@@ -75,6 +76,8 @@ public class NetClient extends Listener {
     public void disconnected(Connection connection) {
         Log.w("Connection lost");
         callbackHandler.failAll();
+        AmongUs.get().setSession(null);
+        AmongUs.get().removeGameObjects(o -> o instanceof PlayerGameObject);
     }
 
     @Override

@@ -1,12 +1,11 @@
 package de.twometer.amongus.net.client;
 
 import de.twometer.amongus.core.AmongUs;
+import de.twometer.amongus.game.PlayerGameObject;
 import de.twometer.amongus.model.ClientSession;
 import de.twometer.amongus.model.Player;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.neko.util.Log;
-
-import javax.xml.crypto.dsig.CanonicalizationMethod;
 
 public class NetHandler {
 
@@ -19,7 +18,7 @@ public class NetHandler {
     }
 
     public void handle(Object o) {
-        Log.d("Received " + o.toString());
+        // Log.d("Received " + o.toString());
         if (o instanceof NetMessage.OnPlayerUpdate) {
             var update = (NetMessage.OnPlayerUpdate) o;
             var player = amongUs.getSession().getPlayer(update.id);
@@ -28,6 +27,7 @@ public class NetHandler {
         } else if (o instanceof NetMessage.OnPlayerLeave) {
             var leave = (NetMessage.OnPlayerLeave) o;
             amongUs.getSession().removePlayer(leave.id);
+            amongUs.removeGameObjects(gameObject -> gameObject instanceof PlayerGameObject && ((PlayerGameObject) gameObject).getTrackedPlayer().id == leave.id);
         } else if (o instanceof NetMessage.OnPlayerJoin) {
             var join = (NetMessage.OnPlayerJoin) o;
             var player = new Player();
@@ -35,13 +35,15 @@ public class NetHandler {
             player.color = join.color;
             player.username = join.username;
             amongUs.getSession().addPlayer(player);
+            if (player.id != amongUs.getSession().getMyPlayerId())
+                amongUs.getScheduler().run(() -> amongUs.addGameObject(new PlayerGameObject(player)));
         } else if (o instanceof NetMessage.PositionChange) {
             var change = (NetMessage.PositionChange) o;
             var player = amongUs.getSession().getPlayer(change.playerId);
             player.position = change.position;
             player.rotation = change.rotation;
 
-            if (player.id == amongUs.getSession().getMyself().getId()) {
+            if (player.id == amongUs.getSession().getMyPlayerId()) {
                 amongUs.getCamera().getPosition().set(player.position);
                 amongUs.getCamera().getAngle().x = player.rotation;
                 Log.d("Server teleported me to " + player.position.x + "|" + player.position.y + "|" + player.position.z);

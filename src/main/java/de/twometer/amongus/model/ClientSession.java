@@ -19,4 +19,8 @@ public class ClientSession extends Session<Player> {
         throw new RuntimeException("Can't find myself.");
     }
 
+    public int getMyPlayerId() {
+        return myPlayerId;
+    }
+
 }

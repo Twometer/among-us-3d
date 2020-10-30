@@ -41,4 +41,10 @@ public class ServerSession extends Session<PlayerConnection> {
             player.sendTCP(message);
     }
 
+    public void broadcastExcept(Object message, int except) {
+        for (var player : players)
+            if (player.player.id != except)
+                player.sendTCP(message);
+    }
+
 }
