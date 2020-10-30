@@ -191,10 +191,12 @@
         }
     }
 
-    function addTask(val) {
+    function addTask(val, state) {
         var elem = document.createElement('p');
         elem.classList.add('task-item');
         elem.innerText = val;
+        if (state == 1) elem.style.color = 'yellow';
+        else if (state == 2) elem.style.color = 'lime';
         taskContainer.appendChild(elem);
         redraw();
     }

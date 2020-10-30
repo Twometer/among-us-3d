@@ -21,6 +21,11 @@ public abstract class BasePage extends Page {
         super(path);
         amongUs = AmongUs.get();
         previous = amongUs.getGuiManager().getCurrentPage();
+    }
+
+    @Override
+    public void onDomReady() {
+        super.onDomReady();
         Events.register(this);
     }
 
