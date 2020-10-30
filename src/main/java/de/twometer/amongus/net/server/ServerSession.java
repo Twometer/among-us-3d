@@ -11,10 +11,16 @@ import java.util.stream.Collectors;
 
 public class ServerSession extends Session<PlayerConnection> {
 
-    private final Random random = new Random();
+    public int tasksFinished;
+    public int totalTasks;
 
     public ServerSession(String gameCode, int host) {
         super(gameCode, host);
+    }
+
+    public float getTaskProgress() {
+        if (totalTasks == 0) return 0;
+        else return tasksFinished / (float) totalTasks;
     }
 
     public void findNewHost() {

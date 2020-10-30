@@ -4,6 +4,7 @@ import de.twometer.amongus.core.AmongUs;
 import de.twometer.amongus.model.Location;
 import de.twometer.amongus.model.PlayerTask;
 import de.twometer.amongus.model.TaskType;
+import de.twometer.amongus.net.NetMessage;
 
 public class TaskPage extends BasePage {
 
@@ -21,6 +22,7 @@ public class TaskPage extends BasePage {
         } else {
             AmongUs.get().getSoundFX().play("TaskProgress.ogg");
         }
+        AmongUs.get().getClient().sendMessage(new NetMessage.CompleteTaskStage());
         close();
     }
 

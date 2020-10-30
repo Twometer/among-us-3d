@@ -198,6 +198,9 @@ public class AmongUsServer extends Listener {
 
                 Collections.shuffle(list);
 
+                if (player.getRole() != PlayerRole.Impostor)
+                    p.session.totalTasks += list.size();
+
                 player.sendTCP(new NetMessage.OnGameStart(list));
             }
         });
@@ -205,6 +208,11 @@ public class AmongUsServer extends Listener {
             if (p.session == null) return;
             m.playerId = p.player.id;
             p.session.broadcastExcept(m, m.playerId);
+        });
+        handlers.register(NetMessage.CompleteTaskStage.class, (p, m) -> {
+            if (p.session == null) return;
+            p.session.tasksFinished ++;
+            p.session.broadcast(new NetMessage.OnTaskProgressChanged(p.session.getTaskProgress()));
         });
     }
 

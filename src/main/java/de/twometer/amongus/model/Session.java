@@ -13,8 +13,6 @@ public abstract class Session<P extends PlayerBehavior> {
 
     private SessionConfig config;
 
-    public float taskProgress;
-
     public Session(String gameCode, int host) {
         this.gameCode = gameCode;
         this.host = host;
