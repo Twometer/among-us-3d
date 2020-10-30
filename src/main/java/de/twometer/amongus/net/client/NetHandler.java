@@ -3,6 +3,7 @@ package de.twometer.amongus.net.client;
 import de.twometer.amongus.core.AmongUs;
 import de.twometer.amongus.game.PlayerGameObject;
 import de.twometer.amongus.model.ClientSession;
+import de.twometer.amongus.model.GameState;
 import de.twometer.amongus.model.Player;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.neko.util.Log;
@@ -62,6 +63,7 @@ public class NetHandler {
         } else if (o instanceof NetMessage.OnGameStart) {
             var myTasks = ((NetMessage.OnGameStart) o).tasks;
             amongUs.getSession().getMyself().tasks = myTasks;
+            amongUs.getStateController().changeState(GameState.Ingame);
             Log.d("Server assigned " + myTasks.size() + " tasks.");
         } else if (o instanceof NetMessage.OnTaskProgressChanged) {
             amongUs.getSession().taskProgress = ((NetMessage.OnTaskProgressChanged) o).progress;

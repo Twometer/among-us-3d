@@ -2,15 +2,14 @@ package de.twometer.amongus.core;
 
 import de.twometer.amongus.game.GameObject;
 import de.twometer.amongus.game.GameObjectDecoder;
-import de.twometer.amongus.game.PlayerGameObject;
 import de.twometer.amongus.gui.ApiGui;
 import de.twometer.amongus.gui.LoadingPage;
 import de.twometer.amongus.gui.MainMenuPage;
 import de.twometer.amongus.io.FileSystem;
 import de.twometer.amongus.model.ClientSession;
-import de.twometer.amongus.model.Player;
 import de.twometer.amongus.net.client.NetClient;
 import de.twometer.amongus.physics.CollidingPlayerController;
+import de.twometer.amongus.render.PickEngine;
 import de.twometer.amongus.util.Config;
 import de.twometer.amongus.util.Scheduler;
 import de.twometer.amongus.util.UserSettings;
@@ -24,7 +23,6 @@ import de.twometer.neko.render.overlay.VignetteOverlay;
 import de.twometer.neko.res.ModelLoader;
 import de.twometer.neko.res.TextureLoader;
 import de.twometer.neko.util.Log;
-import org.joml.Vector3f;
 
 import java.util.List;
 import java.util.Objects;
@@ -37,6 +35,7 @@ public class AmongUs extends NekoApp {
     private final StateController stateController = new StateController();
     private final Scheduler scheduler = new Scheduler();
     private final FileSystem fileSystem = new FileSystem();
+    private final PickEngine pickEngine = new PickEngine();
     private List<GameObject> gameObjects;
     private NetClient client;
     private UserSettings userSettings;
@@ -95,6 +94,9 @@ public class AmongUs extends NekoApp {
         for (var obj : gameObjects)
             obj.onAdded();
 
+        // Services
+        pickEngine.initialize();
+
         // Sky
         var skyboxCubemap = TextureLoader.loadCubemap("Sky/right.png", "Sky/left.png", "Sky/top.png", "Sky/bottom.png", "Sky/front.png", "Sky/back.png");
         getScene().getSkybox().setActive(true);
@@ -119,6 +121,13 @@ public class AmongUs extends NekoApp {
         scheduler.update();
         for (var obj : gameObjects)
             obj.onUpdate();
+    }
+
+    @Override
+    protected void onRender() {
+        super.onRender();
+        if (stateController.isRunning())
+            pickEngine.render();
     }
 
     public void reloadFxConfig() {
@@ -173,5 +182,9 @@ public class AmongUs extends NekoApp {
             if (selector.test(obj))
                 obj.onRemoved();
         gameObjects.removeIf(selector);
+    }
+
+    public List<GameObject> getGameObjects() {
+        return gameObjects;
     }
 }

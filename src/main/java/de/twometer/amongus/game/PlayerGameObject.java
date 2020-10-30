@@ -46,7 +46,7 @@ public class PlayerGameObject extends GameObject {
 
     @Override
     public void onRemoved() {
-        //AmongUs.get().getScene().removeModel(baseModel);
+        AmongUs.get().getScene().removeModel(baseModel);
     }
 
     @Override

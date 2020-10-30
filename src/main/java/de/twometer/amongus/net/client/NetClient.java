@@ -5,6 +5,8 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import de.twometer.amongus.core.AmongUs;
 import de.twometer.amongus.game.PlayerGameObject;
+import de.twometer.amongus.gui.MainMenuPage;
+import de.twometer.amongus.model.GameState;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.amongus.util.Config;
 import de.twometer.neko.event.Events;
@@ -78,6 +80,8 @@ public class NetClient extends Listener {
         callbackHandler.failAll();
         AmongUs.get().setSession(null);
         AmongUs.get().removeGameObjects(o -> o instanceof PlayerGameObject);
+        AmongUs.get().getStateController().changeState(GameState.Menus);
+        AmongUs.get().getScheduler().run(() -> AmongUs.get().getGuiManager().showPage(new MainMenuPage()));
     }
 
     @Override

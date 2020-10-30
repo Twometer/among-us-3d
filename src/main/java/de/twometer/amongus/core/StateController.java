@@ -16,6 +16,9 @@ public class StateController {
         return state;
     }
 
+    public boolean isRunning() {
+        return state == GameState.Ingame;
+    }
 
     private void handleChange(GameState prev, GameState next) {
 

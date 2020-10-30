@@ -17,7 +17,7 @@ public class TaskGameObject extends GameObject {
 
     @Override
     public boolean canInteract() {
-        return false;
+        return true;
     }
 
 }

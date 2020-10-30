@@ -15,6 +15,7 @@ public abstract class GameObject {
     public GameObject(ModelBase model) {
         this.id = idCounter.incrementAndGet();
         this.model = model;
+        this.model.setTag(id);
     }
 
     public int getId() {

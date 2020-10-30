@@ -1,5 +1,7 @@
 package de.twometer.amongus.gui;
 
+import de.twometer.amongus.core.AmongUs;
+import de.twometer.amongus.model.GameState;
 import de.twometer.amongus.net.NetMessage;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -17,6 +19,8 @@ public class LobbyPage extends BasePage {
         for (var player : amongUs.getSession().getPlayers()) {
             addPlayer(player.id, player.username, player.color.name());
         }
+
+        AmongUs.get().getStateController().changeState(GameState.Lobby);
 
         updateHost();
     }
