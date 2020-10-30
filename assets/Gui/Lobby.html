@@ -51,25 +51,6 @@
 <h1>Game Code: <span id="gamecode"></span></h1>
 <div class="container" style="height: 75%;display: flex;flex-flow:column;justify-content: space-between">
     <div class="player-items" id="playerContainer">
-        <!--
-        <div class="player-item">
-            <img class="player-icon" src="img/PlayerIcon.png">
-            <div class="player-item-header">xxxxxxxxxxxxx</div>
-        </div>
-        <div class="player-item">
-            <img class="player-icon" src="img/PlayerIcon.png">
-            <div class="player-item-header">xxxxxxxxxxxxx</div>
-        </div>
-        <div class="player-item">
-            <img class="player-icon" src="img/PlayerIcon.png">
-            <div class="player-item-header">xxxxxxxxxxxxx</div>
-        </div>
-        <div class="player-item">
-            <img class="player-icon" src="img/PlayerIcon.png">
-            <div class="player-item-header">xxxxxxxxxxxxx</div>
-        </div>
--->
-
     </div>
     <div class="button-panel">
         <button onclick="_remote.start()" id="startBtn">Start</button>
@@ -89,7 +70,7 @@
     function addPlayer(id, username, color) {
         var item = document.createElement('div');
         item.classList.add('player-item');
-        item.innerHTML = '<img class="player-icon" src="img/PlayerIcon.png"><div class="player-item-header">' + username + '</div>'
+        item.innerHTML = '<img class="player-icon" src="img/PlayerIcon/' + color + '.png"><div class="player-item-header">' + username + '</div>'
         item.setAttribute('id', id);
         container.appendChild(item);
     }
