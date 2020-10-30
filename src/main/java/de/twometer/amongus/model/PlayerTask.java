@@ -81,4 +81,19 @@ public class PlayerTask {
 
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (!(obj instanceof PlayerTask)) return false;
+
+        var other = (PlayerTask) obj;
+        if (other.stages.size() != stages.size()) return false;
+
+        for (var i = 0; i < stages.size(); i++) {
+            if (!other.stages.get(i).equals(stages.get(i)))
+                return false;
+        }
+
+        return true;
+    }
 }

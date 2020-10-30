@@ -3,8 +3,11 @@ package de.twometer.amongus.net.server;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
+import de.twometer.amongus.game.TaskGameObject;
+import de.twometer.amongus.model.Player;
 import de.twometer.amongus.model.PlayerRole;
 import de.twometer.amongus.model.PlayerTask;
+import de.twometer.amongus.model.SessionConfig;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.amongus.util.AsyncScheduler;
 import de.twometer.amongus.util.Config;
@@ -15,12 +18,10 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 public class AmongUsServer extends Listener {
 
@@ -189,12 +190,7 @@ public class AmongUsServer extends Listener {
             for (var player : p.session.getPlayers()) {
                 var list = new ArrayList<PlayerTask>();
                 list.add(commonTask);
-
-                for (var i = 0; i < p.session.getConfig().getShortTasks(); i++)
-                    list.add(TaskGenerator.newShortTask());
-
-                for (var i = 0; i < p.session.getConfig().getLongTasks(); i++)
-                    list.add(TaskGenerator.newLongTask());
+                generateTasks(list, p.session.getConfig());
 
                 Collections.shuffle(list);
 
@@ -214,6 +210,30 @@ public class AmongUsServer extends Listener {
             p.session.tasksFinished ++;
             p.session.broadcast(new NetMessage.OnTaskProgressChanged(p.session.getTaskProgress()));
         });
+    }
+
+    private void generateTasks(List<PlayerTask> list, SessionConfig config) {
+        for (var i = 0; i < config.getShortTasks(); i++) {
+            PlayerTask shortTask = generate(list, TaskGenerator::newShortTask);
+            list.add(shortTask);
+        }
+
+        for (var i = 0; i < config.getLongTasks(); i++) {
+            PlayerTask longTask = generate(list, TaskGenerator::newLongTask);
+            list.add(longTask);
+        }
+    }
+
+    private <T> T generate(List<T> list, Supplier<T> supplier) {
+        T t;
+        var tries = 0;
+        do {
+            t = supplier.get();
+            tries++;
+            if (tries > 25)
+                throw new IllegalStateException("Exceeded random tries.");
+        } while (list.contains(t));
+        return t;
     }
 
     private void broadcastPlayerUpdate(PlayerConnection p) {
