@@ -47,6 +47,13 @@ public class PlayerTask {
         Completed
     }
 
+    @Override
+    public String toString() {
+        var lastStage = stages.get(stages.size() - 1);
+        var nextStage = getNextStage();
+        var renderStage = nextStage == null ? lastStage : nextStage;
+        return renderStage.getLocation() + ": " + renderStage.getTaskType();
+    }
 
     public static class Builder {
 

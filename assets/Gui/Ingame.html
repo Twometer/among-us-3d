@@ -52,8 +52,9 @@
             top: 23px;
             left: 23px;
             height: 34px;
-            width: 381px; /* Max width: 762 */
+            width: 0; /* Max width: 762 */
             background: #72D65B;
+            transition: width .5s;
         }
 
         .taskbar-text {
@@ -77,7 +78,7 @@
             padding: 14px;
         }
 
-        .taskmanager > p {
+        .taskmanager p {
             padding: 0;
             margin: 4px 4px;
         }
@@ -93,7 +94,17 @@
             right: 0;
             left: 0;
             bottom: 0;
-            background: #ff000035;
+            background: #ff000045;
+            display: none;
+        }
+
+        #redraw-overlay {
+            z-index: 16;
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            bottom: 0;
             display: none;
         }
 
@@ -108,17 +119,21 @@
 <body>
 
 <img class="taskbar" src="img/Taskbar.png">
-<div class="taskbar-fill-state"></div>
+<div class="taskbar-fill-state" id="progress"></div>
 <div class="taskbar-text">Task progress</div>
-<div class="taskmanager">
-    <p>Cafeteria: Fix wiring</p>
+<div class="taskmanager" id="task-main">
+    <div id="task-container">
+
+    </div>
+    <!--<p>Cafeteria: Fix wiring</p>
     <p>Storage: Refuel Engines (0/2)</p>
     <p>Comms: Download Data</p>
-    <p>Admin: Swipe card</p>
-    <p id="sabotage" class="sabotage">Fix lights</p>
+    <p>Admin: Swipe card</p>-->
+    <p id="sabotage" class="sabotage"></p>
 </div>
 
 <div id="alarm-overlay"></div>
+<div id="redraw-overlay"></div>
 <img class="chair" src="img/Crosshair.png">
 
 <div class="actions-panel">
@@ -147,14 +162,68 @@
 </body>
 
 <script>
-    var _AlarmRunning = false;
+    var sabotageContainer = document.getElementById('sabotage');
+    var taskContainer = document.getElementById('task-container');
+    var progress = document.getElementById('progress');
 
     var blinkstate = false;
-    setInterval(() => {
-        if (!_AlarmRunning)
-            return;
-        document.getElementById('alarm-overlay').style.display = blinkstate ? 'block' : 'none';
-        blinkstate = !blinkstate;
-    }, 1000);
+    var alarmInterval = 0;
+
+    var alarmFunc = () => {
+                document.getElementById('alarm-overlay').style.display = blinkstate ? 'block' : 'none';
+                blinkstate = !blinkstate;
+                if (!blinkstate)
+                    _api.playSound('Alarm.ogg');
+            };
+
+    function setTasksVisible(v) {
+        document.getElementById('task-main').style.display = (v ? 'block' : 'none');
+        redraw();
+    }
+
+    function setAlarm(alarm) {
+        if (alarm) {
+            alarmInterval = setInterval(alarmFunc, 1000);
+            blinkstate = true;
+            alarmFunc();
+        } else {
+            clearInterval(alarmInterval);
+        }
+    }
+
+    function addTask(val) {
+        var elem = document.createElement('p');
+        elem.classList.add('task-item');
+        elem.innerText = val;
+        taskContainer.appendChild(elem);
+        redraw();
+    }
+
+    function setTask(idx, val) {
+        var clazzes = document.getElementsByClassName('task-item');
+        clazzes[idx].innerText = val;
+        redraw();
+    }
+
+    function setSabotage(sab) {
+        if (sab == null || sab == '') {
+            sabotageContainer.style.display = 'none';
+        } else {
+            sabotageContainer.style.display = 'block';
+        }
+        sabotageContainer.innerText = sab;
+        redraw();
+    }
+
+    function setTaskProgress(p) {
+        var w = 762 * p;
+        progress.style.width = w;
+        redraw();
+    }
+
+    function redraw() {
+        document.getElementById('redraw-overlay').style.display = 'block';
+        setTimeout(() => { document.getElementById('redraw-overlay').style.display = 'none'; }, 1);
+    }
 </script>
 </html>
