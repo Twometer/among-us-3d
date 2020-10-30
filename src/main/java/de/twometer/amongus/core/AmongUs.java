@@ -14,6 +14,7 @@ import de.twometer.amongus.util.Config;
 import de.twometer.amongus.util.Scheduler;
 import de.twometer.amongus.util.UserSettings;
 import de.twometer.neko.core.NekoApp;
+import de.twometer.neko.event.MouseClickedEvent;
 import de.twometer.neko.render.filter.FrustumCullingFilter;
 import de.twometer.neko.render.light.LightSource;
 import de.twometer.neko.render.model.CompositeModel;
@@ -23,11 +24,12 @@ import de.twometer.neko.render.overlay.VignetteOverlay;
 import de.twometer.neko.res.ModelLoader;
 import de.twometer.neko.res.TextureLoader;
 import de.twometer.neko.util.Log;
+import org.greenrobot.eventbus.Subscribe;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class AmongUs extends NekoApp {
 
@@ -83,16 +85,14 @@ public class AmongUs extends NekoApp {
                 .forEach(m -> getScene().addLight(new LightSource(m.getCenter())));
 
         var decoder = new GameObjectDecoder();
-        gameObjects = skeld.streamTree()
+        gameObjects = new ArrayList<>();
+        skeld.streamTree()
                 .filter(m -> m instanceof CompositeModel)
                 .map(decoder::decode)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .forEach(this::addGameObject);
 
         getScene().addModel(skeld);
-
-        for (var obj : gameObjects)
-            obj.onAdded();
 
         // Services
         pickEngine.initialize();
@@ -128,6 +128,12 @@ public class AmongUs extends NekoApp {
         super.onRender();
         if (stateController.isRunning())
             pickEngine.render();
+    }
+
+    @Subscribe
+    public void onClick(MouseClickedEvent event) {
+        var clicked = pickEngine.getHoveringId();
+        Log.i("Clicked on: " + clicked);
     }
 
     public void reloadFxConfig() {

@@ -1,10 +1,12 @@
 package de.twometer.amongus.game;
 
+import de.twometer.amongus.core.AmongUs;
 import de.twometer.amongus.model.AnimationType;
 import de.twometer.amongus.model.Location;
 import de.twometer.amongus.model.TaskType;
 import de.twometer.amongus.model.ToolType;
 import de.twometer.neko.render.model.ModelBase;
+import de.twometer.neko.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +32,18 @@ public class GameObjectDecoder {
             case "TASK": {
                 var location = Location.valueOf(args[0]);
                 var taskType = TaskType.valueOf(args[1]);
+                var subtype = args[2];
+                if (subtype.equalsIgnoreCase("FX")) {
+                    for (var obj : AmongUs.get().getGameObjects()) {
+                        if (obj instanceof TaskGameObject) {
+                            var task = (TaskGameObject) obj;
+                            if (task.getLocation() == location && task.getTaskType() == taskType) {
+                                model.setTag(obj.getId());
+                            }
+                        }
+                    }
+                    return null;
+                }
                 return new TaskGameObject(model, location, taskType);
             }
             case "VENT": {

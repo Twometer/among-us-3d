@@ -20,4 +20,11 @@ public class TaskGameObject extends GameObject {
         return true;
     }
 
+    public Location getLocation() {
+        return location;
+    }
+
+    public TaskType getTaskType() {
+        return taskType;
+    }
 }

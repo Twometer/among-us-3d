@@ -4,7 +4,6 @@ import de.twometer.amongus.core.AmongUs;
 import de.twometer.neko.event.Events;
 import de.twometer.neko.event.SizeChangedEvent;
 import de.twometer.neko.gl.Framebuffer;
-import de.twometer.neko.util.Log;
 import org.greenrobot.eventbus.Subscribe;
 import org.lwjgl.BufferUtils;
 
