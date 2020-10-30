@@ -31,6 +31,7 @@ public class IngamePage extends BasePage {
         for (var task : amongUs.getSession().getMyself().tasks) {
             var state = task.getProgress() == 0 ? 0 : 1;
             if (task.isCompleted()) state = 2;
+
             context.call("addTask", task.toString(), state);
         }
     }

@@ -1,5 +1,7 @@
 package de.twometer.amongus.model;
 
+import de.twometer.amongus.gui.TaskFormatter;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,8 +29,12 @@ public class PlayerTask {
     }
 
     public TaskStage getNextStage() {
-        if (progress >= stages.size()) return null;
+        if (progress >= stages.size()) return getLastStage();
         return stages.get(progress);
+    }
+
+    public TaskStage getLastStage() {
+        return stages.get(stages.size() - 1);
     }
 
     public void advance() {
@@ -37,9 +43,12 @@ public class PlayerTask {
     }
 
     public boolean isMultiStage() {
-        return stages.size() > 0;
+        return stages.size() > 1;
     }
 
+    public int length() {
+        return stages.size();
+    }
 
     public enum State {
         NotStarted,
@@ -49,10 +58,7 @@ public class PlayerTask {
 
     @Override
     public String toString() {
-        var lastStage = stages.get(stages.size() - 1);
-        var nextStage = getNextStage();
-        var renderStage = nextStage == null ? lastStage : nextStage;
-        return renderStage.getLocation() + ": " + renderStage.getTaskType();
+        return TaskFormatter.format(this);
     }
 
     public static class Builder {

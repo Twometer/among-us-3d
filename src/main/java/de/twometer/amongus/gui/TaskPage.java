@@ -11,7 +11,7 @@ public class TaskPage extends BasePage {
 
     public TaskPage(Location location, TaskType taskType) {
         super("Tasks/" + taskType.name() + ".html");
-        this.task = AmongUs.get().getSession().getMyself().findTaskByStage(location, taskType);
+        this.task = AmongUs.get().getSession().getMyself().findRunningTaskByStage(location, taskType);
     }
 
     public void taskComplete() {
