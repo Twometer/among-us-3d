@@ -2,6 +2,7 @@ package de.twometer.amongus.game;
 
 import de.twometer.amongus.core.AmongUs;
 import de.twometer.amongus.model.Player;
+import de.twometer.amongus.render.PlayerShadingStrategy;
 import de.twometer.neko.render.model.ModelBase;
 import de.twometer.neko.render.model.ModelInstance;
 import de.twometer.neko.res.ModelLoader;
@@ -13,9 +14,13 @@ public class PlayerGameObject extends GameObject {
 
     private final Player trackedPlayer;
 
+    private final PlayerShadingStrategy shadingStrategy;
+
     public PlayerGameObject(Player trackedPlayer) {
         super(newModelInstance());
+        shadingStrategy = new PlayerShadingStrategy(trackedPlayer);
         getModel().setCascadeTransforms(true);
+        getModel().overwriteShadingStrategy(shadingStrategy);
         this.trackedPlayer = trackedPlayer;
     }
 
