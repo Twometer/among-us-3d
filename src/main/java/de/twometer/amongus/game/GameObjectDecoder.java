@@ -80,6 +80,9 @@ public class GameObjectDecoder {
                 var type = ToolType.valueOf(args[1]);
                 return new ToolGameObject(model, location, type);
             }
+            case "STATIC": {
+                return new StaticGameObject(model);
+            }
         }
 
         return null;

@@ -37,4 +37,15 @@ public class Player implements PlayerBehavior {
     public PlayerColor getColor() {
         return color;
     }
+
+    public boolean canDoTask(Location location, TaskType taskType) {
+        for (var task : tasks) {
+            var stage = task.getNextStage();
+            if (stage == null) continue;
+            if (stage.getTaskType() == taskType && stage.getLocation() == location)
+                return true;
+        }
+        return false;
+    }
+
 }

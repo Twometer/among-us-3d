@@ -9,6 +9,7 @@ import de.twometer.amongus.io.FileSystem;
 import de.twometer.amongus.model.ClientSession;
 import de.twometer.amongus.net.client.NetClient;
 import de.twometer.amongus.physics.CollidingPlayerController;
+import de.twometer.amongus.render.HighlightEngine;
 import de.twometer.amongus.render.PickEngine;
 import de.twometer.amongus.util.Config;
 import de.twometer.amongus.util.Scheduler;
@@ -38,6 +39,7 @@ public class AmongUs extends NekoApp {
     private final Scheduler scheduler = new Scheduler();
     private final FileSystem fileSystem = new FileSystem();
     private final PickEngine pickEngine = new PickEngine();
+    private final HighlightEngine highlightEngine = new HighlightEngine();
     private List<GameObject> gameObjects;
     private NetClient client;
     private UserSettings userSettings;
@@ -96,6 +98,7 @@ public class AmongUs extends NekoApp {
 
         // Services
         pickEngine.initialize();
+        highlightEngine.initialize();
 
         // Sky
         var skyboxCubemap = TextureLoader.loadCubemap("Sky/right.png", "Sky/left.png", "Sky/top.png", "Sky/bottom.png", "Sky/front.png", "Sky/back.png");
@@ -126,8 +129,10 @@ public class AmongUs extends NekoApp {
     @Override
     protected void onRender() {
         super.onRender();
-        if (stateController.isRunning())
+        if (stateController.isRunning()) {
             pickEngine.render();
+            highlightEngine.render();
+        }
     }
 
     @Subscribe
@@ -192,5 +197,9 @@ public class AmongUs extends NekoApp {
 
     public List<GameObject> getGameObjects() {
         return gameObjects;
+    }
+
+    public PickEngine getPickEngine() {
+        return pickEngine;
     }
 }

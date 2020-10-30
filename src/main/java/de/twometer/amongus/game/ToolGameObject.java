@@ -20,4 +20,9 @@ public class ToolGameObject extends GameObject {
         return true;
     }
 
+    @Override
+    public boolean isHighlighted() {
+        return isMouseOver();
+    }
+
 }

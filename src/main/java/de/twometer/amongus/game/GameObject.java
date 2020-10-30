@@ -1,5 +1,6 @@
 package de.twometer.amongus.game;
 
+import de.twometer.amongus.core.AmongUs;
 import de.twometer.neko.render.Color;
 import de.twometer.neko.render.model.ModelBase;
 
@@ -42,11 +43,15 @@ public abstract class GameObject {
     }
 
     public boolean isHighlighted() {
-        return true;
+        return false;
     }
 
     public Color getHighlightColor() {
-        return Color.WHITE;
+        return isMouseOver() ? new Color(1, 1, 0, 0.65f) : new Color(1, 1, 1, 0.55f);
+    }
+
+    public boolean isMouseOver() {
+        return AmongUs.get().getPickEngine().getHoveringId() == id;
     }
 
 }

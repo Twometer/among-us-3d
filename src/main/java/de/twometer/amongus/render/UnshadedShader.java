@@ -18,7 +18,7 @@ public class UnshadedShader extends Shader {
 
     public Uniform<Matrix4f> modelMatrix;
 
-    @Dimensions(3)
+    @Dimensions(4)
     public Uniform<Color> color;
 
     public UnshadedShader() {
