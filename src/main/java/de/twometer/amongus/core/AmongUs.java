@@ -1,5 +1,7 @@
 package de.twometer.amongus.core;
 
+import de.twometer.amongus.game.GameObject;
+import de.twometer.amongus.game.GameObjectDecoder;
 import de.twometer.amongus.gui.ApiGui;
 import de.twometer.amongus.gui.LoadingPage;
 import de.twometer.amongus.gui.MainMenuPage;
@@ -13,6 +15,7 @@ import de.twometer.amongus.util.UserSettings;
 import de.twometer.neko.core.NekoApp;
 import de.twometer.neko.render.filter.FrustumCullingFilter;
 import de.twometer.neko.render.light.LightSource;
+import de.twometer.neko.render.model.CompositeModel;
 import de.twometer.neko.render.model.ModelPart;
 import de.twometer.neko.render.overlay.FXAAOverlay;
 import de.twometer.neko.render.overlay.VignetteOverlay;
@@ -20,12 +23,17 @@ import de.twometer.neko.res.ModelLoader;
 import de.twometer.neko.res.TextureLoader;
 import de.twometer.neko.util.Log;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 public class AmongUs extends NekoApp {
 
     // Game services
     private final StateController stateController = new StateController();
     private final Scheduler scheduler = new Scheduler();
     private final FileSystem fileSystem = new FileSystem();
+    private List<GameObject> gameObjects;
     private NetClient client;
     private UserSettings userSettings;
     private ClientSession session;
@@ -70,6 +78,14 @@ public class AmongUs extends NekoApp {
         skeld.streamTree()
                 .filter(m -> m instanceof ModelPart && m.getName().contains("Luces"))
                 .forEach(m -> getScene().addLight(new LightSource(m.getCenter())));
+
+        var decoder = new GameObjectDecoder();
+        gameObjects = skeld.streamTree()
+                .filter(m -> m instanceof CompositeModel)
+                .map(decoder::decode)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
         getScene().addModel(skeld);
 
         // Sky
@@ -94,6 +110,8 @@ public class AmongUs extends NekoApp {
     protected void onTick() {
         super.onTick();
         scheduler.update();
+        for (var obj : gameObjects)
+            obj.onUpdate();
     }
 
     public void reloadFxConfig() {
