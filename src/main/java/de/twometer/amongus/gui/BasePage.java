@@ -2,12 +2,12 @@ package de.twometer.amongus.gui;
 
 import com.google.gson.Gson;
 import de.twometer.amongus.core.AmongUs;
-import de.twometer.amongus.model.ClientSession;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.neko.event.Events;
+import de.twometer.neko.event.KeyPressedEvent;
 import de.twometer.neko.gui.Page;
-import de.twometer.neko.util.Log;
-import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.lwjgl.glfw.GLFW;
 
 public abstract class BasePage extends Page {
 
@@ -21,10 +21,10 @@ public abstract class BasePage extends Page {
         super(path);
         amongUs = AmongUs.get();
         previous = amongUs.getGuiManager().getCurrentPage();
-        if (usesEvents()) Events.register(this);
+        Events.register(this);
     }
 
-    protected boolean usesEvents() {
+    protected boolean escapeGoesBack() {
         return false;
     }
 
@@ -36,7 +36,7 @@ public abstract class BasePage extends Page {
     public void onUnload() {
         super.onUnload();
         ApiGui.reset();
-        if (usesEvents()) Events.unregister(this);
+        Events.unregister(this);
     }
 
     protected final void showLoading(String msg) {
@@ -77,5 +77,12 @@ public abstract class BasePage extends Page {
 
     protected final void runOnUiThread(Runnable runnable) {
         AmongUs.get().getScheduler().run(runnable);
+    }
+
+    @Subscribe
+    public void onKeyPress(KeyPressedEvent e) {
+        if (e.key == GLFW.GLFW_KEY_ESCAPE && escapeGoesBack()) {
+            goBack();
+        }
     }
 }

@@ -66,8 +66,4 @@ public class LobbyPage extends BasePage {
         context.call("addPlayer", id, username, color);
     }
 
-    @Override
-    protected boolean usesEvents() {
-        return true;
-    }
 }

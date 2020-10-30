@@ -1,5 +1,7 @@
 package de.twometer.amongus.game;
 
+import de.twometer.amongus.core.AmongUs;
+import de.twometer.amongus.gui.CallMeetingPage;
 import de.twometer.amongus.model.Location;
 import de.twometer.amongus.model.ToolType;
 import de.twometer.neko.render.model.ModelBase;
@@ -21,8 +23,10 @@ public class ToolGameObject extends GameObject {
     }
 
     @Override
-    public boolean isHighlighted() {
-        return isMouseOver();
+    public void onClick() {
+        super.onClick();
+        if (toolType == ToolType.Emergency) {
+            AmongUs.get().getGuiManager().showPage(new CallMeetingPage());
+        }
     }
-
 }

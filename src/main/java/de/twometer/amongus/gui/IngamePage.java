@@ -40,10 +40,5 @@ public class IngamePage extends BasePage {
         }
     }
 
-    @Override
-    protected boolean usesEvents() {
-        return true;
-    }
-
 }
 

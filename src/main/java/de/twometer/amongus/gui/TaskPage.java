@@ -18,4 +18,8 @@ public class TaskPage extends BasePage {
         AmongUs.get().getScheduler().runLater(800, this::goBack);
     }
 
+    @Override
+    protected boolean escapeGoesBack() {
+        return true;
+    }
 }

@@ -3,6 +3,7 @@ package de.twometer.amongus.core;
 import de.twometer.amongus.game.GameObject;
 import de.twometer.amongus.game.GameObjectDecoder;
 import de.twometer.amongus.gui.ApiGui;
+import de.twometer.amongus.gui.IngamePage;
 import de.twometer.amongus.gui.LoadingPage;
 import de.twometer.amongus.gui.MainMenuPage;
 import de.twometer.amongus.io.FileSystem;
@@ -137,8 +138,18 @@ public class AmongUs extends NekoApp {
 
     @Subscribe
     public void onClick(MouseClickedEvent event) {
+        if (!stateController.isRunning()) return;
+        if (!(getGuiManager().getCurrentPage() instanceof IngamePage))
+            return;
+
         var clicked = pickEngine.getHoveringId();
-        Log.i("Clicked on: " + clicked);
+        for (var obj : gameObjects)
+            if (obj.getId() == clicked) {
+                if (!obj.canInteract())
+                    return;
+                obj.onClick();
+                return;
+            }
     }
 
     public void reloadFxConfig() {

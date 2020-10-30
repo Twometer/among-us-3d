@@ -43,7 +43,7 @@ public abstract class GameObject {
     }
 
     public boolean isHighlighted() {
-        return false;
+        return canInteract() && isMouseOver();
     }
 
     public Color getHighlightColor() {

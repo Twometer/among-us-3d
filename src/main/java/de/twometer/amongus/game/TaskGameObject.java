@@ -1,6 +1,7 @@
 package de.twometer.amongus.game;
 
 import de.twometer.amongus.core.AmongUs;
+import de.twometer.amongus.gui.TaskPage;
 import de.twometer.amongus.model.Location;
 import de.twometer.amongus.model.TaskType;
 import de.twometer.neko.render.model.ModelBase;
@@ -18,7 +19,7 @@ public class TaskGameObject extends GameObject {
 
     @Override
     public boolean canInteract() {
-        return true;
+        return AmongUs.get().getSession().getMyself().canDoTask(location, taskType);
     }
 
     public Location getLocation() {
@@ -31,10 +32,13 @@ public class TaskGameObject extends GameObject {
 
     @Override
     public boolean isHighlighted() {
-        return canBeDone();
+        return canInteract();
     }
 
-    private boolean canBeDone() {
-        return AmongUs.get().getSession().getMyself().canDoTask(location, taskType);
+    @Override
+    public void onClick() {
+        super.onClick();
+        AmongUs.get().getGuiManager().showPage(new TaskPage(taskType));
     }
+
 }
