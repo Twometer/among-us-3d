@@ -21,12 +21,6 @@ public enum TaskType {
     UnlockManifold,
     StartReactor,
 
-    // Sabotages
-    FixLights,
-    FixComms,
-    FixO2Depletion,
-    FixMeltdown,
-
     // Navigation
     StabilizeSteering,
     ChartCourse,

@@ -1,16 +1,26 @@
 package de.twometer.amongus.gui;
 
 import de.twometer.amongus.core.AmongUs;
+import de.twometer.amongus.model.Location;
+import de.twometer.amongus.model.PlayerTask;
 import de.twometer.amongus.model.TaskType;
 
 public class TaskPage extends BasePage {
 
-    public TaskPage(TaskType taskType) {
+    private final PlayerTask task;
+
+    public TaskPage(Location location, TaskType taskType) {
         super("Tasks/" + taskType.name() + ".html");
+        this.task = AmongUs.get().getSession().getMyself().findTaskByStage(location, taskType);
     }
 
     public void taskComplete() {
-        AmongUs.get().getSoundFX().play("TaskComplete.ogg");
+        task.advance();
+        if (task.isCompleted()) {
+            AmongUs.get().getSoundFX().play("TaskComplete.ogg");
+        } else {
+            AmongUs.get().getSoundFX().play("TaskProgress.ogg");
+        }
         close();
     }
 

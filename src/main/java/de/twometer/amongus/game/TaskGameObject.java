@@ -38,7 +38,7 @@ public class TaskGameObject extends GameObject {
     @Override
     public void onClick() {
         super.onClick();
-        AmongUs.get().getGuiManager().showPage(new TaskPage(taskType));
+        AmongUs.get().getGuiManager().showPage(new TaskPage(location, taskType));
     }
 
 }

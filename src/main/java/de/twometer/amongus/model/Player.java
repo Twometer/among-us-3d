@@ -39,13 +39,17 @@ public class Player implements PlayerBehavior {
     }
 
     public boolean canDoTask(Location location, TaskType taskType) {
+        return findTaskByStage(location, taskType) != null;
+    }
+
+    public PlayerTask findTaskByStage(Location location, TaskType taskType) {
         for (var task : tasks) {
             var stage = task.getNextStage();
             if (stage == null) continue;
             if (stage.getTaskType() == taskType && stage.getLocation() == location)
-                return true;
+                return task;
         }
-        return false;
+        return null;
     }
 
 }

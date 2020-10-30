@@ -1,0 +1,74 @@
+<html>
+<head>
+    <link rel="stylesheet" href="styles/base.css">
+    <style>
+        #input {
+            font-family: "Dot Matrix";
+            color: white;
+            font-size: 40px;
+        }
+        #todayscode {
+            font-family: "Indie Flower";
+            transform: translate(350px, 105px) rotateZ(-28deg) ;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img class="abs background" src="img/admin_keypad_base.png">
+    <img class="abs" src="img/admin_keypad_note.png" r="-177" t="48">
+    <div class="abs" id="input" t="50" l="70"></div>
+    <div class="abs" id="todayscode">today's code:<br><span id="codeval">xxxxx</span></div>
+    <div class="btn abs" l="57" t="122" v="1" style="width: 82px;height:82px;"></div>
+    <div class="btn abs" l="145" t="122" v="2" style="width: 82px;height:82px;"></div>
+    <div class="btn abs" l="235" t="122" v="3" style="width: 82px;height:82px;"></div>
+
+    <div class="btn abs" l="57" t="212" v="4" style="width: 82px;height:82px;"></div>
+    <div class="btn abs" l="145" t="212" v="5" style="width: 82px;height:82px;"></div>
+    <div class="btn abs" l="235" t="212" v="6" style="width: 82px;height:82px;"></div>
+
+    <div class="btn abs" l="57" t="301" v="7" style="width: 82px;height:82px;"></div>
+    <div class="btn abs" l="145" t="301" v="8" style="width: 82px;height:82px;"></div>
+    <div class="btn abs" l="235" t="301" v="9" style="width: 82px;height:82px;"></div>
+
+    <div class="btn abs" l="57" t="390" v="x" style="width: 82px;height:82px;"></div>
+    <div class="btn abs" l="145" t="390" v="0" style="width: 82px;height:82px;"></div>
+    <div class="btn abs" l="235" t="390" v="k" style="width: 82px;height:82px;"></div>
+</div>
+
+
+</body>
+<script src="scripts/base.js"></script>
+<script>
+    var inx = $('input');
+    var code = '00000';
+    function setCode(c) {
+        $('codeval').innerText = c;
+        code = c;
+    }
+
+    var locked = false;
+    var buttons = _('btn');
+    for (const button of buttons) {
+        const val = button.getAttribute('v');
+        button.onclick = () => {
+            if (locked) return;
+            if (val == 'x') {
+                inx.innerText = '';
+            } else if (val == 'k') {
+                locked = true;
+                if (inx.innerText == code) {
+                    inx.innerText = "ACCEPTED";
+                    _remote.setFixing(true);
+                } else {
+                    inx.innerText = "INVALID CODE";
+                    setTimeout(() => { inx.innerText = ''; locked=false;}, 1000);
+                }
+            } else if(inx.innerText.length < 5) {
+                inx.innerText += val;
+            }
+        }
+    }
+</script>
+</html>

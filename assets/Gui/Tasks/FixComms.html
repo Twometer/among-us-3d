@@ -97,6 +97,7 @@
         dragging = false;
         if (Math.abs(_dialVal) < 0.07 && !lock) {
             console.log("Complete");
+            _remote.setFixing(true);
             _dialVal = 0;
             lock = true;
         }

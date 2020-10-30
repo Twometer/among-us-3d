@@ -1,10 +1,7 @@
 package de.twometer.amongus.game;
 
 import de.twometer.amongus.core.AmongUs;
-import de.twometer.amongus.model.AnimationType;
-import de.twometer.amongus.model.Location;
-import de.twometer.amongus.model.TaskType;
-import de.twometer.amongus.model.ToolType;
+import de.twometer.amongus.model.*;
 import de.twometer.neko.render.model.ModelBase;
 import de.twometer.neko.util.Log;
 
@@ -82,6 +79,11 @@ public class GameObjectDecoder {
             }
             case "STATIC": {
                 return new StaticGameObject(model);
+            }
+            case "SABOTAGE": {
+                var sabotage = Sabotage.valueOf(args[0]);
+                var index = Integer.parseInt(args[1]);
+                return new SabotageGameObject(model, sabotage, index);
             }
         }
 

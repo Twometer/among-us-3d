@@ -56,7 +56,7 @@
             else switches_online--;
             _api.playSound('SabotageSwitch.ogg');
             if (switches_online == 5) {
-                _remote.taskComplete();
+                _remote.setFixing(true);
             }
         }
         idx++;
