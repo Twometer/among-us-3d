@@ -6,13 +6,18 @@ import de.twometer.amongus.gui.MainMenuPage;
 import de.twometer.amongus.io.FileSystem;
 import de.twometer.amongus.model.ClientSession;
 import de.twometer.amongus.net.client.NetClient;
+import de.twometer.amongus.physics.CollidingPlayerController;
 import de.twometer.amongus.util.Config;
 import de.twometer.amongus.util.Scheduler;
 import de.twometer.amongus.util.UserSettings;
 import de.twometer.neko.core.NekoApp;
 import de.twometer.neko.render.filter.FrustumCullingFilter;
+import de.twometer.neko.render.light.LightSource;
+import de.twometer.neko.render.model.ModelPart;
 import de.twometer.neko.render.overlay.FXAAOverlay;
 import de.twometer.neko.render.overlay.VignetteOverlay;
+import de.twometer.neko.res.ModelLoader;
+import de.twometer.neko.res.TextureLoader;
 import de.twometer.neko.util.Log;
 
 public class AmongUs extends NekoApp {
@@ -61,7 +66,7 @@ public class AmongUs extends NekoApp {
         reloadFxConfig();
 
         // Base map
-        /*var skeld = ModelLoader.loadModel("TheSkeld.obj");
+        var skeld = ModelLoader.loadModel("TheSkeld.obj");
         skeld.streamTree()
                 .filter(m -> m instanceof ModelPart && m.getName().contains("Luces"))
                 .forEach(m -> getScene().addLight(new LightSource(m.getCenter())));
@@ -70,7 +75,11 @@ public class AmongUs extends NekoApp {
         // Sky
         var skyboxCubemap = TextureLoader.loadCubemap("Sky/right.png", "Sky/left.png", "Sky/top.png", "Sky/bottom.png", "Sky/front.png", "Sky/back.png");
         getScene().getSkybox().setActive(true);
-        getScene().getSkybox().setTexture(skyboxCubemap);*/
+        getScene().getSkybox().setTexture(skyboxCubemap);
+
+        // Player
+        getCamera().getOffset().y = 0.65f;
+        setPlayerController(new CollidingPlayerController());
 
         // UI
         getGuiManager().registerGlobalJsObject("_api", new ApiGui());
