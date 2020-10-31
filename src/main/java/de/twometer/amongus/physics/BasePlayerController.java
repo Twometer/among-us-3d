@@ -55,8 +55,6 @@ public abstract class BasePlayerController implements IPlayerController {
 
         if (camera.getAngle().y > 90) camera.getAngle().y = 90f;
         if (camera.getAngle().y < -90) camera.getAngle().y = -90f;
-
-        AmongUs.get().getClient().sendMessage(new NetMessage.PositionChange(camera.getPosition(), MathF.toRadians(camera.getAngle().x)));
     }
 
     boolean mayFly() {

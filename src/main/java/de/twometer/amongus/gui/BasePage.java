@@ -33,7 +33,7 @@ public abstract class BasePage extends Page {
         return false;
     }
 
-    protected final void goBack() {
+    protected void goBack() {
         AmongUs.get().getGuiManager().showPage(previous);
     }
 

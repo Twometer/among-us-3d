@@ -1,8 +1,10 @@
 package de.twometer.amongus.model;
 
-public interface VentConnections {
+import java.util.Arrays;
 
-    Location[][] VENTS = new Location[][]{
+public final class VentConnections {
+
+    private static final Location[][] ventLocations = new Location[][]{
             {Location.UpperEngine, Location.Reactor},
             {Location.LowerEngine, Location.Reactor},
             {Location.Security, Location.MedBay, Location.Electrical},
@@ -10,5 +12,13 @@ public interface VentConnections {
             {Location.Shields, Location.Navigation},
             {Location.Cafeteria, Location.Hallways, Location.Admin}
     };
+
+    public static Location[] getVentEnds(Location start) {
+        for (var locations : ventLocations) {
+            if (Arrays.stream(locations).anyMatch(l -> l == start))
+                return locations;
+        }
+        return null;
+    }
 
 }
