@@ -2,6 +2,7 @@ package de.twometer.amongus.gui;
 
 import de.twometer.amongus.core.AmongUs;
 import de.twometer.amongus.event.UpdateEvent;
+import de.twometer.amongus.model.GameState;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.neko.event.KeyPressedEvent;
 import org.greenrobot.eventbus.Subscribe;
@@ -37,6 +38,7 @@ public class IngamePage extends BasePage {
             context.call("addTask", task.toString(), state);
         }
         setProgress(amongUs.getSession().taskProgress);
+        amongUs.getStateController().changeState(GameState.Ingame);
     }
 
     private long lastUpdate = System.currentTimeMillis();

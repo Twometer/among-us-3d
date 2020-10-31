@@ -1,6 +1,7 @@
 package de.twometer.amongus.gui;
 
 import de.twometer.amongus.core.AmongUs;
+import de.twometer.amongus.model.GameState;
 import de.twometer.amongus.model.PlayerRole;
 import de.twometer.amongus.net.NetMessage;
 
@@ -49,7 +50,11 @@ public class EjectPage extends BasePage {
     }
 
     public void close() {
-        amongUs.getGuiManager().showPage(new IngamePage());
+        if (amongUs.getStateController().getState() == GameState.End) {
+            amongUs.getGuiManager().showPage(new GameEndPage());
+        } else {
+            amongUs.getGuiManager().showPage(new IngamePage());
+        }
     }
 
 }

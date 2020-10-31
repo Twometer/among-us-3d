@@ -3,6 +3,7 @@ package de.twometer.amongus.net.client;
 import de.twometer.amongus.core.AmongUs;
 import de.twometer.amongus.game.PlayerGameObject;
 import de.twometer.amongus.gui.EmergencyPage;
+import de.twometer.amongus.gui.GameEndPage;
 import de.twometer.amongus.model.ClientSession;
 import de.twometer.amongus.model.GameState;
 import de.twometer.amongus.model.Player;
@@ -66,22 +67,39 @@ public class NetHandler {
         } else if (o instanceof NetMessage.OnGameStart) {
             var myTasks = ((NetMessage.OnGameStart) o).tasks;
             amongUs.getSession().getMyself().tasks = myTasks;
-            amongUs.getStateController().changeState(GameState.Ingame);
             amongUs.getSession().getMyself().emergencyMeetings = amongUs.getSession().getConfig().getEmergencyMeetings();
             amongUs.getSession().lastEmergency = System.currentTimeMillis();
+            amongUs.getSession().winners = null;
             Log.d("Server assigned " + myTasks.size() + " tasks.");
         } else if (o instanceof NetMessage.OnTaskProgressChanged) {
             amongUs.getSession().taskProgress = ((NetMessage.OnTaskProgressChanged) o).progress;
         } else if (o instanceof NetMessage.OnEmergencyMeeting) {
-            var meeting = (NetMessage.OnEmergencyMeeting)o;
+            var meeting = (NetMessage.OnEmergencyMeeting) o;
             amongUs.getScheduler().run(() -> {
-               var sound = meeting.cause == NetMessage.EmergencyCause.Button
-                       ? "EmergencyMeeting.ogg"
-                       : "EmergencyBody.ogg";
-               amongUs.getSoundFX().play(sound);
-               amongUs.getGuiManager().showPage(new EmergencyPage(meeting.reporterId));
+                var sound = meeting.cause == NetMessage.EmergencyCause.Button
+                        ? "EmergencyMeeting.ogg"
+                        : "EmergencyBody.ogg";
+                amongUs.getSoundFX().play(sound);
+                amongUs.getStateController().changeState(GameState.Emergency);
+                amongUs.getGuiManager().showPage(new EmergencyPage(meeting.reporterId));
             });
-            // TODO Here, we also need to remove all dead body objects from the game world
+            // TODO clear dead bodies
+        } else if (o instanceof NetMessage.OnGameEnd) {
+            var end = (NetMessage.OnGameEnd) o;
+            var sess = amongUs.getSession();
+            sess.winners = end.winners;
+            if (amongUs.getStateController().getState() != GameState.Emergency) {
+                amongUs.getScheduler().run(() -> amongUs.getGuiManager().showPage(new GameEndPage()));
+            }
+            amongUs.getStateController().changeState(GameState.End);
+            // TODO reset dead bodies to players
+        } else if (o instanceof NetMessage.Kill) {
+            var kill = (NetMessage.Kill) o;
+            var player = amongUs.getSession().getPlayer(kill.playerId);
+            player.alive = false;
+            if (!kill.system) {
+                // TODO spawn dead body
+            }
         }
     }
 

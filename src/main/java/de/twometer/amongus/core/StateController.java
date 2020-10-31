@@ -1,6 +1,7 @@
 package de.twometer.amongus.core;
 
 import de.twometer.amongus.model.GameState;
+import de.twometer.neko.util.Log;
 
 public class StateController {
 
@@ -21,7 +22,7 @@ public class StateController {
     }
 
     private void handleChange(GameState prev, GameState next) {
-
+        Log.i("Changed state from " + prev + " to " + next);
     }
 
 }

@@ -196,6 +196,7 @@ public class AmongUsServer extends Listener {
             if (p.session == null) return;
             p.session.tasksFinished++;
             p.session.broadcast(new NetMessage.OnTaskProgressChanged(p.session.getTaskProgress()));
+            checkVictory(p.session);
         });
         handlers.register(NetMessage.CallEmergency.class, (p, m) -> {
             if (p.session == null) return;
@@ -215,6 +216,12 @@ public class AmongUsServer extends Listener {
             p.session.broadcast(broadcast);
             p.session.votes.put(p.player.id, m.playerId);
             checkAllVoted(p.session);
+        });
+        handlers.register(NetMessage.Kill.class, (p, m) -> {
+            if (p.session == null) return;
+            var victim = p.session.getPlayer(m.playerId);
+            victim.player.alive = false;
+            p.session.broadcast(new NetMessage.Kill(false, m.playerId));
         });
     }
 
@@ -239,7 +246,7 @@ public class AmongUsServer extends Listener {
             scheduler.cancel(session.votingTask);
         session.broadcast(new NetMessage.OnVoteResults(session.votes));
 
-        scheduler.runLater(10000, () -> {
+        scheduler.runLater(8000, () -> {
             // Determine who was ejected
 
             Map<Integer, Integer> voteCounts = new HashMap<>();
@@ -272,6 +279,7 @@ public class AmongUsServer extends Listener {
             } else {
                 // Eject
                 int ejectedPlayer = highestVotes.getKey();
+                session.getPlayer(ejectedPlayer).player.alive = false;
                 session.broadcast(new NetMessage.Kill(true, ejectedPlayer));
                 session.broadcast(new NetMessage.OnPlayerEjected(NetMessage.OnPlayerEjected.Result.Eject, ejectedPlayer));
             }
@@ -279,6 +287,8 @@ public class AmongUsServer extends Listener {
             tpAllToSpawn(session);
 
             session.votes.clear();
+
+            checkVictory(session);
         });
     }
 

@@ -122,12 +122,13 @@
 </body>
 <script>
     var container = document.getElementById('playercontainer');
-    function addPlayer(pid, username, color, isDead, isCaller) {
+    function addPlayer(pid, username, color, isDead, isCaller, isImpostor) {
         var item = document.createElement('div');
         item.classList.add('player-item');
         if (isDead) item.classList.add('dead');
         var callerHtml = isCaller ? '<img style="margin-left: auto;" src="img/Reported.png">' : '';
-        var html = ' <img class="player-icon" src="img/PlayerIcon/' + color + '.png"><div class="player-name"><div class="player-item-header">' + username + '</div><div class="player-item-votes" id="V-' + pid + '"></div></div>' + callerHtml;
+        var impstyle = isImpostor ? ' style="color:red;"' : '';
+        var html = ' <img class="player-icon" src="img/PlayerIcon/' + color + '.png"><div class="player-name"><div class="player-item-header"' + impstyle + '>' + username + '</div><div class="player-item-votes" id="V-' + pid + '"></div></div>' + callerHtml;
         item.innerHTML = html;
         item.setAttribute('id', 'P-' + pid);
         container.appendChild(item);
@@ -171,7 +172,7 @@
         }
 
         for (var i = 0; i < largestArray; i++) {
-            await delay(1000);
+            await delay(800);
             for (var pid in resultMap) {
                 var voteArr = resultMap[pid];
                 var container = document.getElementById('V-' + pid);

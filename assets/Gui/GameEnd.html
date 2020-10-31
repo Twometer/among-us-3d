@@ -51,25 +51,27 @@
     </style>
 </head>
 <body style="text-align: center;padding: 50px;background-color: black; color: white;">
-<h1>VICTORY</h1>
-<div class="teammates">
-    <p>
-        TEAMMATE
-    </p>
-    <p>
-        TEAMMATE
-    </p>
-    <p>
-        TEAMMATE
-    </p>
-    <p>
-        TEAMMATE
-    </p>
+<h1 id="statecontainer" >VICTORY</h1>
+<div class="teammates" id="players">
+
 </div>
 </body>
 <script>
+    function addPlayer(player, wasImp) {
+        var elem = document.createElement("p");
+        elem.style.color = wasImp ? "red" : "lightskyblue";
+        elem.innerText = player;
+        document.getElementById('players').appendChild(elem);
+    }
+
+    function setDefeat() {
+        var c =document.getElementById('statecontainer');
+        c.innerText = "DEFEAT";
+        c.style.color = 'red';
+    }
+
     function OnLoaded() {
-        _api.playSound('Victory.ogg');
+
     }
 </script>
 </html>

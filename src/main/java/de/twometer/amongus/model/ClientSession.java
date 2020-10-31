@@ -8,6 +8,8 @@ public class ClientSession extends Session<Player> {
 
     public long lastEmergency = 0;
 
+    public PlayerRole winners;
+
     public ClientSession(String gameCode, int host) {
         super(gameCode, host);
     }
