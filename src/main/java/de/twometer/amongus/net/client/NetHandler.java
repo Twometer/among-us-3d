@@ -10,6 +10,7 @@ import de.twometer.amongus.gui.SabotagePage;
 import de.twometer.amongus.model.ClientSession;
 import de.twometer.amongus.model.GameState;
 import de.twometer.amongus.model.Player;
+import de.twometer.amongus.model.Sabotage;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.amongus.physics.CollidingPlayerController;
 import de.twometer.amongus.physics.GhostPlayerController;
@@ -136,12 +137,23 @@ public class NetHandler {
                 });
             }
         } else if (o instanceof NetMessage.OnSabotageStateChanged) {
-            var sab = (NetMessage.OnSabotageStateChanged)o;
+            var sab = (NetMessage.OnSabotageStateChanged) o;
             if (sab.active) {
                 amongUs.getSession().currentSabotage = sab.sabotage;
                 amongUs.getSession().currentSabotageCode = sab.code;
                 amongUs.getSession().currentSabotageDuration = sab.duration / 1000;
+                if (sab.sabotage == Sabotage.Lights)
+                    amongUs.getScheduler().run(() -> {
+                        for (var light : amongUs.getScene().getLights())
+                            light.setOn(false);
+                        amongUs.getScene().reloadLights();
+                    });
             } else {
+                amongUs.getScheduler().run(() -> {
+                    for (var light : amongUs.getScene().getLights())
+                        light.setOn(true);
+                    amongUs.getScene().reloadLights();
+                });
                 amongUs.getSession().currentSabotage = null;
             }
             Events.post(new SabotageEvent());
