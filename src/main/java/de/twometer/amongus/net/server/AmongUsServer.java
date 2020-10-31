@@ -3,6 +3,7 @@ package de.twometer.amongus.net.server;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
+import de.twometer.amongus.model.Player;
 import de.twometer.amongus.model.PlayerRole;
 import de.twometer.amongus.model.PlayerTask;
 import de.twometer.amongus.model.SessionConfig;
@@ -19,6 +20,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class AmongUsServer extends Listener {
 
@@ -168,19 +170,7 @@ public class AmongUsServer extends Listener {
             }
 
             // Assign spawn locations
-            var center = new Vector3f(28.09f, 0.0f, -22.46f);
-            var radius = 1.7f;
-            var angleOffset = (2.0f * Math.PI) / playerCount;
-            var angle = 0f;
-            for (var player : p.session.getPlayers()) {
-                var position = new Vector3f(
-                        center.x + MathF.sin(angle) * radius,
-                        center.y,
-                        center.z + MathF.cos(angle) * radius
-                );
-                p.session.broadcast(new NetMessage.PositionChange(player.getId(), position, 0));
-                angle += angleOffset;
-            }
+            tpAllToSpawn(p.session);
 
             // Assign tasks and start game
             var commonTask = TaskGenerator.newCommonTask();
@@ -207,6 +197,116 @@ public class AmongUsServer extends Listener {
             p.session.tasksFinished++;
             p.session.broadcast(new NetMessage.OnTaskProgressChanged(p.session.getTaskProgress()));
         });
+        handlers.register(NetMessage.CallEmergency.class, (p, m) -> {
+            if (p.session == null) return;
+            var broadcast = new NetMessage.OnEmergencyMeeting(p.player.id, m.cause);
+            p.session.broadcast(broadcast);
+            p.session.votingTask = scheduler.runLater(p.session.getConfig().getVotingTime() * 1000, () -> {
+                p.session.votingTask = null;
+                handleVotingEnd(p.session);
+            });
+        });
+        handlers.register(NetMessage.Vote.class, (p, m) -> {
+            if (p.session == null) return;
+            if (p.session.votes.containsKey(p.player.id)) // no double votes
+                return;
+
+            var broadcast = new NetMessage.OnPlayerVoted(p.player.id, m.playerId);
+            p.session.broadcast(broadcast);
+            p.session.votes.put(p.player.id, m.playerId);
+            checkAllVoted(p.session);
+        });
+    }
+
+    private void tpAllToSpawn(ServerSession session) {
+        var center = new Vector3f(28.09f, 0.0f, -22.46f);
+        var radius = 1.7f;
+        var angleOffset = (2.0f * Math.PI) / session.getPlayers().size();
+        var angle = 0f;
+        for (var player : session.getPlayers()) {
+            var position = new Vector3f(
+                    center.x + MathF.sin(angle) * radius,
+                    center.y,
+                    center.z + MathF.cos(angle) * radius
+            );
+            session.broadcast(new NetMessage.PositionChange(player.getId(), position, 0));
+            angle += angleOffset;
+        }
+    }
+
+    private void handleVotingEnd(ServerSession session) {
+        if (session.votingTask != null)
+            scheduler.cancel(session.votingTask);
+        session.broadcast(new NetMessage.OnVoteResults(session.votes));
+
+        scheduler.runLater(10000, () -> {
+            // Determine who was ejected
+
+            Map<Integer, Integer> voteCounts = new HashMap<>();
+            if (session.votes.isEmpty()) {
+                session.broadcast(new NetMessage.OnPlayerEjected(NetMessage.OnPlayerEjected.Result.Tie, 0));
+                return;
+            }
+
+            for (var vote : session.votes.entrySet()) {
+                var dstPlayerId = vote.getValue();
+                if (!voteCounts.containsKey(dstPlayerId))
+                    voteCounts.put(dstPlayerId, 1);
+                else
+                    voteCounts.put(dstPlayerId, voteCounts.get(dstPlayerId) + 1);
+            }
+            var sorted = voteCounts.entrySet()
+                    .stream()
+                    .sorted(Comparator.comparingInt(Map.Entry::getValue))
+                    .collect(Collectors.toList());
+
+            var highestVotes = sorted.get(0);
+            var secondHighest = sorted.size() > 1 ? sorted.get(1) : null;
+
+            if (secondHighest != null && highestVotes.getValue().equals(secondHighest.getValue())) {
+                // Tie
+                session.broadcast(new NetMessage.OnPlayerEjected(NetMessage.OnPlayerEjected.Result.Tie, 0));
+            } else if (highestVotes.getKey() == Player.SKIP_PLAYER) {
+                // Skip
+                session.broadcast(new NetMessage.OnPlayerEjected(NetMessage.OnPlayerEjected.Result.Skip, 0));
+            } else {
+                // Eject
+                int ejectedPlayer = highestVotes.getKey();
+                session.broadcast(new NetMessage.Kill(true, ejectedPlayer));
+                session.broadcast(new NetMessage.OnPlayerEjected(NetMessage.OnPlayerEjected.Result.Eject, ejectedPlayer));
+            }
+
+            tpAllToSpawn(session);
+
+            session.votes.clear();
+        });
+    }
+
+    private void checkAllVoted(ServerSession session) {
+        if (session.votes.size() == session.getPlayers().size())
+            handleVotingEnd(session);
+    }
+
+    private void checkVictory(ServerSession session) {
+        var winners = findWinners(session);
+        if (winners == null) return;
+        session.broadcast(new NetMessage.OnGameEnd(winners));
+    }
+
+    private PlayerRole findWinners(ServerSession session) {
+        if (session.getTaskProgress() == 1.0f)
+            return PlayerRole.Crewmate;
+
+        var impostors = 0;
+        var crewmates = 0;
+        for (var player : session.getPlayers()) {
+            if (!player.player.alive) continue;
+            if (player.getRole() == PlayerRole.Impostor) impostors++;
+            else crewmates++;
+        }
+        if (impostors == 0) return PlayerRole.Crewmate;
+        else if (impostors >= crewmates) return PlayerRole.Impostor;
+        else return null;
     }
 
     private void generateTasks(List<PlayerTask> list, SessionConfig config) {

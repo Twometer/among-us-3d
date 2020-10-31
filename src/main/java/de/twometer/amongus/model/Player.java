@@ -6,6 +6,8 @@ import java.util.List;
 
 public class Player implements PlayerBehavior {
 
+    public static final int SKIP_PLAYER = -1;
+
     public int id;
 
     public String username;

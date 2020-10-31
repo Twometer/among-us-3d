@@ -55,13 +55,23 @@
     .player-item.voted {
         background: rgba(0, 85, 0, 0.45);
     }
+
+    img.pop {
+        animation: pop-in 0.25s forwards;
+    }
+
+    @keyframes pop-in {
+        0% { opacity: 0; transform: scale(0.5); }
+        30% { transform: scale(1.3); }
+        100% { opacity: 1; transform: scale(1); }
+    }
 </style>
 <body>
 
 <h1>Who is the impostor?</h1>
 <div class="container" style="height: 75%;display: flex;flex-flow:column;justify-content: space-between">
-    <div class="player-items">
-        <div class="player-item">
+    <div class="player-items" id="playercontainer">
+        <!--<div class="player-item">
             <img class="player-icon" src="img/PlayerIcon.png">
             <div class="player-name">
                 <div class="player-item-header">xxxxxxxxxxxxx</div>
@@ -94,24 +104,88 @@
         </div>
 
         <div class="player-item dead">
-            <img class="player-icon" src="img/PlayerIcon.png">
-            <div class="player-name">
-                <div class="player-item-header">xxxxxxxxxxxxx</div>
-                <div class="player-item-votes">
 
-                </div>
-            </div>
-        </div>
+        </div>-->
 
 
     </div>
     <div class="button-panel">
-        <button style="width: 150px">Skip</button>
-        <img src="img/VoteResults.png">
-        <img src="img/VoteResults.png">
-        <span style="font-size: 50px; float:right;line-height: 70px">Voting ends in 59s</span>
+        <button style="width: 150px" onclick="vote(-1)">Skip</button>
+        <div style="display: inline-block" id="V--1">
+            <!--<img src="img/VoteResults/Black.png">1
+            <img src="img/VoteResults/Green.png">-->
+        </div>
+        <span id="votingTimeout" style="font-size: 50px; float:right;line-height: 70px"></span>
     </div>
 </div>
 
 </body>
+<script>
+    var container = document.getElementById('playercontainer');
+    function addPlayer(pid, username, color, isDead, isCaller) {
+        var item = document.createElement('div');
+        item.classList.add('player-item');
+        if (isDead) item.classList.add('dead');
+        var callerHtml = isCaller ? '<img style="margin-left: auto;" src="img/Reported.png">' : '';
+        var html = ' <img class="player-icon" src="img/PlayerIcon/' + color + '.png"><div class="player-name"><div class="player-item-header">' + username + '</div><div class="player-item-votes" id="V-' + pid + '"></div></div>' + callerHtml;
+        item.innerHTML = html;
+        item.setAttribute('id', 'P-' + pid);
+        container.appendChild(item);
+
+        const _pid = pid;
+        item.onclick = function() {
+            vote(_pid);
+        }
+    }
+    var voted = false;
+    function vote(pid) {
+        if (voted) return;
+        voted = true;
+        _remote.vote(pid);
+    }
+    function onPlayerVote(pid) {
+        var item = document.getElementById('P-' + pid);
+        item.classList.add('voted');
+    }
+
+    function delay(d) {
+        return new Promise((resolve, reject) => {
+            setTimeout(function() {
+                resolve();
+            }, d);
+        });
+    }
+
+    async function onResults(idColorMap, votes) {
+        var resultMap = {};
+        for (var key in votes) {
+            var val = votes[key];
+            if (resultMap[val] == undefined) resultMap[val] = [];
+            resultMap[val].push(idColorMap[key]);
+        }
+        var largestArray = 0;
+        for (var pid in resultMap)
+        {
+            var arrSize = resultMap[pid].length;
+            if (largestArray < arrSize) largestArray = arrSize;
+        }
+
+        for (var i = 0; i < largestArray; i++) {
+            await delay(1000);
+            for (var pid in resultMap) {
+                var voteArr = resultMap[pid];
+                var container = document.getElementById('V-' + pid);
+                var color = voteArr[i];
+                if (color == null) continue;
+                var img = new Image();
+                img.classList.add('pop');
+                img.src = 'img/VoteResults/' + color + '.png';
+                container.appendChild(img);
+            }
+            _api.playSound('Notification.ogg');
+        }
+
+
+    }
+</script>
 </html>

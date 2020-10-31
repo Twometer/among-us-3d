@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Scheduler {
 
-    private static class Task {
+    public static class Task {
 
         private static final AtomicInteger idCounter = new AtomicInteger(0);
 

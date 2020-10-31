@@ -3,15 +3,21 @@ package de.twometer.amongus.net.server;
 import de.twometer.amongus.model.PlayerColor;
 import de.twometer.amongus.model.Session;
 import de.twometer.amongus.util.RandomUtil;
+import de.twometer.amongus.util.Scheduler;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ServerSession extends Session<PlayerConnection> {
 
     public int tasksFinished;
     public int totalTaskStages;
+    public Scheduler.Task votingTask;
+
+    public final Map<Integer, Integer> votes = new HashMap<>();
 
     public ServerSession(String gameCode, int host) {
         super(gameCode, host);

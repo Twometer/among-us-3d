@@ -2,10 +2,12 @@ package de.twometer.amongus.net.client;
 
 import de.twometer.amongus.core.AmongUs;
 import de.twometer.amongus.game.PlayerGameObject;
+import de.twometer.amongus.gui.EmergencyPage;
 import de.twometer.amongus.model.ClientSession;
 import de.twometer.amongus.model.GameState;
 import de.twometer.amongus.model.Player;
 import de.twometer.amongus.net.NetMessage;
+import de.twometer.amongus.util.Scheduler;
 import de.twometer.neko.util.Log;
 
 public class NetHandler {
@@ -70,6 +72,16 @@ public class NetHandler {
             Log.d("Server assigned " + myTasks.size() + " tasks.");
         } else if (o instanceof NetMessage.OnTaskProgressChanged) {
             amongUs.getSession().taskProgress = ((NetMessage.OnTaskProgressChanged) o).progress;
+        } else if (o instanceof NetMessage.OnEmergencyMeeting) {
+            var meeting = (NetMessage.OnEmergencyMeeting)o;
+            amongUs.getScheduler().run(() -> {
+               var sound = meeting.cause == NetMessage.EmergencyCause.Button
+                       ? "EmergencyMeeting.ogg"
+                       : "EmergencyBody.ogg";
+               amongUs.getSoundFX().play(sound);
+               amongUs.getGuiManager().showPage(new EmergencyPage(meeting.reporterId));
+            });
+            // TODO Here, we also need to remove all dead body objects from the game world
         }
     }
 

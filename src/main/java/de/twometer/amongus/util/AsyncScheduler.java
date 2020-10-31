@@ -18,7 +18,7 @@ public class AsyncScheduler extends Scheduler {
                     Thread.sleep(1);
                 } catch (Throwable t) {
                     Log.e("Scheduler failed", t);
-                    break;
+                    t.printStackTrace();
                 }
             }
         })).start();

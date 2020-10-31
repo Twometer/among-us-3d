@@ -50,6 +50,7 @@ public final class NetMessage {
             OnPlayerVoted.class,
             OnVoteResults.class,
             OnPlayerEjected.class,
+            OnPlayerEjected.Result.class,
             Vent.class,
             OnVent.class,
             Kill.class,
@@ -392,7 +393,7 @@ public final class NetMessage {
     }
 
     public static class CallEmergency {
-        EmergencyCause cause;
+        public EmergencyCause cause;
 
         public CallEmergency(EmergencyCause cause) {
             this.cause = cause;
@@ -453,9 +454,18 @@ public final class NetMessage {
     }
 
     public static class OnPlayerEjected {
+        public enum Result {
+            Eject,
+            Tie,
+            Skip
+        }
+
+        public Result result;
+
         public int playerId;
 
-        public OnPlayerEjected(int playerId) {
+        public OnPlayerEjected(Result result, int playerId) {
+            this.result = result;
             this.playerId = playerId;
         }
 
@@ -498,12 +508,14 @@ public final class NetMessage {
 
     // Killing
     public static class Kill {
+        public boolean system;
         public int playerId;
 
         public Kill() {
         }
 
-        public Kill(int playerId) {
+        public Kill(boolean system, int playerId) {
+            this.system = system;
             this.playerId = playerId;
         }
     }
