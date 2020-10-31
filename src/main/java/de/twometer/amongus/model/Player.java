@@ -41,6 +41,7 @@ public class Player implements PlayerBehavior {
     }
 
     public boolean canDoTask(Location location, TaskType taskType) {
+        if (role == PlayerRole.Impostor) return false;
         return findRunningTaskByStage(location, taskType) != null;
     }
 

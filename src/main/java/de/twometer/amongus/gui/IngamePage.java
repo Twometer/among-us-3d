@@ -34,11 +34,16 @@ public class IngamePage extends BasePage {
 
             context.call("addTask", task.toString(), state);
         }
+        setProgress(amongUs.getSession().taskProgress);
     }
 
     @Subscribe
     public void onProgressChanged(NetMessage.OnTaskProgressChanged progressChanged) {
-        amongUs.getScheduler().run(() -> context.call("setTaskProgress", progressChanged.progress));
+        amongUs.getScheduler().run(() -> setProgress(progressChanged.progress));
+    }
+
+    private void setProgress(float progress) {
+        context.call("setTaskProgress", progress);
     }
 
     @Subscribe

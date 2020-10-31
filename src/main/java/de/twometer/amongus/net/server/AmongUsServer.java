@@ -3,8 +3,6 @@ package de.twometer.amongus.net.server;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
-import de.twometer.amongus.game.TaskGameObject;
-import de.twometer.amongus.model.Player;
 import de.twometer.amongus.model.PlayerRole;
 import de.twometer.amongus.model.PlayerTask;
 import de.twometer.amongus.model.SessionConfig;
@@ -14,7 +12,6 @@ import de.twometer.amongus.util.Config;
 import de.twometer.amongus.util.RandomUtil;
 import de.twometer.neko.util.Log;
 import de.twometer.neko.util.MathF;
-import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import java.io.IOException;
@@ -191,11 +188,11 @@ public class AmongUsServer extends Listener {
                 var list = new ArrayList<PlayerTask>();
                 list.add(commonTask);
                 generateTasks(list, p.session.getConfig());
-
                 Collections.shuffle(list);
 
                 if (player.getRole() != PlayerRole.Impostor)
-                    p.session.totalTasks += list.size();
+                    for (var task : list)
+                        p.session.totalTaskStages += task.length();
 
                 player.sendTCP(new NetMessage.OnGameStart(list));
             }

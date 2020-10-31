@@ -6,21 +6,20 @@ import de.twometer.amongus.util.RandomUtil;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 public class ServerSession extends Session<PlayerConnection> {
 
     public int tasksFinished;
-    public int totalTasks;
+    public int totalTaskStages;
 
     public ServerSession(String gameCode, int host) {
         super(gameCode, host);
     }
 
     public float getTaskProgress() {
-        if (totalTasks == 0) return 0;
-        else return tasksFinished / (float) totalTasks;
+        if (totalTaskStages == 0) return 0;
+        else return tasksFinished / (float) totalTaskStages;
     }
 
     public void findNewHost() {

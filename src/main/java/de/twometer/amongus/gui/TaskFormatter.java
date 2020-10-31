@@ -1,6 +1,7 @@
 package de.twometer.amongus.gui;
 
 import de.twometer.amongus.core.AmongUs;
+import de.twometer.amongus.model.Location;
 import de.twometer.amongus.model.PlayerTask;
 import de.twometer.amongus.model.TaskType;
 
@@ -10,7 +11,7 @@ public class TaskFormatter {
         var stage = task.getNextStage();
 
         var sb = new StringBuilder();
-        sb.append(stage.getLocation().name());
+        sb.append(formatLocation(stage.getLocation()));
         sb.append(": ");
         sb.append(formatStage(task.getProgress(), stage.getTaskType(), task));
 
@@ -21,14 +22,14 @@ public class TaskFormatter {
         return sb.toString();
     }
 
-    private static String formatLocation(String location) {
-        return i18n("rooms." + location);
+    public static String formatLocation(Location location) {
+        return i18n("rooms." + location.name());
     }
 
     private static String formatStage(int progress, TaskType type, PlayerTask task) {
         switch (type) {
             case DivertPower:
-                var dst = formatLocation(task.getLastStage().getLocation().name());
+                var dst = formatLocation(task.getLastStage().getLocation());
                 return String.format(i18n("tasks.DivertPower"), dst);
             case DataTransfer:
                 if (progress == 0) return i18n("tasks.Download");
