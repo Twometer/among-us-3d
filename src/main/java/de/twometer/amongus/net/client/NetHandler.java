@@ -51,6 +51,7 @@ public class NetHandler {
             }
         } else if (o instanceof NetMessage.OnSessionUpdate) {
             amongUs.getSession().setConfig(((NetMessage.OnSessionUpdate) o).config);
+            Log.d("Loaded session config");
         } else if (o instanceof NetMessage.SessionJoined) {
             var joined = (NetMessage.SessionJoined) o;
             if (joined.result == NetMessage.SessionJoined.Result.Success) {
@@ -64,6 +65,8 @@ public class NetHandler {
             var myTasks = ((NetMessage.OnGameStart) o).tasks;
             amongUs.getSession().getMyself().tasks = myTasks;
             amongUs.getStateController().changeState(GameState.Ingame);
+            amongUs.getSession().getMyself().emergencyMeetings = amongUs.getSession().getConfig().getEmergencyMeetings();
+            amongUs.getSession().lastEmergency = System.currentTimeMillis();
             Log.d("Server assigned " + myTasks.size() + " tasks.");
         } else if (o instanceof NetMessage.OnTaskProgressChanged) {
             amongUs.getSession().taskProgress = ((NetMessage.OnTaskProgressChanged) o).progress;

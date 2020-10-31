@@ -207,7 +207,7 @@ public class AmongUsServer extends Listener {
         });
         handlers.register(NetMessage.CompleteTaskStage.class, (p, m) -> {
             if (p.session == null) return;
-            p.session.tasksFinished ++;
+            p.session.tasksFinished++;
             p.session.broadcast(new NetMessage.OnTaskProgressChanged(p.session.getTaskProgress()));
         });
     }

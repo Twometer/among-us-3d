@@ -6,6 +6,8 @@ public class ClientSession extends Session<Player> {
 
     public float taskProgress;
 
+    public long lastEmergency = 0;
+
     public ClientSession(String gameCode, int host) {
         super(gameCode, host);
     }

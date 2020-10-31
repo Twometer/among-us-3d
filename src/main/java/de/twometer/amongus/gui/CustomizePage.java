@@ -55,6 +55,7 @@ public class CustomizePage extends BasePage {
                         showLoading("Configuring session...");
                         amongUs.getClient().sendMessage(new NetMessage.SessionConfigure(config))
                                 .await(NetMessage.SessionConfigured.class, configured -> {
+                                    amongUs.getSession().setConfig(config);
 
                                     // Configure the player
                                     showLoading("Configuring player...");

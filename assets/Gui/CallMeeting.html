@@ -42,6 +42,15 @@
         btn.style.top = 140;
         $('lid-open').hide();
         $('lid-closed').show();
+    }
+
+    function setCallsLeft(left) {
+        $('remaining').innerText = left;
+        if (left == 0)
+            setClosed();
+    }
+
+    function setRemainingTime() {
         $('line1').innerText = 'CREWMATES MUST WAIT';
         $('remaining').innerText = '10s';
         $('line2').innerText = 'BEFORE NEXT EMERGENCY';

@@ -22,6 +22,8 @@ public class Player implements PlayerBehavior {
 
     public boolean alive;
 
+    public int emergencyMeetings = 0;
+
     public int getId() {
         return id;
     }
