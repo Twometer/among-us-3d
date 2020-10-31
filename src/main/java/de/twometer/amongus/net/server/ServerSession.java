@@ -16,6 +16,8 @@ public class ServerSession extends Session<PlayerConnection> {
     public int tasksFinished;
     public int totalTaskStages;
     public Scheduler.Task votingTask;
+    public Scheduler.Task sabotageTask;
+    public int fixers = 0;
 
     public final Map<Integer, Integer> votes = new HashMap<>();
 

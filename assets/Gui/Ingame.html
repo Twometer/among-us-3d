@@ -258,6 +258,10 @@ You're an impostor
         redraw();
     }
 
+    function setCommsSabotaged(sab) {
+        taskContainer.style.display = sab ? 'none' : 'block';
+    }
+
     function setTaskProgress(p) {
         var w = 762 * p;
         progress.style.width = w;

@@ -10,6 +10,10 @@ public class ClientSession extends Session<Player> {
 
     public PlayerRole winners;
 
+    public Sabotage currentSabotage = null;
+    public String currentSabotageCode = "";
+    public int currentSabotageDuration = 0;
+
     public ClientSession(String gameCode, int host) {
         super(gameCode, host);
     }

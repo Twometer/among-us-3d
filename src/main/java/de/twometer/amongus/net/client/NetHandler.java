@@ -1,10 +1,12 @@
 package de.twometer.amongus.net.client;
 
 import de.twometer.amongus.core.AmongUs;
+import de.twometer.amongus.event.SabotageEvent;
 import de.twometer.amongus.game.DeadBodyGameObject;
 import de.twometer.amongus.game.PlayerGameObject;
 import de.twometer.amongus.gui.EmergencyPage;
 import de.twometer.amongus.gui.GameEndPage;
+import de.twometer.amongus.gui.SabotagePage;
 import de.twometer.amongus.model.ClientSession;
 import de.twometer.amongus.model.GameState;
 import de.twometer.amongus.model.Player;
@@ -12,6 +14,7 @@ import de.twometer.amongus.net.NetMessage;
 import de.twometer.amongus.physics.CollidingPlayerController;
 import de.twometer.amongus.physics.GhostPlayerController;
 import de.twometer.amongus.util.Scheduler;
+import de.twometer.neko.event.Events;
 import de.twometer.neko.util.Log;
 
 public class NetHandler {
@@ -132,6 +135,16 @@ public class NetHandler {
                     }
                 });
             }
+        } else if (o instanceof NetMessage.OnSabotageStateChanged) {
+            var sab = (NetMessage.OnSabotageStateChanged)o;
+            if (sab.active) {
+                amongUs.getSession().currentSabotage = sab.sabotage;
+                amongUs.getSession().currentSabotageCode = sab.code;
+                amongUs.getSession().currentSabotageDuration = sab.duration / 1000;
+            } else {
+                amongUs.getSession().currentSabotage = null;
+            }
+            Events.post(new SabotageEvent());
         }
     }
 

@@ -358,9 +358,9 @@ public final class NetMessage {
         public Sabotage sabotage;
         public boolean active;
         public int duration;
-        public int code;
+        public String code;
 
-        public OnSabotageStateChanged(Sabotage sabotage, boolean active, int duration, int code) {
+        public OnSabotageStateChanged(Sabotage sabotage, boolean active, int duration, String code) {
             this.sabotage = sabotage;
             this.active = active;
             this.duration = duration;

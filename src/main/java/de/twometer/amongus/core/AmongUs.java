@@ -3,12 +3,10 @@ package de.twometer.amongus.core;
 import de.twometer.amongus.event.UpdateEvent;
 import de.twometer.amongus.game.GameObject;
 import de.twometer.amongus.game.GameObjectDecoder;
-import de.twometer.amongus.gui.ApiGui;
-import de.twometer.amongus.gui.IngamePage;
-import de.twometer.amongus.gui.LoadingPage;
-import de.twometer.amongus.gui.MainMenuPage;
+import de.twometer.amongus.gui.*;
 import de.twometer.amongus.io.FileSystem;
 import de.twometer.amongus.model.ClientSession;
+import de.twometer.amongus.model.PlayerRole;
 import de.twometer.amongus.net.client.NetClient;
 import de.twometer.amongus.physics.CollidingPlayerController;
 import de.twometer.amongus.render.HighlightEngine;
@@ -18,6 +16,7 @@ import de.twometer.amongus.util.Scheduler;
 import de.twometer.amongus.util.UserSettings;
 import de.twometer.neko.core.NekoApp;
 import de.twometer.neko.event.Events;
+import de.twometer.neko.event.KeyPressedEvent;
 import de.twometer.neko.event.MouseClickedEvent;
 import de.twometer.neko.render.filter.FrustumCullingFilter;
 import de.twometer.neko.render.light.LightSource;
@@ -29,6 +28,7 @@ import de.twometer.neko.res.ModelLoader;
 import de.twometer.neko.res.TextureLoader;
 import de.twometer.neko.util.Log;
 import org.greenrobot.eventbus.Subscribe;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -153,6 +153,13 @@ public class AmongUs extends NekoApp {
                 obj.onClick();
                 return;
             }
+    }
+
+    @Subscribe
+    public void onKeyPress(KeyPressedEvent event) {
+        if (stateController.isRunning() && event.key == GLFW.GLFW_KEY_Q && AmongUs.get().getSession().getMyself().role == PlayerRole.Impostor) {
+            getGuiManager().showPage(new SabotagePage());
+        }
     }
 
     public void reloadFxConfig() {

@@ -3,10 +3,7 @@ package de.twometer.amongus.net.server;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
-import de.twometer.amongus.model.Player;
-import de.twometer.amongus.model.PlayerRole;
-import de.twometer.amongus.model.PlayerTask;
-import de.twometer.amongus.model.SessionConfig;
+import de.twometer.amongus.model.*;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.amongus.util.AsyncScheduler;
 import de.twometer.amongus.util.Config;
@@ -226,6 +223,31 @@ public class AmongUsServer extends Listener {
             p.session.broadcast(new NetMessage.Kill(false, victim.player.id));
             p.session.broadcast(new NetMessage.PositionChange(p.player.id, victim.player.position, victim.player.rotation));
             checkVictory(p.session);
+        });
+        handlers.register(NetMessage.StartSabotage.class, (p, m) -> {
+            if (p.session == null) return;
+            p.session.broadcast(new NetMessage.OnSabotageStateChanged(m.sabotage, true, 30000, CodeGenerator.newO2Code()));
+            if (m.sabotage == Sabotage.O2 || m.sabotage == Sabotage.Reactor) {
+                p.session.sabotageTask = scheduler.runLater(30000, () -> {
+                    p.session.broadcast(new NetMessage.OnGameEnd(PlayerRole.Impostor));
+                });
+            }
+        });
+        handlers.register(NetMessage.FixSabotage.class, (p, m) -> {
+            if (p.session == null) return;
+            if (m.fixed) p.session.fixers++;
+            else p.session.fixers--;
+
+            if (m.sabotage == Sabotage.Reactor || m.sabotage == Sabotage.O2) {
+                if (p.session.fixers == 2) {
+                    scheduler.cancel(p.session.sabotageTask);
+                    p.session.broadcast(new NetMessage.OnSabotageStateChanged(m.sabotage, false, 0, ""));
+                }
+            } else if (m.sabotage == Sabotage.Comms || m.sabotage == Sabotage.Lights) {
+                if (p.session.fixers > 0) {
+                    p.session.broadcast(new NetMessage.OnSabotageStateChanged(m.sabotage, false, 0, ""));
+                }
+            }
         });
     }
 

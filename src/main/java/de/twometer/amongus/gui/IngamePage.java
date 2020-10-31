@@ -1,9 +1,11 @@
 package de.twometer.amongus.gui;
 
 import de.twometer.amongus.core.AmongUs;
+import de.twometer.amongus.event.SabotageEvent;
 import de.twometer.amongus.event.UpdateEvent;
 import de.twometer.amongus.model.GameState;
 import de.twometer.amongus.model.PlayerRole;
+import de.twometer.amongus.model.Sabotage;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.neko.event.KeyPressedEvent;
 import org.greenrobot.eventbus.Subscribe;
@@ -20,6 +22,18 @@ public class IngamePage extends BasePage {
                 AmongUs.get().getWindow().getWidth() / 2.0f,
                 AmongUs.get().getWindow().getHeight() / 2.0f
         ));
+    }
+
+    @Subscribe
+    public void onSabotage(SabotageEvent e) {
+        runOnUiThread(() -> {
+            if (amongUs.getSession().currentSabotage == Sabotage.O2 || amongUs.getSession().currentSabotage == Sabotage.Reactor)
+                context.call("setAlarm", true);
+            else
+                context.call("setAlarm", false);
+
+            context.call("setCommsSabotaged", amongUs.getSession().currentSabotage == Sabotage.Comms);
+        });
     }
 
     @Override
@@ -43,6 +57,7 @@ public class IngamePage extends BasePage {
 
         context.call("setImpostor", amongUs.getSession().getMyself().getRole() == PlayerRole.Impostor);
         context.call("setGhost", !amongUs.getSession().getMyself().alive);
+        onSabotage(null);
     }
 
     private long lastUpdate = System.currentTimeMillis();
@@ -60,6 +75,13 @@ public class IngamePage extends BasePage {
             }
 
             lastUpdate = System.currentTimeMillis();
+
+            if (AmongUs.get().getSession().currentSabotage != null) {
+                context.call("setSabotage", TaskFormatter.formatSabotage(AmongUs.get().getSession().currentSabotage, AmongUs.get().getSession().currentSabotageDuration));
+                AmongUs.get().getSession().currentSabotageDuration--;
+            } else {
+                context.call("setSabotage", "");
+            }
         }
     }
 

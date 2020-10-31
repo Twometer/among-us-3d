@@ -3,9 +3,14 @@ package de.twometer.amongus.gui;
 import de.twometer.amongus.core.AmongUs;
 import de.twometer.amongus.model.Location;
 import de.twometer.amongus.model.PlayerTask;
+import de.twometer.amongus.model.Sabotage;
 import de.twometer.amongus.model.TaskType;
 
 public class TaskFormatter {
+
+    public static String formatSabotage(Sabotage sabotage, int dur) {
+        return String.format(i18n("sabotage." + sabotage.name()), dur);
+    }
 
     public static String format(PlayerTask task) {
         var stage = task.getNextStage();
