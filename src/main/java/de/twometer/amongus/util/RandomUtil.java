@@ -21,4 +21,8 @@ public class RandomUtil {
         return set;
     }
 
+    public static int nextInt(int low, int high) {
+        return low + random.nextInt(high - low);
+    }
+
 }

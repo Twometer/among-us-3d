@@ -101,6 +101,7 @@
         dispenser.style.left = 30;
         await delay(800);
         _remote.close();
+        _remote.beginTimeout();
     }
 
     function putLiquid(i) {

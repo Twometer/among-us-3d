@@ -11,11 +11,29 @@ public class PlayerTask {
 
     private int progress;
 
+    private long timerEnd = -1;
+
     private PlayerTask() {
     }
 
     public int getProgress() {
         return progress;
+    }
+
+    public void startTimer(long timeout) {
+        timerEnd = System.currentTimeMillis() + timeout * 1000;
+    }
+
+    public boolean isTimerRunning() {
+        return timerEnd != -1 && !isTimerEnded();
+    }
+
+    public boolean isTimerEnded() {
+        return timerEnd != -1 && timerEnd <= System.currentTimeMillis();
+    }
+
+    public long getEndTime() {
+        return timerEnd;
     }
 
     public State getState() {

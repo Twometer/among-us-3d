@@ -20,7 +20,7 @@ public class Player implements PlayerBehavior {
 
     public List<PlayerTask> tasks;
 
-    public boolean alive;
+    public boolean alive = true;
 
     public int emergencyMeetings = 0;
 
@@ -42,7 +42,8 @@ public class Player implements PlayerBehavior {
 
     public boolean canDoTask(Location location, TaskType taskType) {
         if (role == PlayerRole.Impostor) return false;
-        return findRunningTaskByStage(location, taskType) != null;
+        var task = findRunningTaskByStage(location, taskType);
+        return task != null && !task.isTimerRunning();
     }
 
     public PlayerTask findRunningTaskByStage(Location location, TaskType taskType) {

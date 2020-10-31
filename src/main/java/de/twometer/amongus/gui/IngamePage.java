@@ -1,6 +1,7 @@
 package de.twometer.amongus.gui;
 
 import de.twometer.amongus.core.AmongUs;
+import de.twometer.amongus.event.UpdateEvent;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.neko.event.KeyPressedEvent;
 import org.greenrobot.eventbus.Subscribe;
@@ -30,11 +31,30 @@ public class IngamePage extends BasePage {
 
         for (var task : amongUs.getSession().getMyself().tasks) {
             var state = task.getProgress() == 0 ? 0 : 1;
+            if (task.isTimerRunning()) state = 1;
             if (task.isCompleted()) state = 2;
 
             context.call("addTask", task.toString(), state);
         }
         setProgress(amongUs.getSession().taskProgress);
+    }
+
+    private long lastUpdate = System.currentTimeMillis();
+
+    @Subscribe
+    public void onUpdate(UpdateEvent event) {
+        if (System.currentTimeMillis() - lastUpdate > 1000) {
+
+            var idx = 0;
+            for (var task : amongUs.getSession().getMyself().tasks) {
+                if (task.isTimerRunning()) {
+                    context.call("setTask", idx, task.toString());
+                }
+                idx++;
+            }
+
+            lastUpdate = System.currentTimeMillis();
+        }
     }
 
     @Subscribe

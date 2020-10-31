@@ -1,5 +1,6 @@
 package de.twometer.amongus.core;
 
+import de.twometer.amongus.event.UpdateEvent;
 import de.twometer.amongus.game.GameObject;
 import de.twometer.amongus.game.GameObjectDecoder;
 import de.twometer.amongus.gui.ApiGui;
@@ -16,6 +17,7 @@ import de.twometer.amongus.util.Config;
 import de.twometer.amongus.util.Scheduler;
 import de.twometer.amongus.util.UserSettings;
 import de.twometer.neko.core.NekoApp;
+import de.twometer.neko.event.Events;
 import de.twometer.neko.event.MouseClickedEvent;
 import de.twometer.neko.render.filter.FrustumCullingFilter;
 import de.twometer.neko.render.light.LightSource;
@@ -125,6 +127,7 @@ public class AmongUs extends NekoApp {
         scheduler.update();
         for (var obj : gameObjects)
             obj.onUpdate();
+        Events.post(new UpdateEvent());
     }
 
     @Override

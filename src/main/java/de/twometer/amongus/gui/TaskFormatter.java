@@ -17,6 +17,9 @@ public class TaskFormatter {
 
         if (task.isMultiStage()) {
             sb.append(" (").append(task.getProgress()).append("/").append(task.length()).append(")");
+        } else if (task.isTimerRunning()) {
+            var remain = Math.round((task.getEndTime() - System.currentTimeMillis()) / 1000.0);
+            sb.append(" (").append(remain).append(")");
         }
 
         return sb.toString();
