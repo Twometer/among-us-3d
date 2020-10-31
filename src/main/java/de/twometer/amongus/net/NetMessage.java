@@ -514,6 +514,10 @@ public final class NetMessage {
         public Kill() {
         }
 
+        public Kill(int playerId) {
+            this.playerId = playerId;
+        }
+
         public Kill(boolean system, int playerId) {
             this.system = system;
             this.playerId = playerId;

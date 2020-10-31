@@ -1,6 +1,7 @@
 package de.twometer.amongus.net.client;
 
 import de.twometer.amongus.core.AmongUs;
+import de.twometer.amongus.game.DeadBodyGameObject;
 import de.twometer.amongus.game.PlayerGameObject;
 import de.twometer.amongus.gui.EmergencyPage;
 import de.twometer.amongus.gui.GameEndPage;
@@ -8,6 +9,8 @@ import de.twometer.amongus.model.ClientSession;
 import de.twometer.amongus.model.GameState;
 import de.twometer.amongus.model.Player;
 import de.twometer.amongus.net.NetMessage;
+import de.twometer.amongus.physics.CollidingPlayerController;
+import de.twometer.amongus.physics.GhostPlayerController;
 import de.twometer.amongus.util.Scheduler;
 import de.twometer.neko.util.Log;
 
@@ -83,7 +86,7 @@ public class NetHandler {
                 amongUs.getStateController().changeState(GameState.Emergency);
                 amongUs.getGuiManager().showPage(new EmergencyPage(meeting.reporterId));
             });
-            // TODO clear dead bodies
+            clearDed();
         } else if (o instanceof NetMessage.OnGameEnd) {
             var end = (NetMessage.OnGameEnd) o;
             var sess = amongUs.getSession();
@@ -92,15 +95,48 @@ public class NetHandler {
                 amongUs.getScheduler().run(() -> amongUs.getGuiManager().showPage(new GameEndPage()));
             }
             amongUs.getStateController().changeState(GameState.End);
-            // TODO reset dead bodies to players
+            clearDed();
+            for (var player : amongUs.getSession().getPlayers()) {
+                if (!player.alive) {
+                    player.alive = true;
+                    amongUs.getScheduler().run(() -> {
+                        amongUs.addGameObject(new PlayerGameObject(player));
+                    });
+                }
+            }
+            amongUs.getCamera().getPosition().y = 0;
+            amongUs.setPlayerController(new CollidingPlayerController());
         } else if (o instanceof NetMessage.Kill) {
             var kill = (NetMessage.Kill) o;
-            var player = amongUs.getSession().getPlayer(kill.playerId);
-            player.alive = false;
+            var victim = amongUs.getSession().getPlayer(kill.playerId);
+            victim.alive = false;
             if (!kill.system) {
-                // TODO spawn dead body
+                amongUs.getScheduler().run(() -> {
+                    // Create body
+                    var body = new DeadBodyGameObject(victim, victim.position);
+                    amongUs.addGameObject(body);
+
+                    // Remove player
+                    amongUs.removeGameObjects(gameObject -> {
+                        if (gameObject instanceof PlayerGameObject) {
+                            var obj = (PlayerGameObject) gameObject;
+                            return obj.getTrackedPlayer().id == victim.id;
+                        }
+                        return false;
+                    });
+
+                    // Put player in ghost mode
+                    if (victim.id == amongUs.getSession().getMyPlayerId()) {
+                        amongUs.getCamera().getPosition().y += 1;
+                        amongUs.setPlayerController(new GhostPlayerController());
+                    }
+                });
             }
         }
+    }
+
+    private void clearDed() {
+        amongUs.removeGameObjects(o -> o instanceof DeadBodyGameObject);
     }
 
 }

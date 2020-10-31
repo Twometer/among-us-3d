@@ -122,6 +122,7 @@
 </body>
 <script>
     var container = document.getElementById('playercontainer');
+    var deads = [];
     function addPlayer(pid, username, color, isDead, isCaller, isImpostor) {
         var item = document.createElement('div');
         item.classList.add('player-item');
@@ -132,7 +133,7 @@
         item.innerHTML = html;
         item.setAttribute('id', 'P-' + pid);
         container.appendChild(item);
-
+        if (isDead) deads.push(pid);
         const _pid = pid;
         item.onclick = function() {
             vote(_pid);
@@ -140,6 +141,7 @@
     }
     var voted = false;
     function vote(pid) {
+        if (deads.includes(pid)) return;
         if (voted) return;
         voted = true;
         _remote.vote(pid);

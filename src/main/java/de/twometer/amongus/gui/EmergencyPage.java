@@ -35,6 +35,8 @@ public class EmergencyPage extends BasePage {
     }
 
     public void vote(int id) {
+        if (!amongUs.getSession().getMyself().alive)
+            return;
         amongUs.getClient().sendMessage(new NetMessage.Vote(id));
     }
 

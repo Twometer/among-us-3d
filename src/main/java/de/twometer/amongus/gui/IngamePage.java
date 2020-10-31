@@ -3,6 +3,7 @@ package de.twometer.amongus.gui;
 import de.twometer.amongus.core.AmongUs;
 import de.twometer.amongus.event.UpdateEvent;
 import de.twometer.amongus.model.GameState;
+import de.twometer.amongus.model.PlayerRole;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.neko.event.KeyPressedEvent;
 import org.greenrobot.eventbus.Subscribe;
@@ -39,6 +40,9 @@ public class IngamePage extends BasePage {
         }
         setProgress(amongUs.getSession().taskProgress);
         amongUs.getStateController().changeState(GameState.Ingame);
+
+        context.call("setImpostor", amongUs.getSession().getMyself().getRole() == PlayerRole.Impostor);
+        context.call("setGhost", !amongUs.getSession().getMyself().alive);
     }
 
     private long lastUpdate = System.currentTimeMillis();

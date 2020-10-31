@@ -114,6 +114,18 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
+        #rolehint {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'In your face, Joffrey!';
+            font-size: 32px;
+            color: white;
+            margin: 5px;
+            padding: 15px;
+            background-color: #6868689F;
+        }
     </style>
 </head>
 <body>
@@ -130,6 +142,9 @@
     <p>Comms: Download Data</p>
     <p>Admin: Swipe card</p>-->
     <p id="sabotage" class="sabotage"></p>
+</div>
+<div id="rolehint">
+You're an impostor
 </div>
 
 <div id="alarm-overlay"></div>
@@ -162,6 +177,32 @@
 </body>
 
 <script>
+    var impostor = false;
+    var ghost = false;
+
+    function setGhost(g) {
+        ghost = g;
+        setVisiblity('action1', !g);
+    }
+
+    function setImpostor(imp) {
+        impostor = imp;
+        setVisibility('action2', imp);
+    }
+
+    function setVisibility(id, vis) {
+        document.getElementById(id).style.display = vis ? 'block' : 'none';
+    }
+
+    function OnLoaded() {
+        var hint = document.getElementById('rolehint');
+        if (impostor) hint.style.color = "red";
+        else hint.style.color = "lightskyblue";
+        if (ghost) hint.innerText = "You're a Ghost.";
+        else if (impostor) hint.innerText = "You're an impostor";
+        else hint.innerText = "You're a crewmate";
+    }
+
     var sabotageContainer = document.getElementById('sabotage');
     var taskContainer = document.getElementById('task-container');
     var progress = document.getElementById('progress');

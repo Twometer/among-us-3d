@@ -1,6 +1,7 @@
 package de.twometer.amongus.render;
 
 import de.twometer.amongus.core.AmongUs;
+import de.twometer.amongus.game.PlayerGameObject;
 import de.twometer.neko.event.Events;
 import de.twometer.neko.event.SizeChangedEvent;
 import de.twometer.neko.gl.Framebuffer;
@@ -48,9 +49,8 @@ public class PickEngine {
         var strategy = new UnshadedShadingStrategy();
         AmongUs.get().getRenderManager().setShadingStrategy(strategy);
         for (var obj : AmongUs.get().getGameObjects()) {
-            var model = obj.getModel();
-            var radius = model.getSize().length() / 2;
-            var distance = model.getCenter().distance(AmongUs.get().getCamera().getInterpolatedPosition(AmongUs.get().getTimer().getPartial())) - radius;
+            var radius = obj.getRadius();
+            var distance = obj.getPosition().distance(AmongUs.get().getCamera().getInterpolatedPosition(AmongUs.get().getTimer().getPartial())) - radius;
             if (distance > 2)
                 continue;
 

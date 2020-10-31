@@ -189,6 +189,8 @@ public class AmongUsServer extends Listener {
         });
         handlers.register(NetMessage.PositionChange.class, (p, m) -> {
             if (p.session == null) return;
+            p.player.position = m.position;
+            p.player.rotation = m.rotation;
             m.playerId = p.player.id;
             p.session.broadcastExcept(m, m.playerId);
         });
@@ -221,7 +223,9 @@ public class AmongUsServer extends Listener {
             if (p.session == null) return;
             var victim = p.session.getPlayer(m.playerId);
             victim.player.alive = false;
-            p.session.broadcast(new NetMessage.Kill(false, m.playerId));
+            p.session.broadcast(new NetMessage.Kill(false, victim.player.id));
+            p.session.broadcast(new NetMessage.PositionChange(p.player.id, victim.player.position, victim.player.rotation));
+            checkVictory(p.session);
         });
     }
 

@@ -3,6 +3,7 @@ package de.twometer.amongus.game;
 import de.twometer.amongus.core.AmongUs;
 import de.twometer.neko.render.Color;
 import de.twometer.neko.render.model.ModelBase;
+import org.joml.Vector3f;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -52,6 +53,14 @@ public abstract class GameObject {
 
     public boolean isMouseOver() {
         return AmongUs.get().getPickEngine().getHoveringId() == id;
+    }
+
+    public float getRadius() {
+        return model.getSize().length() / 2;
+    }
+
+    public Vector3f getPosition() {
+        return model.getTransformedCenter();
     }
 
 }
