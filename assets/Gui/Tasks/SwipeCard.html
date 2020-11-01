@@ -62,6 +62,11 @@
                 card.style.left = newx;
             }
         }
+
+        function badReadMessage() {
+            return Math.random() * 100 > 99 ? "KREBS KREBS" : "BAD READ.";
+        }
+
         document.onmouseup = function(e) {
             document.onmousemove =null;
             if (!started) return;
@@ -71,7 +76,7 @@
             var progress = (card.style.left.replace('px', '') - 20) / 276;
             var random = Math.random() * 10 > 9;
             if (random || progress < 0.99)
-                message.innerHTML = ("BAD READ.");
+                message.innerHTML = badRadMessage();
             else if (duration < 650)
                 message.innerHTML = ("TOO FAST. TRY AGAIN.");
             else if(duration > 800)

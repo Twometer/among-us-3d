@@ -129,10 +129,14 @@ public class NetHandler {
                         return false;
                     });
 
-                    // Put player in ghost mode
+                    // Was it me?
                     if (victim.id == amongUs.getSession().getMyPlayerId()) {
+                        // Put player in ghost mode
                         amongUs.getCamera().getPosition().y += 1;
                         amongUs.setPlayerController(new GhostPlayerController());
+
+                        // Play DEATH SOUND
+                        amongUs.getSoundFX().play("KillMusic.ogg");
                     }
                 });
             }

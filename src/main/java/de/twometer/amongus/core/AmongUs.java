@@ -6,6 +6,7 @@ import de.twometer.amongus.game.GameObjectDecoder;
 import de.twometer.amongus.gui.*;
 import de.twometer.amongus.io.FileSystem;
 import de.twometer.amongus.model.ClientSession;
+import de.twometer.amongus.model.GameState;
 import de.twometer.amongus.model.PlayerRole;
 import de.twometer.amongus.net.client.NetClient;
 import de.twometer.amongus.physics.CollidingPlayerController;
@@ -43,6 +44,7 @@ public class AmongUs extends NekoApp {
     private final FileSystem fileSystem = new FileSystem();
     private final PickEngine pickEngine = new PickEngine();
     private final HighlightEngine highlightEngine = new HighlightEngine();
+    private final SoundController soundController = new SoundController();
     private List<GameObject> gameObjects;
     private GameObject hoveringGameObject;
     private NetClient client;
@@ -118,9 +120,14 @@ public class AmongUs extends NekoApp {
         getGuiManager().registerGlobalJsObject("_api", new ApiGui());
         getGuiManager().showPage(new MainMenuPage());
 
+        // Sounds
+        soundController.initialize();
+
         Log.i("Connecting to server: " + Config.get().getServerIp());
         client = new NetClient();
         client.connect();
+
+        stateController.changeState(GameState.Menus);
     }
 
     @Override
