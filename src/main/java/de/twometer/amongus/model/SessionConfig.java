@@ -2,6 +2,10 @@ package de.twometer.amongus.model;
 
 public class SessionConfig {
 
+    // Base variables for converting the relative values to world-values
+    public static float PLAYER_VISION_BASE_RADIUS = 6.0f;
+    public static float PLAYER_VISION_BASE_SPEED = 0.1f;
+
     private int impostorCount = 1;
     private float playerVision = 0.8f;
     private float impostorVision = 1.2f;

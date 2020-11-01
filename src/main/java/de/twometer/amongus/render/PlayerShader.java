@@ -26,6 +26,8 @@ public class PlayerShader extends Shader {
     @Dimensions(3)
     public Uniform<Color> playerColor;
 
+    public Uniform<Float> visionRadius;
+
     public PlayerShader() {
         super("Player");
     }

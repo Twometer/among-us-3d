@@ -1,7 +1,5 @@
 package de.twometer.amongus.physics;
 
-import de.twometer.amongus.core.AmongUs;
-import de.twometer.amongus.net.NetMessage;
 import de.twometer.neko.core.IPlayerController;
 import de.twometer.neko.gl.Window;
 import de.twometer.neko.render.Camera;
@@ -13,16 +11,12 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public abstract class BasePlayerController implements IPlayerController {
 
-    private float speed;
-
-    public BasePlayerController(float speed) {
-        this.speed = speed;
-    }
-
     @Override
     public void update(Window window, Camera camera) {
         if (window.isCursorVisible())
             return;
+
+        var speed = getSpeed();
 
         float yaw = MathF.toRadians(camera.getAngle().x);
         Vector3f fwd = new Vector3f(MathF.sin(yaw), 0, MathF.cos(yaw)).normalize(speed);
@@ -61,8 +55,5 @@ public abstract class BasePlayerController implements IPlayerController {
         return false;
     }
 
-    final void setSpeed(float speed) {
-        this.speed = speed;
-    }
-
+    public abstract float getSpeed();
 }

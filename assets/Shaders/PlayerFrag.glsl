@@ -8,6 +8,7 @@ in vec3 fragmentPosition;
 in vec3 fragmentNormal;
 in vec2 fragmentTexture;
 in vec4 fragmentColor;
+in float visibility;
 
 uniform bool hasTexture;
 uniform sampler2D texSampler;
@@ -16,7 +17,9 @@ void main(void) {
     gPosition = vec4(fragmentPosition, 1.0f);
     gNormal = vec4(normalize(fragmentNormal), 1.0f);
     gAlbedoSpec = hasTexture ? texture(texSampler, fragmentTexture) : fragmentColor;
+    gAlbedoSpec.a *= visibility;
 
-    if (gAlbedoSpec.a == 0)
+
+    if (gAlbedoSpec.a < 0.05)
         discard;
 }
