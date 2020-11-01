@@ -291,7 +291,7 @@ public class AmongUsServer extends Listener {
             }
             var sorted = voteCounts.entrySet()
                     .stream()
-                    .sorted(Comparator.comparingInt(Map.Entry::getValue))
+                    .sorted(Comparator.comparingInt(e -> -e.getValue()))
                     .collect(Collectors.toList());
 
             var highestVotes = sorted.get(0);

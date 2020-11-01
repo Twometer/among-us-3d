@@ -21,17 +21,21 @@ public class EjectPage extends BasePage {
         super.onDomReady();
 
         amongUs.getScheduler().runLater(1500, () -> {
+            var impostors = amongUs.getSession().getPlayers().stream().filter(p -> p.getRole() == PlayerRole.Impostor && p.alive).count();
+            var remainMsg = impostors == 1 ? " Impostor remains" : " Impostors remain";
+            var remaining = amongUs.getSession().getConfig().isConfirmEjects() ? impostors + remainMsg : "";
+
             switch (result) {
                 case Tie:
-                    context.call("drawEjectMessage", "No one was ejected (Tie)", "");
+                    context.call("drawEjectMessage", "No one was ejected (Tie)", remaining);
                     break;
                 case Skip:
-                    context.call("drawEjectMessage", "No one was ejected (Skipped)", "");
+                    context.call("drawEjectMessage", "No one was ejected (Skipped)", remaining);
                     break;
                 case Eject:
                     var ejectedPlayer = amongUs.getSession().getPlayer(player);
                     if (amongUs.getSession().getConfig().isConfirmEjects()) {
-                        var impostors = amongUs.getSession().getPlayers().stream().filter(p -> p.getRole() == PlayerRole.Impostor && p.alive).count();
+
                         var builder = new StringBuilder();
                         builder.append(ejectedPlayer.username);
                         builder.append(" was ");
@@ -39,10 +43,9 @@ public class EjectPage extends BasePage {
                             builder.append("not ");
                         builder.append((impostors > 1) ? "An Impostor" : "The Impostor");
 
-                        var remainMsg = impostors == 1 ? " Impostor remains" : " Impostors remain";
-                        context.call("drawEjectMessage", builder.toString(), impostors + remainMsg);
+                        context.call("drawEjectMessage", builder.toString(), remaining);
                     } else {
-                        context.call("drawEjectMessage", ejectedPlayer.getUsername() + " was ejected.", "");
+                        context.call("drawEjectMessage", ejectedPlayer.getUsername() + " was ejected.", remaining);
                     }
                     break;
             }

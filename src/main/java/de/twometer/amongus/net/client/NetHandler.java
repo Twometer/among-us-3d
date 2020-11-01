@@ -86,8 +86,8 @@ public class NetHandler {
                 amongUs.getSoundFX().play(sound);
                 amongUs.getStateController().changeState(GameState.Emergency);
                 amongUs.getGuiManager().showPage(new EmergencyPage(meeting.reporterId));
+                clearDed();
             });
-            clearDed();
         } else if (o instanceof NetMessage.OnGameEnd) {
             var end = (NetMessage.OnGameEnd) o;
             var sess = amongUs.getSession();
@@ -98,50 +98,54 @@ public class NetHandler {
             amongUs.getStateController().changeState(GameState.End);
 
             // Reset game state
-            clearDed();
-            for (var player : amongUs.getSession().getPlayers()) {
-                if (!player.alive) {
-                    player.alive = true;
-                    amongUs.getScheduler().run(() -> {
-                        amongUs.addGameObject(new PlayerGameObject(player));
-                    });
+            AmongUs.get().getScheduler().runLater(10000, () -> {
+                Log.d("Resetting session on the client");
+                clearDed();
+                for (var player : amongUs.getSession().getPlayers()) {
+                    if (!player.alive && player.id != amongUs.getSession().getMyPlayerId()) {
+                        player.alive = true;
+                        amongUs.getScheduler().run(() -> {
+                            amongUs.addGameObject(new PlayerGameObject(player));
+                        });
+                    }
+                    player.role = PlayerRole.Crewmate;
                 }
-                player.role = PlayerRole.Crewmate;
-            }
-            amongUs.getCamera().getPosition().y = 0;
-            amongUs.setPlayerController(new CollidingPlayerController());
-            amongUs.getSession().currentSabotage = null;
-            amongUs.getSession().taskProgress = 0.0f;
+                amongUs.getCamera().getPosition().y = 0;
+                amongUs.setPlayerController(new CollidingPlayerController());
+                amongUs.getSession().currentSabotage = null;
+                amongUs.getSession().taskProgress = 0.0f;
+            });
         } else if (o instanceof NetMessage.Kill) {
             var kill = (NetMessage.Kill) o;
             var victim = amongUs.getSession().getPlayer(kill.playerId);
             victim.alive = false;
-            if (!kill.system) {
-                amongUs.getScheduler().run(() -> {
-                    // Create body
+            amongUs.getScheduler().run(() -> {
+                // Create body
+                if (!kill.system) {
                     var body = new DeadBodyGameObject(victim, victim.position);
                     amongUs.addGameObject(body);
+                }
 
-                    // Remove player
-                    amongUs.removeGameObjects(gameObject -> {
-                        if (gameObject instanceof PlayerGameObject) {
-                            var obj = (PlayerGameObject) gameObject;
-                            return obj.getTrackedPlayer().id == victim.id;
-                        }
-                        return false;
-                    });
-
-                    // Was it me?
-                    if (victim.id == amongUs.getSession().getMyPlayerId()) {
-                        // Put player in ghost mode
-                        amongUs.getCamera().getPosition().y += 1;
-                        amongUs.setPlayerController(new GhostPlayerController());
-
-                        // Play DEATH SOUND
-                        amongUs.getSoundFX().play("KillMusic.ogg");
+                // Remove player
+                amongUs.removeGameObjects(gameObject -> {
+                    if (gameObject instanceof PlayerGameObject) {
+                        var obj = (PlayerGameObject) gameObject;
+                        return obj.getTrackedPlayer().id == victim.id;
                     }
+                    return false;
                 });
-            }
+
+                // Was it me?
+                if (victim.id == amongUs.getSession().getMyPlayerId()) {
+                    // Put player in ghost mode
+                    amongUs.getCamera().getPosition().y += 1;
+                    amongUs.setPlayerController(new GhostPlayerController());
+
+                    // Play DEATH SOUND
+                    if (!kill.system)
+                        amongUs.getSoundFX().play("KillMusic.ogg");
+                }
+            });
         } else if (o instanceof NetMessage.OnSabotageStateChanged) {
             var sab = (NetMessage.OnSabotageStateChanged) o;
             if (sab.active) {
