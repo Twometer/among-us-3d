@@ -193,7 +193,7 @@ public class AmongUs extends NekoApp {
 
     @Subscribe
     public void onKeyPress(KeyPressedEvent event) {
-        if (stateController.isRunning() && event.key == GLFW.GLFW_KEY_Q && AmongUs.get().getSession().getMyself().role == PlayerRole.Impostor && getGuiManager().getCurrentPage() == null) {
+        if (stateController.isRunning() && event.key == GLFW.GLFW_KEY_Q && AmongUs.get().getSession().getMyself().role == PlayerRole.Impostor && (getGuiManager().getCurrentPage() instanceof IngamePage)) {
             getGuiManager().showPage(new SabotagePage());
         }
     }
