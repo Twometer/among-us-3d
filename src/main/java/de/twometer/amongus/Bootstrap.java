@@ -3,7 +3,7 @@ package de.twometer.amongus;
 import de.twometer.amongus.core.AmongUs;
 import de.twometer.amongus.net.server.AmongUsServer;
 
-public final class Boostrap {
+public final class Bootstrap {
 
     public static void main(String[] args) throws Exception {
         System.out.println("    ___                                   __  __        _____ ____ \n" +
