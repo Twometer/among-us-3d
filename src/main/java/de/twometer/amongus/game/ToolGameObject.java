@@ -3,6 +3,7 @@ package de.twometer.amongus.game;
 import de.twometer.amongus.core.AmongUs;
 import de.twometer.amongus.gui.CallMeetingPage;
 import de.twometer.amongus.model.Location;
+import de.twometer.amongus.model.Session;
 import de.twometer.amongus.model.ToolType;
 import de.twometer.neko.render.model.ModelBase;
 
@@ -19,7 +20,7 @@ public class ToolGameObject extends GameObject {
 
     @Override
     public boolean canInteract() {
-        return true;
+        return AmongUs.get().getSession().getMyself().alive;
     }
 
     @Override

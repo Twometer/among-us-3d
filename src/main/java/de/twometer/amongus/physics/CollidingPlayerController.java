@@ -6,9 +6,13 @@ import de.twometer.amongus.net.NetMessage;
 import de.twometer.neko.gl.Window;
 import de.twometer.neko.render.Camera;
 import de.twometer.neko.util.MathF;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 public class CollidingPlayerController extends BasePlayerController {
 
+    private float time = 0.0f;
+    private Vector3f baseOffset;
     private final Collider collider;
 
     public CollidingPlayerController() {
@@ -17,10 +21,24 @@ public class CollidingPlayerController extends BasePlayerController {
 
     @Override
     public void update(Window window, Camera camera) {
+        var oldpos = new Vector3f().set(camera.getPosition());
         super.update(window, camera);
         collider.updatePosition(camera.getPosition());
 
         AmongUs.get().getClient().sendMessage(new NetMessage.PositionChange(camera.getPosition(), MathF.toRadians(camera.getAngle().x)));
+
+        var diff = camera.getPosition().distanceSquared(oldpos);
+        if (diff > 0.005) time += 0.1f;
+
+        if (baseOffset == null)
+            baseOffset = new Vector3f().set(camera.getOffset());
+
+        var yaw = MathF.toRadians(camera.getAngle().x);
+        var bobof = MathF.sin(time * 2) * 0.05f;
+        var rightVec = new Vector3f(MathF.sin(yaw - MathF.PI / 2f), 0.0F, MathF.cos(yaw - MathF.PI / 2f))
+                .normalize(bobof);
+        var bob = Math.abs(MathF.sin(time * 2 + 1.5f) * 0.05f);
+        camera.getOffset().set(0, bob, 0).add(baseOffset).add(rightVec);
     }
 
     @Override

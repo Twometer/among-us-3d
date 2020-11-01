@@ -22,6 +22,7 @@ public abstract class BasePlayerController implements IPlayerController {
         Vector3f fwd = new Vector3f(MathF.sin(yaw), 0, MathF.cos(yaw)).normalize(speed);
         Vector3f left = new Vector3f(MathF.sin(yaw + MathF.PI / 2), 0, MathF.cos(yaw + MathF.PI / 2)).normalize(speed);
 
+        var moving = false;
         if (window.isKeyPressed(GLFW_KEY_W))
             camera.getPosition().add(fwd);
 
@@ -33,6 +34,7 @@ public abstract class BasePlayerController implements IPlayerController {
 
         if (window.isKeyPressed(GLFW_KEY_D))
             camera.getPosition().sub(left);
+
 
         if (mayFly()) {
             if (window.isKeyPressed(GLFW_KEY_SPACE))

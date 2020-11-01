@@ -24,9 +24,13 @@ public class SabotagePage extends BasePage {
     public void sabotage(String sabotage) {
         var sab = Sabotage.valueOf(sabotage);
         if (cooldown < System.currentTimeMillis()) {
-            cooldown = System.currentTimeMillis() + 30000;
+            restartCooldown();
             AmongUs.get().getClient().sendMessage(new NetMessage.StartSabotage(sab));
         }
+    }
+
+    public static void restartCooldown() {
+        cooldown = System.currentTimeMillis() + 30000;
     }
 
     @Override

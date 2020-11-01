@@ -320,7 +320,8 @@ public class AmongUsServer extends Listener {
     }
 
     private void checkAllVoted(ServerSession session) {
-        if (session.votes.size() == session.getPlayers().size())
+        var alivePlayers = session.getPlayers().stream().filter(p -> p.player.alive).count();
+        if (session.votes.size() == alivePlayers)
             handleVotingEnd(session);
     }
 

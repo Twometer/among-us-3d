@@ -5,6 +5,7 @@ import de.twometer.amongus.event.SabotageEvent;
 import de.twometer.amongus.event.UpdateEvent;
 import de.twometer.amongus.game.DeadBodyGameObject;
 import de.twometer.amongus.game.PlayerGameObject;
+import de.twometer.amongus.game.VentGameObject;
 import de.twometer.amongus.model.GameState;
 import de.twometer.amongus.model.PlayerRole;
 import de.twometer.amongus.model.Sabotage;
@@ -105,6 +106,8 @@ public class IngamePage extends BasePage {
             action = "Kill";
         } else if (hovering instanceof DeadBodyGameObject) {
             action = "Report";
+        } else if (hovering instanceof VentGameObject) {
+            action = "Vent";
         }
         if (!action.equals(lastAction)) {
             lastAction = action;

@@ -103,11 +103,11 @@ public class NetHandler {
                 clearDed();
                 for (var player : amongUs.getSession().getPlayers()) {
                     if (!player.alive && player.id != amongUs.getSession().getMyPlayerId()) {
-                        player.alive = true;
                         amongUs.getScheduler().run(() -> {
                             amongUs.addGameObject(new PlayerGameObject(player));
                         });
                     }
+                    player.alive = true;
                     player.role = PlayerRole.Crewmate;
                 }
                 amongUs.getCamera().getPosition().y = 0;
@@ -152,6 +152,7 @@ public class NetHandler {
                 amongUs.getSession().currentSabotage = sab.sabotage;
                 amongUs.getSession().currentSabotageCode = sab.code;
                 amongUs.getSession().currentSabotageDuration = sab.duration / 1000;
+                SabotagePage.restartCooldown();
                 if (sab.sabotage == Sabotage.Lights)
                     amongUs.getScheduler().run(() -> {
                         for (var light : amongUs.getScene().getLights())
