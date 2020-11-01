@@ -19,6 +19,8 @@ public class CollidingPlayerController extends BasePlayerController {
         collider = ColliderLoader.load();
     }
 
+    private float prevBob;
+
     @Override
     public void update(Window window, Camera camera) {
         var oldpos = new Vector3f().set(camera.getPosition());
@@ -37,7 +39,13 @@ public class CollidingPlayerController extends BasePlayerController {
         var bobof = MathF.sin(time * 2) * 0.05f;
         var rightVec = new Vector3f(MathF.sin(yaw - MathF.PI / 2f), 0.0F, MathF.cos(yaw - MathF.PI / 2f))
                 .normalize(bobof);
-        var bob = Math.abs(MathF.sin(time * 2 + 1.5f) * 0.05f);
+        var ubob  =MathF.sin(time * 2 + 1.5f) * 0.05f;
+        var bob = Math.abs(ubob);
+        if ((prevBob < 0 && ubob >= 0) || (prevBob >= 0 && ubob < 0))
+            playFootstep();
+        prevBob = ubob;
+
+
         camera.getOffset().set(0, bob, 0).add(baseOffset).add(rightVec);
     }
 
@@ -45,5 +53,10 @@ public class CollidingPlayerController extends BasePlayerController {
     public float getSpeed() {
         if (!AmongUs.get().getStateController().isRunning()) return 0.0f;
         return AmongUs.get().getSession().getConfig().getPlayerSpeed() * SessionConfig.PLAYER_VISION_BASE_SPEED;
+    }
+
+    private void playFootstep() {
+        var rand = (int) (MathF.rand() * 8) + 1;
+        AmongUs.get().getSoundFX().play("Footsteps/Metal" + rand + ".ogg");
     }
 }
