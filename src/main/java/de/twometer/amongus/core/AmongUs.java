@@ -31,12 +31,20 @@ import de.twometer.neko.util.Log;
 import org.greenrobot.eventbus.Subscribe;
 import org.lwjgl.glfw.GLFW;
 
+import javax.swing.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
 public class AmongUs extends NekoApp {
+
+    public static final int VERSION_ID = 1;
 
     // Game services
     private final StateController stateController = new StateController();
@@ -50,7 +58,6 @@ public class AmongUs extends NekoApp {
     private NetClient client;
     private UserSettings userSettings;
     private ClientSession session;
-
 
     // Singleton
     private static AmongUs instance;
@@ -128,6 +135,24 @@ public class AmongUs extends NekoApp {
         client.connect();
 
         stateController.changeState(GameState.Menus);
+
+        (new Thread(() -> {
+            try {
+                var url = new URL("https://twometer.de/amongus/version.txt");
+                var in = url.openStream();
+                try (var reader = new BufferedReader(new InputStreamReader(in))) {
+                    var ver = Integer.parseInt(reader.readLine());
+                    if (ver > VERSION_ID) {
+                        var p = new JOptionPane("<html><body><h3>New version</h3>A new version is available from <a href='https://twometer.de/amongus'>https://twometer.de/amongus</a>.</body></html>", JOptionPane.INFORMATION_MESSAGE);
+                        var d = p.createDialog("New version available");
+                        d.setAlwaysOnTop(true);
+                        d.setVisible(true);
+                    }
+                }
+            } catch (Exception e) {
+                Log.e("Update check failed", e);
+            }
+        })).start();
     }
 
     @Override
