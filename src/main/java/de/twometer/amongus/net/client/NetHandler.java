@@ -7,10 +7,7 @@ import de.twometer.amongus.game.PlayerGameObject;
 import de.twometer.amongus.gui.EmergencyPage;
 import de.twometer.amongus.gui.GameEndPage;
 import de.twometer.amongus.gui.SabotagePage;
-import de.twometer.amongus.model.ClientSession;
-import de.twometer.amongus.model.GameState;
-import de.twometer.amongus.model.Player;
-import de.twometer.amongus.model.Sabotage;
+import de.twometer.amongus.model.*;
 import de.twometer.amongus.net.NetMessage;
 import de.twometer.amongus.physics.CollidingPlayerController;
 import de.twometer.amongus.physics.GhostPlayerController;
@@ -99,6 +96,8 @@ public class NetHandler {
                 amongUs.getScheduler().run(() -> amongUs.getGuiManager().showPage(new GameEndPage()));
             }
             amongUs.getStateController().changeState(GameState.End);
+
+            // Reset game state
             clearDed();
             for (var player : amongUs.getSession().getPlayers()) {
                 if (!player.alive) {
@@ -107,9 +106,12 @@ public class NetHandler {
                         amongUs.addGameObject(new PlayerGameObject(player));
                     });
                 }
+                player.role = PlayerRole.Crewmate;
             }
             amongUs.getCamera().getPosition().y = 0;
             amongUs.setPlayerController(new CollidingPlayerController());
+            amongUs.getSession().currentSabotage = null;
+            amongUs.getSession().taskProgress = 0.0f;
         } else if (o instanceof NetMessage.Kill) {
             var kill = (NetMessage.Kill) o;
             var victim = amongUs.getSession().getPlayer(kill.playerId);

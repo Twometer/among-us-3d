@@ -220,8 +220,8 @@ public class AmongUsServer extends Listener {
             if (p.session == null) return;
             var victim = p.session.getPlayer(m.playerId);
             victim.player.alive = false;
-            p.session.broadcast(new NetMessage.Kill(false, victim.player.id));
             p.session.broadcast(new NetMessage.PositionChange(p.player.id, victim.player.position, victim.player.rotation));
+            p.session.broadcast(new NetMessage.Kill(false, victim.player.id));
             checkVictory(p.session);
         });
         handlers.register(NetMessage.StartSabotage.class, (p, m) -> {
@@ -229,7 +229,8 @@ public class AmongUsServer extends Listener {
             p.session.broadcast(new NetMessage.OnSabotageStateChanged(m.sabotage, true, 30000, CodeGenerator.newO2Code()));
             if (m.sabotage == Sabotage.O2 || m.sabotage == Sabotage.Reactor) {
                 p.session.sabotageTask = scheduler.runLater(30000, () -> {
-                    p.session.broadcast(new NetMessage.OnGameEnd(PlayerRole.Impostor));
+                    p.session.sabotageTask = null;
+                    handleVictory(p.session, PlayerRole.Impostor);
                 });
             }
         });
@@ -326,7 +327,28 @@ public class AmongUsServer extends Listener {
     private void checkVictory(ServerSession session) {
         var winners = findWinners(session);
         if (winners == null) return;
+        handleVictory(session, winners);
+    }
+
+    private void handleVictory(ServerSession session, PlayerRole winners) {
+        resetSession(session);
         session.broadcast(new NetMessage.OnGameEnd(winners));
+    }
+
+    private void resetSession(ServerSession session) {
+        Log.i("Resetting session");
+        if (session.sabotageTask != null)
+            scheduler.cancel(session.sabotageTask);
+        if (session.votingTask != null)
+            scheduler.cancel(session.votingTask);
+        session.votes.clear();
+        session.tasksFinished = 0;
+        session.totalTaskStages = 0;
+        session.fixers = 0;
+        for (var player : session.getPlayers()) {
+            player.player.alive = true;
+            player.player.role = PlayerRole.Crewmate;
+        }
     }
 
     private PlayerRole findWinners(ServerSession session) {
