@@ -55,14 +55,19 @@ public class PlayerGameObject extends GameObject {
 
     @Override
     public boolean canInteract() {
-        return AmongUs.get().getSession().getMyself().getRole() == PlayerRole.Impostor;
+        var me = AmongUs.get().getSession().getMyself();
+        return me.alive && me.getRole() == PlayerRole.Impostor;
     }
 
     @Override
     public void onClick() {
         super.onClick();
+        var me = AmongUs.get().getSession().getMyself();
+        if (!me.canKill())
+            return;
         AmongUs.get().getSoundFX().play("ImpostorKill.ogg");
         AmongUs.get().getClient().sendMessage(new NetMessage.Kill(trackedPlayer.id));
+        me.resetKillCooldown();
     }
 
     @Override

@@ -44,9 +44,11 @@ public class AmongUs extends NekoApp {
     private final PickEngine pickEngine = new PickEngine();
     private final HighlightEngine highlightEngine = new HighlightEngine();
     private List<GameObject> gameObjects;
+    private GameObject hoveringGameObject;
     private NetClient client;
     private UserSettings userSettings;
     private ClientSession session;
+
 
     // Singleton
     private static AmongUs instance;
@@ -128,6 +130,14 @@ public class AmongUs extends NekoApp {
         for (var obj : gameObjects)
             obj.onUpdate();
         Events.post(new UpdateEvent());
+
+        hoveringGameObject = null;
+        var clicked = pickEngine.getHoveringId();
+        for (var obj : gameObjects)
+            if (obj.getId() == clicked && obj.canInteract()) {
+                hoveringGameObject = obj;
+                return;
+            }
     }
 
     @Override
@@ -145,14 +155,8 @@ public class AmongUs extends NekoApp {
         if (!(getGuiManager().getCurrentPage() instanceof IngamePage))
             return;
 
-        var clicked = pickEngine.getHoveringId();
-        for (var obj : gameObjects)
-            if (obj.getId() == clicked) {
-                if (!obj.canInteract())
-                    return;
-                obj.onClick();
-                return;
-            }
+        if (hoveringGameObject != null)
+            hoveringGameObject.onClick();
     }
 
     @Subscribe
@@ -222,5 +226,9 @@ public class AmongUs extends NekoApp {
 
     public PickEngine getPickEngine() {
         return pickEngine;
+    }
+
+    public GameObject getHoveringGameObject() {
+        return hoveringGameObject;
     }
 }

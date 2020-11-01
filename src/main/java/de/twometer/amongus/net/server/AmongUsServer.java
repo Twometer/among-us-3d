@@ -363,7 +363,7 @@ public class AmongUsServer extends Listener {
         do {
             t = supplier.get();
             tries++;
-            if (tries > 25)
+            if (tries > 50)
                 throw new IllegalStateException("Exceeded random tries.");
         } while (list.contains(t));
         return t;

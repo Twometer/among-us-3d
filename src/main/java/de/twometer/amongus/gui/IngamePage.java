@@ -3,6 +3,8 @@ package de.twometer.amongus.gui;
 import de.twometer.amongus.core.AmongUs;
 import de.twometer.amongus.event.SabotageEvent;
 import de.twometer.amongus.event.UpdateEvent;
+import de.twometer.amongus.game.DeadBodyGameObject;
+import de.twometer.amongus.game.PlayerGameObject;
 import de.twometer.amongus.model.GameState;
 import de.twometer.amongus.model.PlayerRole;
 import de.twometer.amongus.model.Sabotage;
@@ -22,6 +24,10 @@ public class IngamePage extends BasePage {
                 AmongUs.get().getWindow().getWidth() / 2.0f,
                 AmongUs.get().getWindow().getHeight() / 2.0f
         ));
+
+        var me = AmongUs.get().getSession().getMyself();
+        if (me.killCooldown == -1)
+            me.resetKillCooldown();
     }
 
     @Subscribe
@@ -55,19 +61,24 @@ public class IngamePage extends BasePage {
         setProgress(amongUs.getSession().taskProgress);
         amongUs.getStateController().changeState(GameState.Ingame);
 
-        context.call("setImpostor", amongUs.getSession().getMyself().getRole() == PlayerRole.Impostor);
-        context.call("setGhost", !amongUs.getSession().getMyself().alive);
+        var me = amongUs.getSession().getMyself();
+        context.call("setImpostor", me.getRole() == PlayerRole.Impostor);
+        context.call("setGhost", !me.alive);
+        context.call("setKillCooldown", me.killCooldown);
         onSabotage(null);
     }
 
     private long lastUpdate = System.currentTimeMillis();
 
+    private String lastAction = "Use";
+
     @Subscribe
     public void onUpdate(UpdateEvent event) {
         if (System.currentTimeMillis() - lastUpdate > 1000) {
+            var me = AmongUs.get().getSession().getMyself();
 
             var idx = 0;
-            for (var task : amongUs.getSession().getMyself().tasks) {
+            for (var task : me.tasks) {
                 if (task.isTimerRunning()) {
                     context.call("setTask", idx, task.toString());
                 }
@@ -82,12 +93,28 @@ public class IngamePage extends BasePage {
             } else {
                 context.call("setSabotage", "");
             }
+            if (me.killCooldown > 0) {
+                me.killCooldown--;
+                context.call("setKillCooldown", me.killCooldown);
+            }
+        }
+
+        var hovering = AmongUs.get().getHoveringGameObject();
+        var action = "Use";
+        if (hovering instanceof PlayerGameObject) {
+            action = "Kill";
+        } else if (hovering instanceof DeadBodyGameObject) {
+            action = "Report";
+        }
+        if (!action.equals(lastAction)) {
+            lastAction = action;
+            context.call("setMainAction", action);
         }
     }
 
     @Subscribe
     public void onProgressChanged(NetMessage.OnTaskProgressChanged progressChanged) {
-        amongUs.getScheduler().run(() -> setProgress(progressChanged.progress));
+        runOnUiThread(() -> setProgress(progressChanged.progress));
     }
 
     private void setProgress(float progress) {

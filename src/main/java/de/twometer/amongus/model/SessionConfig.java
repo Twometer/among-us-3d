@@ -16,6 +16,7 @@ public class SessionConfig {
     private int commonTasks = 1;
     private int shortTasks = 2;
     private int longTasks = 2;
+    private int killCooldown = 25;
 
     public int getImpostorCount() {
         return impostorCount;
@@ -95,5 +96,13 @@ public class SessionConfig {
 
     public void setLongTasks(int longTasks) {
         this.longTasks = longTasks;
+    }
+
+    public int getKillCooldown() {
+        return killCooldown;
+    }
+
+    public void setKillCooldown(int killCooldown) {
+        this.killCooldown = killCooldown;
     }
 }

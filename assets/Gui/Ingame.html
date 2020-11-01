@@ -106,6 +106,7 @@
             left: 0;
             bottom: 0;
             display: none;
+            background-color: rgba(0, 0, 0, 0.005);
         }
 
         .chair {
@@ -114,6 +115,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
+
         #rolehint {
             position: absolute;
             bottom: 0;
@@ -144,7 +146,7 @@
     <p id="sabotage" class="sabotage"></p>
 </div>
 <div id="rolehint">
-You're an impostor
+    You're an impostor
 </div>
 
 <div id="alarm-overlay"></div>
@@ -152,24 +154,25 @@ You're an impostor
 <img class="chair" src="img/Crosshair.png">
 
 <div class="actions-panel">
-    <div class="action-item">
+    <div class="action-item" id="itm-2">
         <img id="action2" src="img/ActionSabotage.png">
         <div class="action-hint">
             Q
         </div>
     </div>
 
-    <div class="action-item">
+   <!--<div class="action-item">
         <img id="action1" src="img/ActionReport.png">
         <div class="action-hint">
             R
         </div>
-    </div>
+    </div>-->
 
     <div class="action-item">
         <img id="action0" src="img/ActionUse.png">
         <div class="action-hint">
-            <img class="vcenter" src="img/LMB.png">
+            <img class="vcenter" src="img/LMB.png" id="hint-mouse">
+            <span style="display: none;" id="hint-cooldown">29</span>
         </div>
     </div>
 </div>
@@ -179,19 +182,46 @@ You're an impostor
 <script>
     var impostor = false;
     var ghost = false;
+    var killCooldown = 0;
+    var currentAction = 'Use';
 
     function setGhost(g) {
         ghost = g;
-        setVisiblity('action1', !g);
+        //setVisiblity('action1', !g, 'block);
+    }
+
+    function setKillCooldown(cd) {
+        killCooldown = cd;
+        document.getElementById('hint-cooldown').innerText = cd;
+        updateKillCooldownHint();
+    }
+
+    function updateKillCooldownHint() {
+        if (currentAction == 'Kill' && killCooldown > 0 && impostor) {
+            document.getElementById('hint-cooldown').style.display = 'inline';
+            document.getElementById('hint-mouse').style.display = 'none';
+        } else {
+            document.getElementById('hint-cooldown').style.display = 'none';
+            document.getElementById('hint-mouse').style.display = 'inline';
+        }
+        redraw();
+    }
+
+    var actionContainer = document.getElementById('action0');
+    function setMainAction(action) {
+        actionContainer.src = 'img/Action' + action + '.png';
+        currentAction = action;
+        updateKillCooldownHint();
     }
 
     function setImpostor(imp) {
         impostor = imp;
-        setVisibility('action2', imp);
+        setVisibility('itm-2', imp, 'inline-block');
+        redraw();
     }
 
-    function setVisibility(id, vis) {
-        document.getElementById(id).style.display = vis ? 'block' : 'none';
+    function setVisibility(id, vis, s) {
+        document.getElementById(id).style.display = vis ? s : 'none';
     }
 
     function OnLoaded() {
@@ -260,6 +290,7 @@ You're an impostor
 
     function setCommsSabotaged(sab) {
         taskContainer.style.display = sab ? 'none' : 'block';
+        redraw();
     }
 
     function setTaskProgress(p) {
@@ -270,7 +301,8 @@ You're an impostor
 
     function redraw() {
         document.getElementById('redraw-overlay').style.display = 'block';
-        setTimeout(() => { document.getElementById('redraw-overlay').style.display = 'none'; }, 1);
+        setTimeout(() => { document.getElementById('redraw-overlay').style.display = 'none'; }, 35);
     }
+
 </script>
 </html>

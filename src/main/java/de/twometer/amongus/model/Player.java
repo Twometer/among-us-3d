@@ -1,5 +1,6 @@
 package de.twometer.amongus.model;
 
+import de.twometer.amongus.core.AmongUs;
 import org.joml.Vector3f;
 
 import java.util.List;
@@ -25,6 +26,16 @@ public class Player implements PlayerBehavior {
     public boolean alive = true;
 
     public int emergencyMeetings = 0;
+
+    public int killCooldown = -1;
+
+    public void resetKillCooldown() {
+        killCooldown = AmongUs.get().getSession().getConfig().getKillCooldown();
+    }
+
+    public boolean canKill() {
+        return killCooldown == 0;
+    }
 
     public int getId() {
         return id;

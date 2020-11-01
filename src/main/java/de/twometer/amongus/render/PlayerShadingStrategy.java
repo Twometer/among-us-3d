@@ -38,7 +38,7 @@ public class PlayerShadingStrategy extends AbstractGeometryShadingStrategy {
         if (!me.alive)
             return 100.0f;
         else if (session.currentSabotage == Sabotage.Lights)
-            return 1.5f;
+            return 0.75f;
         else if (me.role == PlayerRole.Impostor)
             return session.getConfig().getImpostorVision() * SessionConfig.PLAYER_VISION_BASE_RADIUS;
         else
