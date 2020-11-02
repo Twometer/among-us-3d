@@ -89,6 +89,8 @@ public class AmongUs extends NekoApp {
         getWindow().setCursorVisible(false);
         getWindow().setIcon("Icon.png");
 
+        getI18n().setFallbackLocale("en-US");
+
         getRenderManager().addModelFilter(new FrustumCullingFilter());
 
         // Visual effects

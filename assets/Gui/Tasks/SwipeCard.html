@@ -77,7 +77,7 @@
             var progress = (card.style.left.replace('px', '') - 20) / 276;
             var random = Math.random() * 10 > 9;
             if (random || progress < 0.99)
-                message.innerHTML = badRadMessage();
+                message.innerHTML = badReadMessage();
             else if (duration < 650)
                 message.innerHTML = ("TOO FAST. TRY AGAIN.");
             else if(duration > 800)
