@@ -19,7 +19,10 @@ public class FixSabotagePage extends BasePage {
 
     public void setFixing(boolean fixing) {
         AmongUs.get().getClient().sendMessage(new NetMessage.FixSabotage(AmongUs.get().getSession().currentSabotage, fixing));
-        amongUs.getScheduler().runLater(800, this::goBack);
+        AmongUs.get().getScheduler().runLater(800, () -> {
+            if (AmongUs.get().getStateController().isRunning())
+                this.goBack();
+        });
     }
 
     @Override

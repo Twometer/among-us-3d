@@ -157,13 +157,11 @@ public class NetHandler {
                     amongUs.getScheduler().run(() -> {
                         for (var light : amongUs.getScene().getLights())
                             light.setOn(false);
-                        amongUs.getScene().reloadLights();
                     });
             } else {
                 amongUs.getScheduler().run(() -> {
                     for (var light : amongUs.getScene().getLights())
                         light.setOn(true);
-                    amongUs.getScene().reloadLights();
                 });
                 amongUs.getSession().currentSabotage = null;
             }

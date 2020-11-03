@@ -61,7 +61,10 @@ public class TaskPage extends BasePage {
     }
 
     public void close() {
-        AmongUs.get().getScheduler().runLater(800, this::goBack);
+        AmongUs.get().getScheduler().runLater(800, () -> {
+            if (AmongUs.get().getStateController().isRunning())
+                this.goBack();
+        });
     }
 
     @Override

@@ -7,6 +7,7 @@ import de.twometer.neko.event.Events;
 import de.twometer.neko.event.KeyPressedEvent;
 import de.twometer.neko.gui.Page;
 import org.greenrobot.eventbus.Subscribe;
+import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 
 public abstract class BasePage extends Page {
@@ -21,12 +22,12 @@ public abstract class BasePage extends Page {
         super(path);
         amongUs = AmongUs.get();
         previous = amongUs.getGuiManager().getCurrentPage();
+        Events.register(this);
     }
 
     @Override
     public void onDomReady() {
         super.onDomReady();
-        Events.register(this);
     }
 
     protected boolean escapeGoesBack() {
@@ -42,6 +43,12 @@ public abstract class BasePage extends Page {
         super.onUnload();
         ApiGui.reset();
         Events.unregister(this);
+
+        if (previous != null && previous instanceof IngamePage)
+            AmongUs.get().getWindow().setCursorPosition(new Vector2f(
+                    AmongUs.get().getWindow().getWidth() / 2.0f,
+                    AmongUs.get().getWindow().getHeight() / 2.0f
+            ));
     }
 
     protected final void showLoading(String msg) {

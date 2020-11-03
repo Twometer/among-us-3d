@@ -21,11 +21,6 @@ public class IngamePage extends BasePage {
 
     public IngamePage() {
         super("Ingame.html");
-        AmongUs.get().getWindow().setCursorPosition(new Vector2f(
-                AmongUs.get().getWindow().getWidth() / 2.0f,
-                AmongUs.get().getWindow().getHeight() / 2.0f
-        ));
-
         var me = AmongUs.get().getSession().getMyself();
         if (me.killCooldown == -1)
             me.resetKillCooldown();

@@ -20,7 +20,10 @@ public class ToolGameObject extends GameObject {
 
     @Override
     public boolean canInteract() {
-        var myself = AmongUs.get().getSession().getMyself();
+        var session = AmongUs.get().getSession();
+        if (session == null) return false;
+
+        var myself = session.getMyself();
         return myself != null && myself.alive;
     }
 

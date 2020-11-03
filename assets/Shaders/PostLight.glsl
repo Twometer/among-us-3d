@@ -33,7 +33,7 @@ void main(void){
     vec3 Bloom = texture(bloom, TexCoords).rgb;
 
     // then calculate lighting as usual
-    vec3 lighting = 0.3 * Diffuse;// hard-coded ambient component
+    vec3 lighting = 0.3 * Diffuse; // hard-coded ambient component
     vec3 viewDir  = normalize(viewPos - FragPos);
     for (int i = 0; i < numLights; ++i)
     {
@@ -47,9 +47,8 @@ void main(void){
         // attenuation
         float distance = length(lights[i] - FragPos);
         float attenuation = 1.0 / (1.0 + linear * distance + quadratic * distance * distance);
-        diffuse *= attenuation;
-        specular *= attenuation;
-        lighting += diffuse + specular;
+
+        lighting += diffuse * attenuation + specular * attenuation;
     }
     FragColor = vec4(mix(lighting * (AO + 0.15f), Bloom, length(Bloom)) + Bloom, 1.0f);
 }
