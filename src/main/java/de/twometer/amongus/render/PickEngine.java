@@ -45,6 +45,9 @@ public class PickEngine {
 
     public void render() {
         pickBuffer.bind();
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+        retrievePixels();
+
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
         var strategy = new UnshadedShadingStrategy();
         AmongUs.get().getRenderManager().setShadingStrategy(strategy);
@@ -58,15 +61,18 @@ public class PickEngine {
             obj.getModel().render();
         }
 
-        glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+
         glReadPixels(pickBuffer.getWidth() / 2, pickBuffer.getHeight() / 2, 1, 1, GL_BGR, GL_UNSIGNED_BYTE, 0);
+
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+        Framebuffer.unbind();
+    }
+
+    private void retrievePixels() {
         var buf = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
         if (buf != null)
             hoveringId = buf.get(2);
         glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-
-        Framebuffer.unbind();
     }
 
     public int getHoveringId() {
