@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Among Us 3D"
-#define MyAppVersion "Among Us 3D"
+#define MyAppVersion "1.0.0"
 #define MyAppPublisher "Twometer Game Studios"
 #define MyAppURL "https://github.com/Twometer/among-us-3d"
 #define MyAppExeName "AmongUs3D.exe"
@@ -19,15 +19,22 @@ AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
-DefaultGroupName={#MyAppName}
+DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
-OutputDir=E:\GitHub Repositories\among-us-3d\release\among-us-3d-release
+OutputDir=among-us-3d-release
 OutputBaseFilename=amongus3d-setup
-SetupIconFile=E:\GitHub Repositories\among-us-3d\release\Icon.ico
+SetupIconFile=Icon.ico
 Compression=lzma
 SolidCompression=yes
-WizardStyle=modern
+WizardImageFile=left-250.bmp
+WizardSmallImageFile=small-250.bmp
+
+VersionInfoVersion={#MyAppVersion}
+VersionInfoCompany={#MyAppPublisher}
+
+UninstallDisplayIcon={app}\{#MyAppExeName}
+UninstallDisplayName={#MyAppName}
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -36,12 +43,12 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "E:\GitHub Repositories\among-us-3d\release\among-us-3d-release\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "E:\GitHub Repositories\among-us-3d\release\among-us-3d-release\jre\*"; DestDir: "{app}\jre"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "E:\GitHub Repositories\among-us-3d\release\among-us-3d-release\AmongUs3D.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\GitHub Repositories\among-us-3d\release\among-us-3d-release\assets\Fonts\DotMatrix.ttf"; DestDir: "{fonts}"; FontInstall: "Dot Matrix"; Flags: onlyifdoesntexist uninsneveruninstall
-Source: "E:\GitHub Repositories\among-us-3d\release\among-us-3d-release\assets\Fonts\InYourFaceJoffrey.ttf"; DestDir: "{fonts}"; FontInstall: "In your face, Joffrey!"; Flags: onlyifdoesntexist uninsneveruninstall
-Source: "E:\GitHub Repositories\among-us-3d\release\among-us-3d-release\assets\Fonts\IndieFlower.ttf"; DestDir: "{fonts}"; FontInstall: "Indie Flower"; Flags: onlyifdoesntexist uninsneveruninstall
+Source: "..\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "among-us-3d-release\jre\*"; DestDir: "{app}\jre"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "among-us-3d-release\AmongUs3D.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\assets\Fonts\DotMatrix.ttf"; DestDir: "{fonts}"; FontInstall: "Dot Matrix"; Flags: onlyifdoesntexist uninsneveruninstall
+Source: "..\assets\Fonts\InYourFaceJoffrey.ttf"; DestDir: "{fonts}"; FontInstall: "In your face, Joffrey!"; Flags: onlyifdoesntexist uninsneveruninstall
+Source: "..\assets\Fonts\IndieFlower.ttf"; DestDir: "{fonts}"; FontInstall: "Indie Flower"; Flags: onlyifdoesntexist uninsneveruninstall
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

@@ -1,1 +1,0 @@
-jlink.exe --no-header-files --no-man-pages --compress=2 --strip-debug --add-modules java.base,java.logging,java.sql,java.desktop,jdk.unsupported --output ".\among-us-3d-release\jre"
