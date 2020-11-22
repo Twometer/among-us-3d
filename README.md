@@ -13,9 +13,9 @@ It does not intend any copyright infringement whatsoever. I'm just a fan of Amon
 
 Made with the [Neko 3D engine](https://github.com/Twometer/neko-engine)
 
-### Building from source
+## Building from source
 1. Clone the repository
-2. Open IntelliJ and chose _Open or Import_
+2. Open IntelliJ and choose _Open or Import_
 3. Select the repository root folder e.g. `among-us-3d`
 4. Click on _Import Gradle project_
 5. Download the [Ultralight SDK](https://github.com/ultralight-ux/Ultralight#getting-the-latest-sdk)
