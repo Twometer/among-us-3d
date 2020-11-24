@@ -71,6 +71,10 @@ public class AmongUs extends NekoApp {
         (instance = new AmongUs()).launch("Among Us 3D", 1280, 800);
     }
 
+    public AmongUs() {
+        getI18n().setFallbackLocale("en-US");
+    }
+
     // Callbacks
     @Override
     protected void onPreLoad() {
@@ -88,8 +92,6 @@ public class AmongUs extends NekoApp {
         // Window
         getWindow().setCursorVisible(false);
         getWindow().setIcon("Icon.png");
-
-        getI18n().setFallbackLocale("en-US");
 
         getRenderManager().addModelFilter(new FrustumCullingFilter());
 

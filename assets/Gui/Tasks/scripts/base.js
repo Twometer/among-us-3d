@@ -32,7 +32,7 @@ var _baseY;
 var _baseW;
 var _baseH;
 
-function OnLoaded() {
+function RunAlignments() {
     var background = document.getElementsByClassName("background")[0];
     var container = document.getElementsByClassName("container")[0];
     container.style.width = background.offsetWidth;
@@ -66,7 +66,12 @@ window.onresize = function() {
 
 
 
-OnLoaded();
+document.onload = function() {
+    RunAlignments();
+    OnLoaded();
+}
+RunAlignments();
+delay(100).then(RunAlignments);
 
 function shuffle(a) {
     for (let i = a.length - 1; i > 0; i--) {
