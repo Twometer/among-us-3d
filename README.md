@@ -35,7 +35,7 @@ to point to the Java 11 SDK home location. Also, if you have Inno Setup or Launc
 you have to point the `SOFTWARE_HOME` environment variable to the directory where those programs are installed.
 
 ### Building
-1. Open `.\release\l4j.xml` and update the version number
+1. Open `.\release\setup.iss` and update the version number
 2. Open PowerShell
 3. Make sure you [can run PowerShell scripts](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.1)
 4. Run the `build.ps1` script
