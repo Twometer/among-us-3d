@@ -1,21 +1,38 @@
 <#
 .SYNOPSIS
     Build and packaging tool for Among Us 3D
-.PARAMETER CreateSetup
-    Run Inno Setup compiler after build to create an installation wizard
+.PARAMETER NoInstaller
+    Do not run Launch4j and Inno Setup compiler after build
 #>
 
 [CmdletBinding()]
 param (
     [Parameter()]
-    [switch]$CreateSetup
+    [switch]$NoInstaller
 )
 
 begin {
     $setupDirectory = Join-Path $PSScriptRoot "release"
     
+    function GetSoftwareRoot () {
+        $user = ${env:SOFTWARE_HOME}
+        $sys = ${env:ProgramFiles(x86)}
+        if (!$user) {
+            return $sys
+        } else {
+            return $user
+        }
+    }
+
     function CreateJreBundle () {
-        Start-Process -FilePath "jlink.exe" -ArgumentList `
+        $javaHome = ${env:JAVA_HOME}
+        $jlinkPath = 'jlink.exe'
+        if ($javaHome) {
+            $javaBin = Join-Path $javaHome "bin"
+            $jlinkPath = Join-Path $javaBin $jlinkPath
+        }
+
+        Start-Process -FilePath $jlinkPath -ArgumentList `
             "--no-header-files","--no-man-pages","--compress=2","--strip-debug",`
             "--add-modules","java.base,java.logging,java.sql,java.desktop,jdk.unsupported",`
             "--output",".\among-us-3d-release\jre" `
@@ -23,7 +40,8 @@ begin {
     }
 
     function InvokeLaunch4j () {
-        $l4j = Join-Path ${env:ProgramFiles(x86)} "Launch4j"
+        $swRoot = GetSoftwareRoot
+        $l4j = Join-Path $swRoot "Launch4j"
         $l4jj = Join-Path $l4j "launch4j.jar"
         $l4jc = Join-Path $setupDirectory "l4j.xml"
         if (Test-Path -Path $l4jj -PathType Leaf) {
@@ -36,7 +54,8 @@ begin {
     }
 
     function InvokeInnoSetup () {
-        $is = Join-Path ${env:ProgramFiles(x86)} "Inno Setup 6"
+        $swRoot = GetSoftwareRoot
+        $is = Join-Path $swRoot "Inno Setup 6"
         $iscc = Join-Path $is "ISCC.exe"
         $iss = Join-Path $setupDirectory "setup.iss"
         if (Test-Path -Path $iscc -PathType Leaf) {
@@ -58,11 +77,17 @@ process {
         exit 1
     }
 
-    # Start-Process -FilePath ".\gradlew.bat" -ArgumentList "jar","--no-daemon" -NoNewWindow -Wait
+    Write-Host "Building jar file..."
+    iex '.\gradlew.bat jar --no-daemon'
 
-    if ($CreateSetup) {
+    if (!$NoInstaller) {
+        Write-Host "Creating JRE bundle..."
         CreateJreBundle
+
+        Write-Host "Creating executable..."
         InvokeLaunch4j
+
+        Write-Host "Creating installer..."
         InvokeInnoSetup
     }
 }

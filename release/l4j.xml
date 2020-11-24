@@ -2,7 +2,7 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>..\build\libs\among-us-3d-1.0.0.jar</jar>
+  <jar>..\build\libs\among-us-3d.jar</jar>
   <outfile>.\among-us-3d-release\AmongUs3D.exe</outfile>
   <errTitle>Among Us 3D requires Java 11</errTitle>
   <cmdLine></cmdLine>
