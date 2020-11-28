@@ -6,6 +6,7 @@ import de.twometer.amongus.net.NetMessage;
 import de.twometer.neko.event.Events;
 import de.twometer.neko.event.KeyPressedEvent;
 import de.twometer.neko.gui.Page;
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
@@ -28,6 +29,9 @@ public abstract class BasePage extends Page {
     @Override
     public void onDomReady() {
         super.onDomReady();
+
+        if (!EventBus.getDefault().isRegistered(this))
+            Events.register(this);
     }
 
     protected boolean escapeGoesBack() {

@@ -64,14 +64,32 @@ window.onresize = function() {
     _baseY = container.getBoundingClientRect().top;
 }
 
+var callbacks = [];
 
+function _RegInit(cb) {
+    if (document.readyState === 'complete') {
+        cb();
+    } else {
+        callbacks.push(cb);
+    }
+}
 
-document.onload = function() {
+window.onload = function() {
+    for (let cb of callbacks) {
+        try {
+            cb();
+        }
+        catch(e) {
+            console.error(e);
+        }
+    }
+    callbacks = [];
+}
+
+_RegInit(function() {
     RunAlignments();
     OnLoaded();
-}
-RunAlignments();
-delay(100).then(RunAlignments);
+})
 
 function shuffle(a) {
     for (let i = a.length - 1; i > 0; i--) {

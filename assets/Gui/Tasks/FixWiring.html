@@ -1,7 +1,7 @@
 <html>
 <head>
     <link rel="stylesheet" href="styles/taskBase.css">
-    <style>*{-webkit-user-select:none;-webkit-user-drag:none;cursor:default}body,html{margin:0;padding:0;overflow:hidden}.d-none{display:none}.ctr{top:50%;left:50%;transform:translate(-50%,-50%)}.ctrx{left:50%;transform:translateX(-50%)}.ctry{top:50%;transform:translateY(-50%)}.container{position:relative;top:50%;left:50%;transform:translate(-50%,-50%)}.o0{opacity:0}.clickthru{pointer-events:none}.abs{position:absolute}.ani05{transition:.5s all}.ani1{transition:1s all}.z1{z-index:1}.z2{z-index:2}.z3{z-index:3}.z4{z-index:4}.z5{z-index:5}</style>
+
 </head>
 <body>
 
@@ -14,130 +14,131 @@
 </body>
 <script src="scripts/base.js"></script>
 <script>
-    var canvas = $('canvas');
-    canvas.width = _baseW;
-    canvas.height = _baseH;
+    _RegInit(() => {
+        var canvas = $('canvas');
+        canvas.width = _baseW;
+        canvas.height = _baseH;
 
-    var wiresize =25;
+        var wiresize =25;
 
-    var context = canvas.getContext('2d');
-    context.strokeStyle ='#ff0000';
-    context.lineWidth = wiresize;
+        var context = canvas.getContext('2d');
+        context.strokeStyle ='#ff0000';
+        context.lineWidth = wiresize;
 
-    var image = $('base');
+        var image = $('base');
 
-    document.onmousemove = function(e) {
-        redraw(e);
-    }
-
-
-    var wiresLeft = ['#ff0000', '#606060', '#0000ff', '#ffff00'];
-    var wiresRight = ['#ff0000', '#606060', '#0000ff', '#ffff00'];
-    shuffle(wiresLeft);
-    shuffle(wiresRight);
-    var baseY = 0;
-    var curCol = 0;
-    var dragging = false;
-
-    function getWireUnderMouse(e, wires) {
-        var y = 100;
-        for (var c of wires) {
-            var miny = y - wiresize/2;
-            var maxy = y + wiresize/2;
-
-            if (e.getRealY() >= miny && e.getRealY() <= maxy) {
-                return [c, y];
-            }
-
-            y += 105;
+        document.onmousemove = function(e) {
+            redraw(e);
         }
-        return null;
-    }
 
-    document.onmousedown = function(e) {
-        if (e.getRealX() < 35) {
-            var wire = getWireUnderMouse(e, wiresLeft);
 
-            for (var per of permanentWires)
-                if (per.srcY == wire[1])
-                    return;
+        var wiresLeft = ['#ff0000', '#606060', '#0000ff', '#ffff00'];
+        var wiresRight = ['#ff0000', '#606060', '#0000ff', '#ffff00'];
+        shuffle(wiresLeft);
+        shuffle(wiresRight);
+        var baseY = 0;
+        var curCol = 0;
+        var dragging = false;
 
-            if (wire != null) {
-                dragging = true;
-                baseY = wire[1];
-                curCol = wire[0];
+        function getWireUnderMouse(e, wires) {
+            var y = 100;
+            for (var c of wires) {
+                var miny = y - wiresize/2;
+                var maxy = y + wiresize/2;
+
+                if (e.getRealY() >= miny && e.getRealY() <= maxy) {
+                    return [c, y];
+                }
+
+                y += 105;
             }
+            return null;
         }
-    }
-    var permanentWires = [];
 
-    document.onmouseup = function(e) {
-        dragging = false;
-        if (e.getRealX() > _baseW - 35) {
-            var wire = getWireUnderMouse(e, wiresRight);
-            if (wire != null && wire[0] == curCol) {
-                permanentWires.push({
-                    srcY: baseY,
-                    dstY: wire[1],
-                    color: curCol
-                });
-                _api.playSoundRandom('WireConnect', 3);
+        document.onmousedown = function(e) {
+            if (e.getRealX() < 35) {
+                var wire = getWireUnderMouse(e, wiresLeft);
+
+                for (var per of permanentWires)
+                    if (per.srcY == wire[1])
+                        return;
+
+                if (wire != null) {
+                    dragging = true;
+                    baseY = wire[1];
+                    curCol = wire[0];
+                }
             }
         }
+        var permanentWires = [];
 
-        if (permanentWires.length == wiresLeft.length) {
-            _remote.taskComplete();
-        }
-    }
+        document.onmouseup = function(e) {
+            dragging = false;
+            if (e.getRealX() > _baseW - 35) {
+                var wire = getWireUnderMouse(e, wiresRight);
+                if (wire != null && wire[0] == curCol) {
+                    permanentWires.push({
+                        srcY: baseY,
+                        dstY: wire[1],
+                        color: curCol
+                    });
+                    _api.playSoundRandom('WireConnect', 3);
+                }
+            }
 
-    function drawWireBases(arr, basex0, basex1) {
-        let y = 100;
-        for (var c of arr) {
-            context.strokeStyle = c;
-
-            context.beginPath();
-            context.moveTo(basex0,y);
-            context.lineTo(basex1,y);
-            context.stroke();
-
-            y += 105;
-        }
-    }
-
-    function redraw(e) {
-        context.drawImage(base, 0, 0);
-
-        // draw wire bases
-        drawWireBases(wiresLeft, 0, 35);
-        drawWireBases(wiresRight, _baseW - 35, _baseW);
-
-        if (dragging) {
-            context.strokeStyle = curCol;
-            context.beginPath();
-            context.moveTo(30,baseY);
-            context.lineTo(e.getRealX(), e.getRealY());
-            context.stroke();
+            if (permanentWires.length == wiresLeft.length) {
+                _remote.taskComplete();
+            }
         }
 
-        for (var wire of permanentWires) {
-            context.strokeStyle = wire.color;
-            context.beginPath();
-            context.moveTo(30,wire.srcY);
-            context.lineTo(_baseW - 30, wire.dstY);
-            context.stroke();
+        function drawWireBases(arr, basex0, basex1) {
+            let y = 100;
+            for (var c of arr) {
+                context.strokeStyle = c;
+
+                context.beginPath();
+                context.moveTo(basex0,y);
+                context.lineTo(basex1,y);
+                context.stroke();
+
+                y += 105;
+            }
         }
 
-        // e.x / 1.5 - _baseX, e.y / 1.5 - _baseY
+        function redraw(e) {
+            context.drawImage(base, 0, 0);
+
+            // draw wire bases
+            drawWireBases(wiresLeft, 0, 35);
+            drawWireBases(wiresRight, _baseW - 35, _baseW);
+
+            if (dragging) {
+                context.strokeStyle = curCol;
+                context.beginPath();
+                context.moveTo(30,baseY);
+                context.lineTo(e.getRealX(), e.getRealY());
+                context.stroke();
+            }
+
+            for (var wire of permanentWires) {
+                context.strokeStyle = wire.color;
+                context.beginPath();
+                context.moveTo(30,wire.srcY);
+                context.lineTo(_baseW - 30, wire.dstY);
+                context.stroke();
+            }
+
+            // e.x / 1.5 - _baseX, e.y / 1.5 - _baseY
 
 
-        /**/
-    }
+            /**/
+        }
 
-    redraw();
-
-    function OnLoaded() {
+        redraw();
         _api.playSound('WireOpen.ogg');
-    }
+    });
+
+    function OnLoaded() {}
 
 </script>
 </html>

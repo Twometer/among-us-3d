@@ -69,7 +69,7 @@ public class SoundController {
                         .setLooping(true)
                         .play();
         } else {
-            if (!isMenu(event.getNext())) {
+            if (isMenu(event.getPrev()) && !isMenu(event.getNext())) {
                 menuSound.stop();
                 Log.i("* holy music stops *");
             }

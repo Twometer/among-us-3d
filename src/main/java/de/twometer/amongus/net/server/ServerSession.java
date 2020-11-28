@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class ServerSession extends Session<PlayerConnection> {
@@ -17,7 +18,7 @@ public class ServerSession extends Session<PlayerConnection> {
     public int totalTaskStages;
     public Scheduler.Task votingTask;
     public Scheduler.Task sabotageTask;
-    public int fixers = 0;
+    public AtomicInteger fixers = new AtomicInteger(0);
 
     public final Map<Integer, Integer> votes = new HashMap<>();
 

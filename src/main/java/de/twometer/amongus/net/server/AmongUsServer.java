@@ -236,16 +236,19 @@ public class AmongUsServer extends Listener {
         });
         handlers.register(NetMessage.FixSabotage.class, (p, m) -> {
             if (p.session == null) return;
-            if (m.fixed) p.session.fixers++;
-            else p.session.fixers--;
+
+            int fixers;
+
+            if (m.fixed) fixers = p.session.fixers.incrementAndGet();
+            else fixers = p.session.fixers.decrementAndGet();
 
             if (m.sabotage == Sabotage.Reactor || m.sabotage == Sabotage.O2) {
-                if (p.session.fixers == 2) {
+                if (fixers == 2) {
                     scheduler.cancel(p.session.sabotageTask);
                     p.session.broadcast(new NetMessage.OnSabotageStateChanged(m.sabotage, false, 0, ""));
                 }
             } else if (m.sabotage == Sabotage.Comms || m.sabotage == Sabotage.Lights) {
-                if (p.session.fixers > 0) {
+                if (fixers > 0) {
                     p.session.broadcast(new NetMessage.OnSabotageStateChanged(m.sabotage, false, 0, ""));
                 }
             }
@@ -345,7 +348,7 @@ public class AmongUsServer extends Listener {
         session.votes.clear();
         session.tasksFinished = 0;
         session.totalTaskStages = 0;
-        session.fixers = 0;
+        session.fixers.set(0);
         for (var player : session.getPlayers()) {
             player.player.alive = true;
             player.player.role = PlayerRole.Crewmate;

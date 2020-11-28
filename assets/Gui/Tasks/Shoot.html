@@ -1,7 +1,7 @@
 <html>
 <head>
     <link rel="stylesheet" href="styles/taskBase.css">
-    <style>*{-webkit-user-select:none;-webkit-user-drag:none;cursor:default}body,html{margin:0;padding:0;overflow:hidden}.d-none{display:none}.ctr{top:50%;left:50%;transform:translate(-50%,-50%)}.ctrx{left:50%;transform:translateX(-50%)}.ctry{top:50%;transform:translateY(-50%)}.container{position:relative;top:50%;left:50%;transform:translate(-50%,-50%)}.o0{opacity:0}.clickthru{pointer-events:none}.abs{position:absolute}.ani05{transition:.5s all}.ani1{transition:1s all}.z1{z-index:1}.z2{z-index:2}.z3{z-index:3}.z4{z-index:4}.z5{z-index:5}</style>
+
     <style>
         #killcount {
             font-family: "Dot Matrix";
@@ -24,127 +24,128 @@
 <script src="scripts/base.js"></script>
 <script>
     var base = $('baseimg');
-    var canvas = $('canvas');
-    var context = canvas.getContext('2d');
+var canvas = $('canvas');
+var context = canvas.getContext('2d');
 
-    function img(i) {
-        var image = new Image();
-        image.src = 'img/' + i + '.png';
-        return image;
-    }
+function img(i) {
+    var image = new Image();
+    image.src = 'img/' + i + '.png';
+    return image;
+}
 
-    var images = [
-        img('weapons_asteroid1'),
-        img('weapons_asteroid1X'),
-        img('weapons_asteroid2'),
-        img('weapons_asteroid2X'),
-        img('weapons_asteroid3'),
-        img('weapons_asteroid3X'),
-        img('weapons_asteroid4'),
-        img('weapons_asteroid4X'),
-        img('weapons_asteroid5'),
-        img('weapons_asteroid5X')
-    ];
+var images = [
+    img('weapons_asteroid1'),
+    img('weapons_asteroid1X'),
+    img('weapons_asteroid2'),
+    img('weapons_asteroid2X'),
+    img('weapons_asteroid3'),
+    img('weapons_asteroid3X'),
+    img('weapons_asteroid4'),
+    img('weapons_asteroid4X'),
+    img('weapons_asteroid5'),
+    img('weapons_asteroid5X')
+];
 
-    var explosion = img('weapons_explosion');
+var explosion = img('weapons_explosion');
 
-    var target = new Image();
-    target.src = 'img/weapons_target.png';
+var target = new Image();
+target.src = 'img/weapons_target.png';
 
-    var targetPos = [225, 225];
+var targetPos = [225, 225];
 
-    function redraw() {
-        context.drawImage(base, -28, -28);
-        for (var ast of entities) {
+function redraw() {
+    context.drawImage(base, -28, -28);
+    for (var ast of entities) {
 
-            if (ast.x < -ast.width || ast.y < -ast.height || ast.x > _baseW || ast.y > _baseH)
-                continue;
+        if (ast.x < -ast.width || ast.y < -ast.height || ast.x > _baseW || ast.y > _baseH)
+            continue;
 
-            if (ast.broken)
-            {
-                ast.deadtime ++;
-                if (ast.deadtime < 50) {
-                    context.drawImage(ast.imgx, ast.x, ast.y);
-                    context.drawImage(explosion, ast.x, ast.y);
-                }
-            } else {
-                ast.x += ast.vx;
-                ast.y += ast.vy;
-                context.drawImage(ast.img, ast.x, ast.y);
+        context.save();
+        context.translate(ast.x, ast.y);
+        context.rotate(ast.a);
+
+        if (ast.broken) {
+            ast.deadtime++;
+            if (ast.deadtime < 50) {
+                if (ast.s > 0.5)
+                    context.drawImage(ast.imgx, -ast.imgx.width / 2, -ast.imgx.height / 2);
+                else
+                    context.drawImage(ast.img, -ast.img.width / 2, -ast.img.height / 2);
+
+                context.scale(ast.s, ast.s);
+                if (ast.s < 1)
+                    ast.s += 0.1;
+                context.drawImage(explosion, -explosion.width / 2, -explosion.height / 2);
             }
+        } else {
 
+            context.drawImage(ast.img, -ast.img.width / 2, -ast.img.height / 2);
         }
+        ast.x += ast.vx;
+        ast.y += ast.vy;
+        ast.a += ast.va;
+        context.restore();
 
-        context.drawImage(target, targetPos[0] - target.width/2, targetPos[1] - target.height/2);
+        //context.strokeRect(ast.x - ast.img.width / 2, ast.y - ast.img.height / 2, ast.img.width, ast.img.height);
     }
-    setInterval(redraw, 16);
 
-    var entities = [];
+    context.drawImage(target, targetPos[0] - target.width / 2, targetPos[1] - target.height / 2);
 
-    function addAsteroid() {
-        var rx = Math.floor(Math.random() * images.length / 2) * 2;
 
-        var left = Math.random() > 0.5;
-        var right = Math.random() > 0.5;
-        var top = Math.random() > 0.5;
-        var bot = Math.random() > 0.5;
+}
+setInterval(redraw, 16);
 
-        var x;
-        var y;
-        if (left) { x = -55; y = Math.random() * _baseH; }
-        else if (right) { x = _baseW + 55; y = Math.random() * _baseH; }
-        else if (top) { x = Math.random() * _baseW; y = -55; }
-        else if (bot) { x = Math.random() * _baseW; y = _baseH+55; }
+var entities = [];
 
-        var vx;
-        var vy;
-        if (left) { vx = Math.random() * 5; vy = Math.random() * 10 - 5 }
-        else if (right) { vx = -Math.random() * 5; vy = Math.random() * 10 - 5 }
-        else if (top) { mx = Math.random() * 10 - 5; vy = -Math.random() * 5; }
-        else if (bot) { mx = Math.random() * 10 - 5; vy = Math.random() * 5; }
+function addAsteroid() {
+    var rx = Math.floor(Math.random() * images.length / 2) * 2;
+    var x = 500;
+    var y = (Math.random() * 350) + 50;
 
-        var ast = {
-            vx: vx + 1,
-            vy: vy + 1,
-            x: x,
-            y: y,
-            img: images[rx],
-            imgx: images[rx + 1],
-            broken: false,
-            deadtime: 0
-        };
-        entities.push(ast);
-    }
+    var ast = {
+        vx: -Math.random() * 8 - 4,
+        vy: (Math.random() * 2 - 1) * 2,
+        va: Math.random() * 0.05,
+        a: 0,
+        x: x,
+        y: y,
+        s: 0,
+        img: images[rx],
+        imgx: images[rx + 1],
+        broken: false,
+        deadtime: 0
+    };
+    entities.push(ast);
+}
 
 var broken = 0;
 canvas.onmousemove = function(e) {
-       var x = e.getRealX();
-        var y = e.getRealY();
-        targetPos = [x-28,y-28];
-        }
-    canvas.onclick = function(e) {
-        _api.playSound('WeaponFire.ogg');
+    var x = e.getRealX();
+    var y = e.getRealY();
+    targetPos = [x - 28, y - 28];
+}
+canvas.onclick = function(e) {
+    _api.playSound('WeaponFire.ogg');
 
-        var tx = targetPos[0];
-        var ty = targetPos[1];
-        for (var ast of entities) {
-            if (tx > ast.x && ty > ast.y && tx < ast.x + ast.img.width && ty < ast.y + ast.img.height && !ast.broken)
-            {
-                ast.deadtime = 0;
-                ast.broken = true;
-                broken++;
-                $('killcount').innerText = "DESTROYED: " + broken;
-                _api.playSoundRandom('WeaponHit', 3);
-                if (broken >= 20)
-                    _remote.taskComplete();
-                //console.log(broken);
-            }
+    var tx = targetPos[0];
+    var ty = targetPos[1];
+    for (var ast of entities) {
+        let xo = -ast.img.width / 2;
+        let yo = -ast.img.height / 2;
+        if (tx > ast.x+ xo && ty > ast.y+yo && tx < ast.x + ast.img.width+xo && ty < ast.y + ast.img.height+yo && !ast.broken) {
+            ast.deadtime = 0;
+            ast.broken = true;
+            broken++;
+            $('killcount').innerText = "DESTROYED: " + broken;
+            _api.playSoundRandom('WeaponHit', 3);
+            if (broken >= 20)
+                _remote.taskComplete();
+            //console.log(broken);
         }
     }
+}
 
-    setInterval(addAsteroid, 250);
-
-
+setInterval(addAsteroid, 900);
 </script>
 
 </html>

@@ -57,6 +57,7 @@ public class EjectPage extends BasePage {
             amongUs.getGuiManager().showPage(new GameEndPage());
         } else {
             amongUs.getGuiManager().showPage(new IngamePage());
+            amongUs.getSession().getMyself().resetKillCooldown();
         }
     }
 

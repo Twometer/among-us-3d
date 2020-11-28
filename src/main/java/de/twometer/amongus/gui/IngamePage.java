@@ -10,9 +10,7 @@ import de.twometer.amongus.model.GameState;
 import de.twometer.amongus.model.PlayerRole;
 import de.twometer.amongus.model.Sabotage;
 import de.twometer.amongus.net.NetMessage;
-import de.twometer.neko.event.Events;
 import de.twometer.neko.event.KeyPressedEvent;
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.lwjgl.glfw.GLFW;
 
@@ -47,10 +45,6 @@ public class IngamePage extends BasePage {
     @Override
     public void onDomReady() {
         super.onDomReady();
-
-        if (!EventBus.getDefault().isRegistered(this))
-            Events.register(this);
-
         for (var task : amongUs.getSession().getMyself().tasks) {
             var state = task.getProgress() == 0 ? 0 : 1;
             if (task.isTimerRunning()) state = 1;
