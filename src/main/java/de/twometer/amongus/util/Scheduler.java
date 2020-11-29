@@ -55,8 +55,8 @@ public class Scheduler {
     public void update() {
         for (var task : tasks) {
             if (task.time < System.currentTimeMillis()) {
-                task.runnable.run();
                 tasks.remove(task);
+                task.runnable.run();
                 return;
             }
         }
