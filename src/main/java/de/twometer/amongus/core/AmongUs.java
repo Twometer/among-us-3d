@@ -10,6 +10,7 @@ import de.twometer.amongus.model.GameState;
 import de.twometer.amongus.model.PlayerRole;
 import de.twometer.amongus.net.client.NetClient;
 import de.twometer.amongus.physics.CollidingPlayerController;
+import de.twometer.amongus.render.CamOverlay;
 import de.twometer.amongus.render.HighlightEngine;
 import de.twometer.amongus.render.PickEngine;
 import de.twometer.amongus.util.Config;

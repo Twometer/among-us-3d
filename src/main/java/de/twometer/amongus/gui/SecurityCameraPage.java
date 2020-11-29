@@ -2,6 +2,7 @@ package de.twometer.amongus.gui;
 
 import de.twometer.amongus.core.AmongUs;
 import de.twometer.amongus.physics.NopPlayerController;
+import de.twometer.amongus.render.CamOverlay;
 import de.twometer.neko.core.IPlayerController;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -35,6 +36,7 @@ public class SecurityCameraPage extends BasePage {
 
         AmongUs.get().setPlayerController(new NopPlayerController());
         tpToCam();
+        AmongUs.get().getOverlayManager().addOverlay(new CamOverlay());
     }
 
     @Override
@@ -45,6 +47,8 @@ public class SecurityCameraPage extends BasePage {
         AmongUs.get().getCamera().getAngle().set(prevRotation);
 
         AmongUs.get().setPlayerController(prevController);
+
+        AmongUs.get().getOverlayManager().removeOverlay(CamOverlay.class);
     }
 
     @Override
