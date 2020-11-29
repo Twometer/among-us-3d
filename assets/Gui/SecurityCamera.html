@@ -1,0 +1,28 @@
+<html>
+<style>
+    button {
+        display: inline-block;
+        font-family: 'In your face, Joffrey!';
+        margin: 5px auto;
+        font-size: 50px;
+        border: 0 !important;
+        width: 270px;
+        height: 70px;
+        color: white;
+        transition: background-color .4s;
+        background: rgba(0, 0, 0, 0.65);
+    }
+    button:hover {
+        background: rgba(0, 0, 0, 1.0);
+    }
+
+    .btn-container {
+        text-align: center;
+    }
+</style>
+
+<div class="btn-container">
+    <button onclick="_remote.prev()">Prev cam</button>
+    <button onclick="_remote.next()">Next cam</button>
+</div>
+</html>
