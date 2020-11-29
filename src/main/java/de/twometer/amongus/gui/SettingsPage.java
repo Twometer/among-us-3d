@@ -17,9 +17,9 @@ public class SettingsPage extends BasePage {
 
     public void apply(String settingsJson) {
         var settings = gson.fromJson(settingsJson, UserSettings.class);
-        AmongUs.get().getUserSettings().setGraphics(settings);
+        AmongUs.get().getUserSettings().copyFromJs(settings);
         AmongUs.get().getUserSettings().save();
-        AmongUs.get().reloadFxConfig();
+        AmongUs.get().reloadConfig();
         goBack();
     }
 

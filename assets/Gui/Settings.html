@@ -8,6 +8,10 @@
     <div class="container">
         <table>
             <tr>
+                <th>Master volume</th>
+                <td><input type="range" min="0" max="99" value="75" class="slider" id="volume"></td>
+            </tr>
+            <tr>
                 <th>Ambient Occlusion</th>
                 <td><input type="checkbox" id="useAo"/></td>
             </tr>
@@ -37,6 +41,7 @@
     </div>
 </body>
 <script>
+    var volume = document.getElementById('volume');
     var useAo = document.getElementById('useAo');
     var aoSamples = document.getElementById('aoSamples');
     var useBloom = document.getElementById('useBloom');
@@ -45,6 +50,7 @@
 
     function set(s) {
         console.log(s.useBloom);
+        volume.value = s.volume;
         useAo.checked = s.useAO;
         aoSamples.value = s.aoSamples;
         useBloom.checked = s.useBloom;
@@ -54,6 +60,7 @@
 
     function apply() {
         var settings = {
+            volume: volume.value,
             useAO: useAo.checked,
             aoSamples: aoSamples.value,
             useBloom: useBloom.checked,

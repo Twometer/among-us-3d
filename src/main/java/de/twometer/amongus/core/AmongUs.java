@@ -33,14 +33,15 @@ import org.lwjgl.glfw.GLFW;
 
 import javax.swing.*;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
+
+import static org.lwjgl.openal.AL10.AL_GAIN;
+import static org.lwjgl.openal.AL10.alListenerf;
 
 public class AmongUs extends NekoApp {
 
@@ -96,7 +97,7 @@ public class AmongUs extends NekoApp {
         getRenderManager().addModelFilter(new FrustumCullingFilter());
 
         // Visual effects
-        reloadFxConfig();
+        reloadConfig();
 
         // Base map
         var skeld = ModelLoader.loadModel("TheSkeld.obj");
@@ -202,7 +203,9 @@ public class AmongUs extends NekoApp {
         }
     }
 
-    public void reloadFxConfig() {
+    public void reloadConfig() {
+        alListenerf(AL_GAIN, userSettings.getVolume() / 100.0f);
+
         getFxManager().getSsao().setActive(userSettings.isUseAO());
         getFxManager().getSsao().setSamples(userSettings.getAoSamples());
         getFxManager().getBloom().setActive(userSettings.isUseBloom());

@@ -7,6 +7,7 @@ public class UserSettings {
     public static final String FILE_NAME = "settings.json";
 
     private String username = "";
+    private int volume = 75;
     private boolean useAO = true;
     private int aoSamples = 11;
     private boolean useBloom = true;
@@ -61,15 +62,24 @@ public class UserSettings {
         this.useFxaa = useFxaa;
     }
 
+    public int getVolume() {
+        return volume;
+    }
+
+    public void setVolume(int volume) {
+        this.volume = volume;
+    }
+
     public void save() {
         AmongUs.get().getFileSystem().save(FILE_NAME, this);
     }
 
-    public void setGraphics(UserSettings other) {
+    public void copyFromJs(UserSettings other) {
         useAO = other.useAO;
         aoSamples = other.aoSamples;
         useBloom = other.useBloom;
         useVignette = other.useVignette;
         useFxaa = other.useFxaa;
+        volume = other.volume;
     }
 }
