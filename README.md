@@ -11,7 +11,7 @@ It does not intend any copyright infringement whatsoever. I'm just a fan of Amon
 
   Thanks for making it free :3
 
-Made with the [Neko 3D engine](https://github.com/Twometer/neko-engine)
+Made with the [Neko 3D engine](https://github.com/Twometer/neko-engine/tree/1.x)
 
 ## Building from source
 1. Clone the repository
