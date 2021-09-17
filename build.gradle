@@ -7,13 +7,12 @@ version '1.0.0'
 
 repositories {
     mavenCentral()
-    maven { url 'http://clojars.org/repo/' }
-    maven { url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/' }
-    maven { url 'https://cloud.twometer.de/nexus/repository/maven-releases' }
+    maven { url 'https://clojars.org/repo/' }
+    maven { url 'https://maven.twometer.de/releases/' }
 }
 
 dependencies {
-    implementation 'de.twometer.neko:neko-engine:1.6.4'
+    implementation 'de.twometer:neko-engine:1.6.4'
 
     testCompile 'junit:junit:4.12'
 }
