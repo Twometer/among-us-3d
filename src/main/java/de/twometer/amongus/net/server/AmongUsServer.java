@@ -201,7 +201,7 @@ public class AmongUsServer extends Listener {
             if (p.session == null) return;
             var broadcast = new NetMessage.OnEmergencyMeeting(p.player.id, m.cause);
             p.session.broadcast(broadcast);
-            p.session.votingTask = scheduler.runLater(p.session.getConfig().getVotingTime() * 1000, () -> {
+            p.session.votingTask = scheduler.runLater(p.session.getConfig().getVotingTime() * 1000L, () -> {
                 p.session.votingTask = null;
                 handleVotingEnd(p.session);
             });
@@ -227,7 +227,7 @@ public class AmongUsServer extends Listener {
         handlers.register(NetMessage.StartSabotage.class, (p, m) -> {
             if (p.session == null) return;
             p.session.broadcast(new NetMessage.OnSabotageStateChanged(m.sabotage, true, 30000, CodeGenerator.newO2Code()));
-            if (m.sabotage == Sabotage.O2 || m.sabotage == Sabotage.Reactor) {
+            if (m.sabotage.isCritical()) {
                 p.session.sabotageTask = scheduler.runLater(30000, () -> {
                     p.session.sabotageTask = null;
                     handleVictory(p.session, PlayerRole.Impostor);
@@ -258,7 +258,7 @@ public class AmongUsServer extends Listener {
     private void tpAllToSpawn(ServerSession session) {
         var center = new Vector3f(28.09f, 0.0f, -22.46f);
         var radius = 1.7f;
-        var angleOffset = (2.0f * Math.PI) / session.getPlayers().size();
+        var angleOffset = (2.0f * MathF.PI) / session.getPlayers().size();
         var angle = 0f;
         for (var player : session.getPlayers()) {
             var position = new Vector3f(
