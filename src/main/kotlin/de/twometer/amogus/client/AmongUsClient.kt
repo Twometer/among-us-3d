@@ -13,6 +13,7 @@ import de.twometer.neko.scene.Color
 import de.twometer.neko.scene.nodes.Geometry
 import de.twometer.neko.scene.nodes.PointLight
 import de.twometer.neko.scene.nodes.Sky
+import imgui.ImGui
 import org.greenrobot.eventbus.Subscribe
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW
@@ -38,12 +39,12 @@ object AmongUsClient : NekoApp(
 
         // Load map model
         scene.rootNode.attachChild(ModelCache.get("skeld.obj").also {
-            it.children[0].children.forEach { n ->
-                if (!n.name.startsWith("VENT") && !n.name.startsWith("TASK") && !n.name.startsWith("TOOL")) {
-                    n.scanTree { c ->
-                        if (c is Geometry)
-                            c.canPick = false
-                    }
+            it.children[0].children.forEach { node ->
+                val gameObject = createGameObjectFromNodeName(node.name)
+                if (gameObject != null) {
+                    node.attachComponent(gameObject)
+                } else {
+                    node.scanTree { g -> if (g is Geometry) g.canPick = false }
                 }
             }
         })
@@ -68,6 +69,13 @@ object AmongUsClient : NekoApp(
 
     override fun onRenderFrame() {
         if (debugActive) showDebugWindow()
+
+        val hoverObject = pickEngine.pick()?.findGameObject()
+        if (hoverObject != null) {
+            ImGui.begin("Debug Info")
+            ImGui.text("Hovering: $hoverObject")
+            ImGui.end()
+        }
     }
 
     @Subscribe
