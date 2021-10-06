@@ -2,6 +2,7 @@ package de.twometer.amogus.client
 
 import de.twometer.amogus.gui.IngamePage
 import de.twometer.amogus.player.CollidingPlayerController
+import de.twometer.amogus.render.CRTFilter
 import de.twometer.amogus.res.SmlLoader
 import de.twometer.neko.core.AppConfig
 import de.twometer.neko.core.NekoApp
@@ -63,8 +64,8 @@ object AmongUsClient : NekoApp(
         // Other configuration
         pickEngine.maxDistance = 1.8f
         playerController = CollidingPlayerController()
-
         guiManager.page = IngamePage()
+        renderer.effectsPipeline.steps.add(CRTFilter().also { it.active = false })
     }
 
     override fun onRenderFrame() {

@@ -1,0 +1,47 @@
+#include "base/postproc.base.nks"
+
+#bind sampler 4
+
+#begin fragment
+    out vec4 color;
+    in vec2 texCoords;
+
+    uniform float time;
+    uniform sampler2D sampler;
+
+    vec3 desaturate(vec3 color, float fac) {
+        vec3 luma = vec3(0.299, 0.587, 0.114);
+        vec3 gray = vec3(dot(luma, color));
+        return mix(color, gray, fac);
+    }
+
+    void main() {
+        vec2 uv = texCoords;
+
+        // Screen curve (https://github.com/wessles/GLSL-CRT/blob/master/shader.frag)
+        float dx = abs(0.5 - uv.x);
+        float dy = abs(0.5 - uv.y);
+        dx *= dx;
+        dy *= dy;
+
+        uv.x -= 0.5;
+        uv.x *= 1.0 + (dy * 0.5);
+        uv.x += 0.5;
+
+        uv.y -= 0.5;
+        uv.y *= 1.0 + (dx * 0.5);
+        uv.y += 0.5;
+
+        // Scanlines and desaturation
+        vec3 input = texture(sampler, uv).rgb;
+        vec3 gray = desaturate(input, 0.3);
+
+        float lScan = 0.75 + ((sin(uv.y * 1900) + 1) * 0.125);
+        float hScan = min(max(1 - sin(uv.y * 5 + time * 1), 0.9), 1.0);
+
+        if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0)
+            color = vec4(0.0);
+        else
+            color = vec4(gray * lScan * hScan, 1.0);
+    }
+#end fragment
