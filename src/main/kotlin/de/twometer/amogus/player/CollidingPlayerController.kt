@@ -1,0 +1,98 @@
+package de.twometer.amogus.player
+
+import de.twometer.neko.audio.SoundEngine
+import de.twometer.neko.core.NekoApp
+import de.twometer.neko.core.Window
+import de.twometer.neko.player.PlayerController
+import de.twometer.neko.scene.Scene
+import de.twometer.neko.util.MathExtensions.clone
+import de.twometer.neko.util.MathF
+import org.joml.Vector3f
+import org.lwjgl.glfw.GLFW
+
+class CollidingPlayerController : PlayerController {
+
+    var speed = 2.5f
+    var sensitivity = 0.25f
+    var slipperiness = 0.9f
+    var height = 0.75f
+
+    private val collider = LineColliderLoader.load("collider.sml")
+    private val velocity = Vector3f()
+    private var bobTime = MathF.PI / 2
+    private var prevBob = 0f
+    private var bobStop = false
+
+    init {
+        NekoApp.the.scene.camera.position.set(10f, height, -15f)
+    }
+
+    override fun updateCamera(window: Window, scene: Scene, deltaTime: Double) {
+        if (!window.isFocused() || NekoApp.the.cursorVisible)
+            return
+
+        var speed = this.speed * deltaTime.toFloat()
+        val sensitivity = this.sensitivity * deltaTime.toFloat()
+
+        if (window.isKeyDown(GLFW.GLFW_KEY_LEFT_CONTROL)) {
+            speed *= 4
+        }
+        if (window.isKeyDown(GLFW.GLFW_KEY_W)) {
+            velocity.add(scene.camera.direction.clone().mul(speed))
+        }
+        if (window.isKeyDown(GLFW.GLFW_KEY_S)) {
+            velocity.sub(scene.camera.direction.clone().mul(speed))
+        }
+        if (window.isKeyDown(GLFW.GLFW_KEY_A)) {
+            velocity.sub(scene.camera.right.clone().mul(speed))
+        }
+        if (window.isKeyDown(GLFW.GLFW_KEY_D)) {
+            velocity.add(scene.camera.right.clone().mul(speed))
+        }
+        velocity.y = 0f
+        if (velocity.lengthSquared() > speed * speed)
+            velocity.normalize(speed)
+
+        // Add velocity
+        scene.camera.position.add(velocity)
+        velocity.mul(slipperiness)
+
+        // Physics
+        collider.processPosition(scene.camera.position)
+
+        // View bobbing
+        if (velocity.length() > 0.01) {
+            bobTime += (velocity.length() * deltaTime).toFloat()
+            val viewBob = MathF.sin(bobTime * 420) * velocity.length() * 0.45f
+            scene.camera.position.y = height + viewBob
+
+            if (prevBob < 0 && viewBob < 0 && viewBob > prevBob && !bobStop) {
+                bobStop = true
+                playFootstep()
+            }
+            if (prevBob > 0 && viewBob > 0)
+                bobStop = false
+            prevBob = viewBob
+        } else {
+            bobTime = MathF.PI / 2
+        }
+
+        // Rotation
+        val (winW, winH) = window.getSize()
+        val (curX, curY) = window.getCursorPosition()
+        val dx = winW / 2 - curX
+        val dy = winH / 2 - curY
+
+        scene.camera.rotation.x += dx.toFloat() * sensitivity
+        scene.camera.rotation.y += dy.toFloat() * sensitivity
+        scene.camera.rotation.y = MathF.clamp(-MathF.PI / 2f, MathF.PI / 2f, scene.camera.rotation.y)
+
+        window.setCursorPosition(winW / 2, winH / 2)
+    }
+
+    private fun playFootstep() {
+        val rand = (MathF.rand() * 8).toInt() + 1
+        SoundEngine.play("Footsteps/Metal$rand.ogg")
+    }
+
+}

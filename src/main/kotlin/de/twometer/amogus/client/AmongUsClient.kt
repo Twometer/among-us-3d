@@ -1,5 +1,6 @@
 package de.twometer.amogus.client
 
+import de.twometer.amogus.player.CollidingPlayerController
 import de.twometer.amogus.res.SmlLoader
 import de.twometer.neko.core.AppConfig
 import de.twometer.neko.core.NekoApp
@@ -58,7 +59,8 @@ object AmongUsClient : NekoApp(
         }
 
         // Other configuration
-        pickEngine.maxDistance = 1.0f
+        pickEngine.maxDistance = 1.8f
+        playerController = CollidingPlayerController()
     }
 
     override fun onRenderFrame() {
