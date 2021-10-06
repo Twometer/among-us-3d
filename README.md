@@ -2,7 +2,7 @@
 A fan-made free and open-source 3D remake of Among Us by Innersloth.
 
 ## Disclaimer
-**Important**: This is **NOT **an official version of Among Us, nor is it associated with Among Us or Innersloth in any way.
+**Important**: This is **NOT** an official version of Among Us, nor is it associated with Among Us or Innersloth in any way.
 It does **not** intend any copyright infringement whatsoever. I'm just a fan of Among Us and wanted to make a 3D version of it :P
 
 - Textures and sounds are from the original game and are **Copyright Innersloth LLC**
