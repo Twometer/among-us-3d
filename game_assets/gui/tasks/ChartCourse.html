@@ -1,0 +1,119 @@
+<html>
+<head>
+    <link rel="stylesheet" href="styles/taskBase.css">
+
+    <style>
+        .c {
+            animation: rotating 10s linear infinite;
+        }
+        .cf {
+            animation: rotating 10s linear infinite reverse;
+        }
+        @keyframes rotating {
+            from {
+                transform: rotate(360deg);
+            }
+            to {
+                transform: rotate(0deg);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img class="abs background" src="img/nav_chartCourse_base.png">
+
+    <img class="abs c" src="img/nav_chartCourse_checkPtShadow.png" l="129" t="120">
+    <img class="abs c" src="img/nav_chartCourse_checkPt.png" l="127" t="118">
+
+    <img class="abs c" src="img/nav_chartCourse_checkPtShadow.png" l="241" t="67">
+    <img class="abs c" src="img/nav_chartCourse_checkPt.png" l="239" t="65">
+
+    <img class="abs c" src="img/nav_chartCourse_checkPtShadow.png" l="333" t="187">
+    <img class="abs c" src="img/nav_chartCourse_checkPt.png" l="331" t="185">
+
+    <img class="abs c" src="img/nav_chartCourse_checkPtShadow.png" l="404" t="93">
+    <img class="abs c" src="img/nav_chartCourse_checkPt.png" l="402" t="91">
+
+    <img class="abs cf" src="img/nav_chartCourse_endShadow.png" l="393" t="81">
+    <img class="abs cf" src="img/nav_chartCourse_end.png" l="391" t="79">
+
+
+    <img id="ship" class="abs" src="img/nav_chartCourse_ship.png" a="50" l="49" t="197">
+</div>
+
+
+</body>
+<script src="scripts/base.js"></script>
+<script>
+    var base = [49,197];
+
+    var cps = [
+        [127,118],
+        [241,67],
+        [333,187],
+        [404,93]
+    ];
+
+    var prev = base;
+    var next = cps[0];
+    var id = 0;
+
+    var ship = $('ship');
+    var dragging = false;
+    var sb = [0,0];
+    ship.onmousedown = e=>{
+        dragging = true;
+        sb[0] = ship.offsetLeft - e.getRealX();
+        sb[1] = ship.offsetTop - e.getRealY();
+    }
+
+    ship.onmousemove = e => {
+        if (dragging) {
+            //var oldPos = [ship.offsetLeft, ship.offsetTop];
+            var newPos = [e.getRealX() + sb[0], e.getRealY() + sb[1]];
+            var travelledDist = dist(prev, newPos);
+            var fullDist = dist(prev, next);
+            var progress = travelledDist / fullDist;
+
+            if (progress > 1) {
+                progress = 0;
+                prev = next;
+                id++;
+                next = cps[id];
+
+
+                if (next == undefined) {
+                    dragging = false;
+                    ship.onmousedown = null;
+                    _api.playSound('ChartCourseFinish.ogg');
+                    setTimeout(() => _remote.taskComplete(), 150);
+                } else _api.playSound('ChartCourseCheckpoint.ogg');
+                return;
+            }
+
+            var dx = next[0] - prev[0];
+            var dy = next[1] - prev[1];
+            var angle = Math.atan2(dy, dx) + Math.PI/2;
+            ship.style.transform = 'rotateZ(' + angle + 'rad)';
+            ship.style.left = prev[0] + dx * progress;
+            ship.style.top = prev[1] + dy * progress;
+        }
+    }
+
+    function dist(a, b) {
+        var dx = b[0] - a[0];
+        var dy = b[1] - a[1];
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+    document.onmouseup = () => dragging = false;
+
+    function OnLoaded() {
+            var dx = next[0] - prev[0];
+            var dy = next[1] - prev[1];
+            var angle = Math.atan2(dy, dx) + Math.PI/2;
+            ship.style.transform = 'rotateZ(' + angle + 'rad)';
+    }
+</script>
+</html>

@@ -1,0 +1,146 @@
+#include "base/postproc.base.nks"
+#include "base/depth_util.nks"
+
+#bind gDepth 0
+#bind gNormal 1
+#bind noise 4
+
+#inject CameraMatrices
+#inject ScreenSize
+
+// From https://gist.github.com/transitive-bullshit/6770311
+
+#begin fragment
+    #define NUM_SAMPLES           9
+    #define NUM_SPIRAL_TURNS      7
+    #define USE_ACTUAL_NORMALS    0
+    #define USE_NOISE_TEXTURE     1
+    #define VARIATION             1
+    #define PI                    3.14159265359
+
+    uniform sampler2D gDepth;
+    uniform sampler2D gNormal;
+    uniform sampler2D noise;
+
+    uniform vec2 _screenSize;
+    uniform mat4 _viewMatrix;
+
+    uniform float uFOV;
+    uniform float uIntensity;
+    uniform float uSampleRadiusWS;
+    uniform float uBias;
+
+    in vec2 texCoords;
+    out vec4 FragColor;
+
+    float rand(vec2 co) {
+        return fract( sin( dot( co.xy, vec2( 12.9898, 78.233 ) ) ) * 43758.5453 );
+    }
+
+    // reconstructs view-space unit normal from view-space position
+    vec3 reconstructNormalVS(vec3 positionVS) {
+        return normalize(cross(dFdx(positionVS), dFdy(positionVS)));
+    }
+
+    vec3 getPositionVS(vec2 uv) {
+        return reconstructViewSpacePos(uv, texture(gDepth, uv).r);
+    }
+
+    // returns a unit vector and a screen-space radius for the tap on a unit disk
+    // (the caller should scale by the actual disk radius)
+    vec2 tapLocation(int sampleNumber, float spinAngle, out float radiusSS) {
+        // radius relative to radiusSS
+        float alpha = (float(sampleNumber) + 0.5) * (1.0 / float(NUM_SAMPLES));
+        float angle = alpha * (float(NUM_SPIRAL_TURNS) * 2 * PI) + spinAngle;
+
+        radiusSS = alpha;
+        return vec2(cos(angle), sin(angle));
+    }
+
+    vec3 getOffsetPositionVS(vec2 uv, vec2 unitOffset, float radiusSS) {
+        uv = uv + radiusSS * unitOffset * (1.0 / _screenSize);
+        return getPositionVS(uv);
+    }
+
+    float sampleAO(vec2 uv, vec3 positionVS, vec3 normalVS, float sampleRadiusSS, int tapIndex, float rotationAngle) {
+        const float epsilon = 0.01;
+        float radius2 = uSampleRadiusWS * uSampleRadiusWS;
+
+        // offset on the unit disk, spun for this pixel
+        float radiusSS;
+        vec2 unitOffset = tapLocation(tapIndex, rotationAngle, radiusSS);
+        radiusSS *= sampleRadiusSS;
+
+        vec3 Q = getOffsetPositionVS(uv, unitOffset, radiusSS);
+        vec3 v = Q - positionVS;
+
+        float vv = dot(v, v);
+        float vn = dot(v, normalVS) - uBias;
+
+    #if VARIATION == 0
+
+        // (from the HPG12 paper)
+        // Note large epsilon to avoid overdarkening within cracks
+        return float(vv < radius2) * max(vn / (epsilon + vv), 0.0);
+
+    #elif VARIATION == 1 // default / recommended
+
+        // Smoother transition to zero (lowers contrast, smoothing out corners). [Recommended]
+        float f = max(radius2 - vv, 0.0) / radius2;
+        return f * f * f * max(vn / (epsilon + vv), 0.0);
+
+    #elif VARIATION == 2
+
+        // Medium contrast (which looks better at high radii), no division.  Note that the
+        // contribution still falls off with radius^2, but we've adjusted the rate in a way that is
+        // more computationally efficient and happens to be aesthetically pleasing.
+        float invRadius2 = 1.0 / radius2;
+        return 4.0 * max(1.0 - vv * invRadius2, 0.0) * max(vn, 0.0);
+
+    #else
+
+        // Low contrast, no division operation
+        return 2.0 * float(vv < radius2) * max(vn, 0.0);
+
+    #endif
+    }
+
+    void main() {
+        vec3 originVS = getPositionVS(texCoords);
+
+    #if USE_ACTUAL_NORMALS
+        mat3 normalMatrix = mat3(_viewMatrix);
+        vec3 normalVS = normalize(normalMatrix * texture(gNormal, texCoords).xyz);
+    #else
+        vec3 normalVS = reconstructNormalVS(originVS);
+    #endif
+
+    #if USE_NOISE_TEXTURE
+        vec2 noiseScale = _screenSize / 5;
+        vec3 sampleNoise = texture(noise, texCoords * noiseScale).xyz;
+        float noise = sampleNoise.x;
+    #else
+        float noise = rand(texCoords);
+    #endif
+
+        float randomPatternRotationAngle = 2.0 * PI * noise;
+
+        float projScale = 1.0 / (2.0 * tan(uFOV * 0.5));
+
+        // radius of influence in world space
+        float radiusWS = uSampleRadiusWS;
+
+        // radius of influence in screen space
+        float radiusSS = projScale * radiusWS / (originVS.z * 0.01);
+
+        float occlusion = 0.0;
+        for (int i = 0; i < NUM_SAMPLES; ++i) {
+            occlusion += sampleAO(texCoords, originVS, normalVS, radiusSS, i, randomPatternRotationAngle);
+        }
+
+        occlusion = 1.0 - occlusion / (4.0 * float(NUM_SAMPLES));
+        occlusion = clamp(pow(occlusion, 1.0 + uIntensity), 0.0, 1.0);
+        FragColor = vec4(occlusion, occlusion, occlusion, 1.0);
+    }
+
+#end fragment

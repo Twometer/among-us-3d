@@ -1,0 +1,12 @@
+#include "base/geometry.base.nks"
+
+#begin vertex
+    void main() {
+        vec4 worldSpacePos = modelMatrix * vec4(vertexPosition, 1.0f);
+        gl_Position = _projectionMatrix * _viewMatrix * worldSpacePos;
+
+        fragmentPosition = worldSpacePos.xyz;
+        fragmentNormal = normalize(normalMatrix * vertexNormal);
+        fragmentTexCoords = vertexTexCoords;
+    }
+#end vertex

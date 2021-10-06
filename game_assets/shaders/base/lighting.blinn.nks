@@ -1,0 +1,91 @@
+#include "base/depth_util.nks"
+
+#bind gPosition 0
+#bind gNormal   1
+#bind gAlbedo   2
+
+#inject CameraMatrices
+#inject CameraPosition
+#inject ScreenSize
+
+#begin shared
+    vec3 lightPos;
+    vec4 lightColor;
+    float lightConstant;
+    float lightLinear;
+    float lightQuadratic;
+#end shared
+
+#begin vertex
+    in vec3 position;
+
+    uniform mat4 _projectionMatrix;
+    uniform mat4 _viewMatrix;
+
+    // Each light is 112 bytes in size [4 * 28]
+    // A UBO can store 64KB. 512 lights are 57KB.
+    const int MAX_LIGHTS = 512;
+    struct Light {
+        mat4 matrix;        // 0..15
+        vec4 color;         // 16..20
+        vec4 position;      // 20..24
+        float constant;     // 25
+        float linear;       // 26
+        float quadratic;    // 27
+        float _padding;     // 28
+    };
+    layout (std140) uniform LightsBlock {
+        Light lights[MAX_LIGHTS];
+    };
+
+    void main(void) {
+        Light light = lights[gl_InstanceID];
+        gl_Position = _projectionMatrix * _viewMatrix * light.matrix * vec4(position, 1.0f);
+
+        // Send light information to fragment shader
+        lightPos = light.position.xyz;
+        lightColor = light.color;
+        lightConstant = light.constant;
+        lightLinear = light.linear;
+        lightQuadratic = light.quadratic;
+    }
+#end vertex
+
+#begin fragment
+    out vec4 color;
+
+    uniform vec2 _screenSize;
+    uniform vec3 _cameraPosition;
+
+    uniform sampler2D gDepth;
+    uniform sampler2D gNormal;
+    uniform sampler2D gAlbedo;
+
+    void main() {
+        vec2 texCoords = gl_FragCoord.xy / _screenSize;
+
+        // Unpack GBuffer
+        vec4 normalSpec = texture(gNormal, texCoords);
+        vec4 albedoShine = texture(gAlbedo, texCoords);
+        vec3 position = reconstructWorldSpacePos(texCoords, texture(gDepth, texCoords).r);
+        vec3 normal = normalSpec.xyz;
+        vec3 albedo = albedoShine.rgb;
+        float specularStrength = normalSpec.a;
+        float shininess = albedoShine.a;
+
+        // Light calculations
+        vec3 lightDir = lightPos - position;
+        float distance = length(lightDir);
+        float attenuation = 1.0 / (lightConstant + lightLinear * distance + lightQuadratic * distance * distance);
+
+        vec3 viewDir = normalize(_cameraPosition - position);
+        lightDir /= distance;
+        vec3 halfway = normalize(lightDir + viewDir);
+        vec3 lightRgb = lightColor.rgb;
+        vec3 diffuse = lightRgb * max(dot(normal, lightDir), 0.0f);
+        vec3 specular = lightRgb * pow(max(dot(normal, halfway), 0.0), shininess);
+
+        vec3 finalColor = (albedo * diffuse + specular * specularStrength) * max(attenuation - 0.025, 0); // HACK: Fix weird light sphere edges
+        color = vec4(finalColor, 1.0f);
+    }
+#end fragment

@@ -1,0 +1,73 @@
+<html>
+<head>
+    <link rel="stylesheet" href="styles/generic.css">
+    <link rel="stylesheet" href="styles/settings.css">
+</head>
+<body>
+    <h1>Settings</h1>
+    <div class="container">
+        <table>
+            <tr>
+                <th>Master volume</th>
+                <td><input type="range" min="0" max="99" value="75" class="slider" id="volume"></td>
+            </tr>
+            <tr>
+                <th>Ambient Occlusion</th>
+                <td><input type="checkbox" id="useAo"/></td>
+            </tr>
+            <tr>
+                <th>AO Quality</th>
+                <td><input type="range" min="1" max="64" value="11" class="slider" id="aoSamples"></td>
+            </tr>
+            <tr>
+                <th>Bloom</th>
+                <td><input type="checkbox" id="useBloom"/></td>
+            </tr>
+            <tr>
+                <th>Vignette</th>
+                <td><input type="checkbox" id="useVignette"/></td>
+            </tr>
+            <tr>
+                <th>FXAA</th>
+                <td><input type="checkbox" id="useFxaa"/></td>
+            </tr>
+        </table>
+
+        <div class="button-panel">
+            <button onclick="apply()">Apply</button>
+            <button onclick="_remote.back()">Cancel</button>
+        </div>
+
+    </div>
+</body>
+<script>
+    var volume = document.getElementById('volume');
+    var useAo = document.getElementById('useAo');
+    var aoSamples = document.getElementById('aoSamples');
+    var useBloom = document.getElementById('useBloom');
+    var useVignette = document.getElementById('useVignette');
+    var useFXAA = document.getElementById('useFxaa');
+
+    function set(s) {
+        console.log(s.useBloom);
+        volume.value = s.volume;
+        useAo.checked = s.useAO;
+        aoSamples.value = s.aoSamples;
+        useBloom.checked = s.useBloom;
+        useVignette.checked = s.useVignette;
+        useFxaa.checked = s.useFxaa;
+    }
+
+    function apply() {
+        var settings = {
+            volume: volume.value,
+            useAO: useAo.checked,
+            aoSamples: aoSamples.value,
+            useBloom: useBloom.checked,
+            useVignette: useVignette.checked,
+            useFxaa: useFxaa.checked
+        }
+        _remote.apply(JSON.stringify(settings));
+    }
+</script>
+</html>

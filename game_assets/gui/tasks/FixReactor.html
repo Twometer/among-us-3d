@@ -1,0 +1,54 @@
+<html>
+<head>
+    <link rel="stylesheet" href="styles/taskBase.css">
+
+    <style>
+        .display {
+            font-family: "Dot Matrix";
+            font-size: 32px;
+        }
+        .bar {
+            animation: glow 1.5s infinite alternate linear;
+        }
+        @keyframes glow {
+            from {top: 60px;}
+            to {top: 430px;}
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="colorfill abs" t="15" b="0" l="0" r="0" style="background-color: orangered;"></div>
+    <img class="abs ctrx bar d-none" src="img/reactorMeltdown_glowBar.png" t="0">
+    <img class="background abs ctr" src="img/reactorMeltdown_handprintBase.png">
+    <div class="abs display" t="38" l="55" r="0">HOLD TO FIX MELTDOWN</div>
+    <div class="abs" id="clicksurface" t="95" b="35" l="95" r="105"></div>
+</div>
+
+
+</body>
+<script src="scripts/base.js"></script>
+<script>
+    var bar = _('bar')[0];
+    var display = _('display')[0];
+    var interval = 0;
+    var sfx = () => {
+            _api.playSound('ReactorHand.ogg');
+        };
+
+    $('clicksurface').onmousedown = function() {
+        display.innerText = "WAITING FOR SECOND USER";
+        bar.show();
+        interval = setInterval(sfx, 900);
+        sfx();
+        _remote.setFixing(true);
+    }
+    document.onmouseup = function() {
+        display.innerText = "HOLD TO FIX MELTDOWN";
+        bar.hide();
+        clearInterval(interval);
+        _remote.setFixing(false);
+    }
+</script>
+</html>

@@ -1,0 +1,31 @@
+<html>
+<head>
+    <link rel="stylesheet" href="styles/taskBase.css">
+
+    <style>
+        #switch {
+            transition: all .15s;
+        }
+        .rotated {
+            transform: translate(-50%,-50%) rotateZ(-90deg);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img class="background abs" src="img/electricity_Receive_Bg.png">
+    <img id="switch" class="abs ctr" src="img/electricity_Receive_switch.png" onclick="acceptPower()">
+</div>
+
+
+</body>
+<script>
+    function acceptPower () {
+        $('switch').classList.add('rotated');
+        _api.playSound('AcceptPower.ogg');
+        _remote.taskComplete();
+    }
+</script>
+<script src="scripts/base.js"></script>
+</html>

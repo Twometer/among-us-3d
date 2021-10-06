@@ -1,0 +1,82 @@
+<html>
+<head>
+    <style>
+        * {
+            -webkit-user-select: none;
+            -webkit-user-drag: none;
+            cursor: default;
+        }
+        h1 {
+            font-size: 100px;
+            color: lightskyblue;
+            font-family: "Dot Matrix";
+            margin-bottom: 25px;
+            animation-name: reveal;
+            animation-duration: 4s;
+
+        }
+
+        p {
+            font-size: 25px;
+            font-family: "Dot Matrix";
+            margin: 5px;
+        }
+        .teammates {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            animation-name: revealteammates;
+            animation-duration: 2s;
+            animation-delay: 1s;
+            animation-fill-mode: forwards;
+            -webkit-animation-fill-mode: forwards;
+        }
+
+        @keyframes revealteammates {
+            from {
+                max-height: 0;
+                opacity: 0;
+            }
+            to {
+                max-height: 100%;
+                opacity: 1;
+            }
+        }
+
+        @keyframes reveal {
+            from {
+                transform: translateY(-50%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body style="text-align: center;padding: 50px;background-color: black; color: white;">
+<h1 id="statecontainer" >VICTORY</h1>
+<div class="teammates" id="players">
+
+</div>
+</body>
+<script>
+    function addPlayer(player, wasImp) {
+        var elem = document.createElement("p");
+        elem.style.color = wasImp ? "red" : "lightskyblue";
+        elem.innerText = player;
+        document.getElementById('players').appendChild(elem);
+    }
+
+    function setDefeat() {
+        var c =document.getElementById('statecontainer');
+        c.innerText = "DEFEAT";
+        c.style.color = 'red';
+    }
+
+    function OnLoaded() {
+
+    }
+</script>
+</html>

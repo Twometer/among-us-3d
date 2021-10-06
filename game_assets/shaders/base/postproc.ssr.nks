@@ -1,0 +1,118 @@
+#include "base/postproc.base.nks"
+#include "base/depth_util.nks"
+
+#bind gDepth 0
+#bind gNormal 1
+#bind gAlbedo 2
+#bind postMainTex 4
+#bind bloomTex 5
+
+#inject CameraMatrices
+#inject ScreenSize
+
+// From https://community.khronos.org/t/screen-space-reflections/69987/2
+
+#begin fragment
+
+    uniform sampler2D gDepth;
+    uniform sampler2D gNormal;
+    uniform sampler2D gAlbedo;
+    uniform sampler2D postMainTex;
+    uniform sampler2D bloomTex;
+
+    uniform mat4 _viewMatrix;
+    uniform mat4 _projectionMatrix;
+
+    const float rayStep = 0.25;
+    const float minRayStep = 0.1;
+    const int numRaySteps = 15;
+    const int numBinarySearchSteps = 4;
+    const float specularExponent = 1.55;
+
+    in vec2 texCoords;
+    out vec4 color;
+
+    vec3 sampleViewPosition(vec2 uv) {
+        return reconstructViewSpacePos(uv, texture(gDepth, uv).r);
+    }
+
+    vec2 project(vec3 vec) {
+        vec4 clipSpace = _projectionMatrix * vec4(vec, 1.0f);
+        vec2 ndc = clipSpace.xy / clipSpace.w;
+        return ndc * 0.5 + 0.5;
+    }
+
+    vec3 binarySearch(vec3 dir, inout vec3 ray, out float dDepth) {
+        float depth;
+
+        for(int i = 0; i < numBinarySearchSteps; i++) {
+            vec2 projectedCoord = project(ray);
+            depth = sampleViewPosition(projectedCoord).z;
+            dDepth = ray.z - depth;
+
+            dir *= 0.5;
+            if(dDepth > 0.0)
+                ray += dir;
+            else
+                ray -= dir;
+        }
+
+        return vec3(project(ray), depth);
+    }
+
+    vec4 rayCast(vec3 dir, inout vec3 ray, out float dDepth) {
+        dir *= rayStep;
+
+        vec2 projectedCoord;
+        float depth;
+
+        for(int i = 0; i < numRaySteps; i++) {
+            ray += dir;
+
+            projectedCoord = project(ray);
+            depth = sampleViewPosition(projectedCoord).z;
+            dDepth = ray.z - depth;
+
+            if((dir.z - dDepth) < 1.2 && dDepth <= 0.0)
+                return vec4(binarySearch(dir, ray, dDepth), 1.0);
+        }
+
+        return vec4(projectedCoord, depth, 0.0);
+    }
+
+    float rand(vec2 co){
+        return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+    }
+
+    void main() {
+        vec4 normalVal = texture(gNormal, texCoords);
+        float specular = clamp(normalVal.a, 0, 1);
+        if (specular <= 0.02)
+            discard;
+
+        vec3 viewNormal = normalize(mat3(_viewMatrix) * normalVal.xyz);
+        vec3 viewPos = sampleViewPosition(texCoords);
+
+        // Jitter vector
+        const float jitterStrength = 0.03;
+        vec3 jitter = (vec3(rand(texCoords * 11), rand(texCoords * 13), rand(texCoords * 17)) - 0.5) * jitterStrength;
+
+        // Reflection vector
+        vec3 reflected = reflect(normalize(viewPos), viewNormal + jitter);
+
+        // Ray cast
+        vec3 hitPos = viewPos;
+        float dDepth;
+
+        vec4 coords = rayCast(reflected * max(minRayStep, -viewPos.z), hitPos, dDepth);
+        vec2 dCoords = smoothstep(0.2, 0.6, abs(vec2(0.5, 0.5) - coords.xy));
+        float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
+
+        float fac = pow(specular, specularExponent) * screenEdgefactor * coords.w;
+
+        // Get color
+        vec3 colorVal = texture(postMainTex, coords.xy).rgb;
+        vec3 bloomVal = texture(bloomTex, coords.xy).rgb;
+        color = vec4(colorVal + bloomVal, fac);
+    }
+#end fragment

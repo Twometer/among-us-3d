@@ -1,0 +1,35 @@
+#bind textureSampler 0
+
+#set DepthMask Off
+#set DepthFunc LEqual
+
+#inject CameraMatrices
+
+#begin shared
+    vec3 fragmentTexCoords;
+#end shared
+
+#begin vertex
+    layout(location = 0) in vec3 vertexPosition;
+
+    uniform mat4 _viewMatrix;
+    uniform mat4 _projectionMatrix;
+    uniform mat4 modelMatrix;
+
+    void main() {
+        mat4 skyboxViewMat = mat4(mat3(_viewMatrix));
+        gl_Position = (_projectionMatrix * skyboxViewMat * modelMatrix * vec4(vertexPosition, 1.0)).xyww;
+        fragmentTexCoords = vertexPosition;
+    }
+#end vertex
+
+#begin fragment
+    out vec4 color;
+
+    uniform samplerCube textureSampler;
+
+    void main() {
+        color = texture(textureSampler, fragmentTexCoords);
+    }
+
+#end fragment

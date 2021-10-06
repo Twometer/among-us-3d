@@ -1,0 +1,308 @@
+<html>
+<head>
+    <style>
+        * {
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .actions-panel {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+        }
+
+        .action-item {
+            display: inline-block;
+            margin: 0 15px;
+            opacity: .75;
+        }
+
+        .action-hint {
+            margin-top: 10px;
+            font-family: Calibri;
+            font-size: 30px;
+            width: 35px;
+            height: 35px;
+            border-radius: 6px;
+            background: black;
+            color: white;
+            margin: auto;
+            text-align: center;
+        }
+
+        .vcenter {
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .taskbar {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+        }
+
+        .taskbar-fill-state {
+            position: absolute;
+            top: 23px;
+            left: 23px;
+            height: 34px;
+            width: 0; /* Max width: 762 */
+            background: #72D65B;
+            transition: width .5s;
+        }
+
+        .taskbar-text {
+            position: absolute;
+            top: 24px;
+            left: 29px;
+            color: white;
+            font-size: 32px;
+            font-family: 'In your face, Joffrey!';
+        }
+
+        .taskmanager {
+            font-family: 'In your face, Joffrey!';
+            position: absolute;
+            top: 90px;
+            width: 756px;
+            left: 11px;
+            background: #6868689F;
+            color: #fff;
+            font-size: 48px;
+            padding: 14px;
+        }
+
+        .taskmanager p {
+            padding: 0;
+            margin: 4px 4px;
+        }
+
+        .sabotage {
+            color: red;
+        }
+
+        #alarm-overlay {
+            z-index: 15;
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            bottom: 0;
+            background: #ff000045;
+            display: none;
+        }
+
+        #redraw-overlay {
+            z-index: 16;
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+            bottom: 0;
+            display: none;
+            background-color: rgba(0, 0, 0, 0.005);
+        }
+
+        .chair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #rolehint {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'In your face, Joffrey!';
+            font-size: 32px;
+            color: white;
+            margin: 5px;
+            padding: 15px;
+            background-color: #6868689F;
+        }
+    </style>
+</head>
+<body>
+
+<img class="taskbar" src="img/Taskbar.png">
+<div class="taskbar-fill-state" id="progress"></div>
+<div class="taskbar-text">Task progress</div>
+<div class="taskmanager" id="task-main">
+    <div id="task-container">
+
+    </div>
+    <!--<p>Cafeteria: Fix wiring</p>
+    <p>Storage: Refuel Engines (0/2)</p>
+    <p>Comms: Download Data</p>
+    <p>Admin: Swipe card</p>-->
+    <p id="sabotage" class="sabotage"></p>
+</div>
+<div id="rolehint">
+    You're an impostor
+</div>
+
+<div id="alarm-overlay"></div>
+<div id="redraw-overlay"></div>
+<img class="chair" src="img/Crosshair.png">
+
+<div class="actions-panel">
+    <div class="action-item" id="itm-2">
+        <img id="action2" src="img/ActionSabotage.png">
+        <div class="action-hint">
+            Q
+        </div>
+    </div>
+
+   <!--<div class="action-item">
+        <img id="action1" src="img/ActionReport.png">
+        <div class="action-hint">
+            R
+        </div>
+    </div>-->
+
+    <div class="action-item">
+        <img id="action0" src="img/ActionUse.png">
+        <div class="action-hint">
+            <img class="vcenter" src="img/LMB.png" id="hint-mouse">
+            <span style="display: none;" id="hint-cooldown">29</span>
+        </div>
+    </div>
+</div>
+
+</body>
+
+<script>
+    var impostor = false;
+    var ghost = false;
+    var killCooldown = 0;
+    var currentAction = 'Use';
+
+    function setGhost(g) {
+        ghost = g;
+        //setVisiblity('action1', !g, 'block);
+    }
+
+    function setKillCooldown(cd) {
+        killCooldown = cd;
+        document.getElementById('hint-cooldown').innerText = cd;
+        updateKillCooldownHint();
+    }
+
+    function updateKillCooldownHint() {
+        if (currentAction == 'Kill' && killCooldown > 0 && impostor) {
+            document.getElementById('hint-cooldown').style.display = 'inline';
+            document.getElementById('hint-mouse').style.display = 'none';
+        } else {
+            document.getElementById('hint-cooldown').style.display = 'none';
+            document.getElementById('hint-mouse').style.display = 'inline';
+        }
+        redraw();
+    }
+
+    var actionContainer = document.getElementById('action0');
+    function setMainAction(action) {
+        actionContainer.src = 'img/Action' + action + '.png';
+        currentAction = action;
+        updateKillCooldownHint();
+    }
+
+    function setImpostor(imp) {
+        impostor = imp;
+        setVisibility('itm-2', imp, 'inline-block');
+        redraw();
+    }
+
+    function setVisibility(id, vis, s) {
+        document.getElementById(id).style.display = vis ? s : 'none';
+    }
+
+    function OnLoaded() {
+        var hint = document.getElementById('rolehint');
+        if (impostor) hint.style.color = "red";
+        else hint.style.color = "lightskyblue";
+        if (ghost) hint.innerText = "You're a Ghost.";
+        else if (impostor) hint.innerText = "You're an impostor";
+        else hint.innerText = "You're a crewmate";
+    }
+
+    var sabotageContainer = document.getElementById('sabotage');
+    var taskContainer = document.getElementById('task-container');
+    var progress = document.getElementById('progress');
+
+    var blinkstate = false;
+    var alarmInterval = 0;
+
+    var alarmFunc = () => {
+                document.getElementById('alarm-overlay').style.display = blinkstate ? 'block' : 'none';
+                blinkstate = !blinkstate;
+                if (!blinkstate)
+                    _api.playSound('Alarm.ogg');
+            };
+
+    function setTasksVisible(v) {
+        document.getElementById('task-main').style.display = (v ? 'block' : 'none');
+        redraw();
+    }
+
+    function setAlarm(alarm) {
+        if (alarm) {
+            alarmInterval = setInterval(alarmFunc, 1000);
+            blinkstate = true;
+            alarmFunc();
+        } else {
+            clearInterval(alarmInterval);
+        }
+    }
+
+    function addTask(val, state) {
+        var elem = document.createElement('p');
+        elem.classList.add('task-item');
+        elem.innerText = val;
+        if (state == 1) elem.style.color = 'yellow';
+        else if (state == 2) elem.style.color = 'lime';
+        taskContainer.appendChild(elem);
+        redraw();
+    }
+
+    function setTask(idx, val) {
+        var clazzes = document.getElementsByClassName('task-item');
+        clazzes[idx].innerText = val;
+        redraw();
+    }
+
+    function setSabotage(sab) {
+        if (sab == null || sab == '') {
+            sabotageContainer.style.display = 'none';
+        } else {
+            sabotageContainer.style.display = 'block';
+        }
+        sabotageContainer.innerText = sab;
+        redraw();
+    }
+
+    function setCommsSabotaged(sab) {
+        taskContainer.style.display = sab ? 'none' : 'block';
+        redraw();
+    }
+
+    function setTaskProgress(p) {
+        var w = 762 * p;
+        progress.style.width = w;
+        redraw();
+    }
+
+    function redraw() {
+        document.getElementById('redraw-overlay').style.display = 'block';
+        setTimeout(() => { document.getElementById('redraw-overlay').style.display = 'none'; }, 35);
+    }
+
+</script>
+</html>

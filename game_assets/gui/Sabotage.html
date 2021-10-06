@@ -1,0 +1,33 @@
+<html>
+<head>
+    <link rel="stylesheet" href="Tasks/styles/taskBase.css">
+
+</head>
+<body>
+
+<div class="container">
+    <img class="background abs" src="img/Map.png">
+    <img class="abs sabotage" id="Reactor" src="img/SabotageReactor.png" l="26" t="271" width="50">
+    <img class="abs sabotage" id="Comms" src="img/SabotageComms.png" l="606" t="490" width="50">
+    <img class="abs sabotage" id="Lights" src="img/SabotageLights.png" l="324" t="372" width="50">
+    <img class="abs sabotage" id="O2" src="img/SabotageO2.png" l="656" t="216" width="50">
+</div>
+
+
+</body>
+<script src="Tasks/scripts/base.js"></script>
+<script>
+var sabs = _('sabotage');
+for (const elem of sabs) {
+    elem.onclick = function() {
+        setCooldown(elem.id);
+        _remote.sabotage(elem.id);
+    }
+}
+
+function setCooldown(sab) {
+    for (const elem of sabs)
+        elem.style.opacity = 0.5;
+}
+</script>
+</html>
