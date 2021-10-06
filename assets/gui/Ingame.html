@@ -118,7 +118,7 @@
 
         #rolehint {
             position: absolute;
-            bottom: 0;
+            bottom: 15px;
             left: 50%;
             transform: translateX(-50%);
             font-family: 'In your face, Joffrey!';
@@ -126,7 +126,29 @@
             color: white;
             margin: 5px;
             padding: 15px;
-            background-color: #6868689F;
+            background-color: #6868688F;
+            border-radius: 5px;
+        }
+
+        #monitor {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            animation: flash infinite 2s;
+        }
+
+        @keyframes flash {
+            0%, 20% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: .75;
+            }
+
+            80%, 100% {
+                opacity: 0;
+            }
         }
     </style>
 </head>
@@ -152,7 +174,7 @@
 <div id="alarm-overlay"></div>
 <div id="redraw-overlay"></div>
 <img class="chair" src="img/Crosshair.png">
-
+<img id="monitor" src="img/CamsActive.png">
 <div class="actions-panel">
     <div class="action-item" id="itm-2">
         <img id="action2" src="img/ActionSabotage.png">
