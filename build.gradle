@@ -1,0 +1,17 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.5.31'
+}
+
+group 'de.twometer'
+version '2.0.0'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://maven.twometer.de/releases/' }
+}
+
+dependencies {
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.5.31'
+    implementation 'org.slf4j:slf4j-log4j12:1.7.30'
+    implementation 'de.twometer:neko-engine:2.0.1'
+}
