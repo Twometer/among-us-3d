@@ -53,7 +53,7 @@ object AmongUsClient : NekoApp(
             }
             it.scanTree { node ->
                 if (node is Geometry && node.name == "Translucent_Glass_Blue.002") {
-                    node.material.shader = "geometry.sky_translucent.nks"
+                    node.material.shader = "geometry.space_glass.nks"
                 }
             }
         })
