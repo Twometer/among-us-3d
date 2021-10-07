@@ -1,0 +1,16 @@
+#include "base/postproc.base.nks"
+
+#bind sampler 4
+#bind mask 5
+
+#begin fragment
+    out vec4 color;
+    in vec2 texCoords;
+
+    uniform sampler2D sampler;
+    uniform sampler2D mask;
+
+    void main() {
+        color = texture(sampler, texCoords) * (1 - texture(mask, texCoords).a);
+    }
+#end fragment

@@ -4,7 +4,11 @@ import de.twometer.amogus.model.Location
 import de.twometer.amogus.model.SabotageType
 import de.twometer.amogus.model.TaskType
 import de.twometer.amogus.model.ToolType
+import de.twometer.neko.Neko
+import de.twometer.neko.core.NekoApp
+import de.twometer.neko.scene.Color
 import de.twometer.neko.scene.component.BaseComponent
+import de.twometer.neko.scene.nodes.Geometry
 import de.twometer.neko.scene.nodes.Node
 
 abstract class GameObject : BaseComponent() {
@@ -14,19 +18,38 @@ abstract class GameObject : BaseComponent() {
     open fun canInteract(): Boolean {
         return true
     }
+
+    open fun isHighlighted(): Boolean {
+        return AmongUsClient.currentPickTarget?.equals(this) == true
+    }
+
+    open fun getHighlightColor(): Color {
+        return if (AmongUsClient.currentPickTarget?.equals(this) == true)
+            Color(1f, 1f, 0f, 1f)
+        else
+            Color(1f, 1f, 1f, 1f)
+    }
 }
 
 abstract class LocationBasedInteractableGameObject(protected open val location: Location) : GameObject() {
     override fun canInteract(): Boolean = AmongUsClient.currentPlayerLocation == location
 }
 
-data class VentGameObject(override val location: Location, val number: Int = 1) : LocationBasedInteractableGameObject(location)
+data class VentGameObject(override val location: Location, val number: Int = 1) :
+    LocationBasedInteractableGameObject(location) {
+    override fun getHighlightColor(): Color {
+        return Color(1f, 0.15f, 0.15f, 1f)
+    }
+}
 
-data class TaskGameObject(override val location: Location, val taskType: TaskType) : LocationBasedInteractableGameObject(location)
+data class TaskGameObject(override val location: Location, val taskType: TaskType) :
+    LocationBasedInteractableGameObject(location)
 
-data class SabotageGameObject(override val location: Location, val sabotageType: SabotageType) : LocationBasedInteractableGameObject(location)
+data class SabotageGameObject(override val location: Location, val sabotageType: SabotageType) :
+    LocationBasedInteractableGameObject(location)
 
-data class ToolGameObject(override val location: Location, val toolType: ToolType) : LocationBasedInteractableGameObject(location)
+data class ToolGameObject(override val location: Location, val toolType: ToolType) :
+    LocationBasedInteractableGameObject(location)
 
 fun createGameObjectFromNodeName(name: String): GameObject? {
     val parts = name.split("_")

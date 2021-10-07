@@ -4,6 +4,7 @@ import de.twometer.amogus.gui.IngamePage
 import de.twometer.amogus.model.Location
 import de.twometer.amogus.player.*
 import de.twometer.amogus.render.CRTFilter
+import de.twometer.amogus.render.HighlightRenderer
 import de.twometer.amogus.res.SmlLoader
 import de.twometer.neko.core.AppConfig
 import de.twometer.neko.core.NekoApp
@@ -15,6 +16,7 @@ import de.twometer.neko.scene.Color
 import de.twometer.neko.scene.nodes.Geometry
 import de.twometer.neko.scene.nodes.PointLight
 import de.twometer.neko.util.MathExtensions.clone
+import de.twometer.neko.util.Profiler
 import imgui.ImGui
 import org.greenrobot.eventbus.Subscribe
 import org.joml.Vector3f
@@ -91,6 +93,15 @@ object AmongUsClient : NekoApp(
         if (debugActive) showDebugWindow()
 
         updatePlayerTests()
+
+        HighlightRenderer.begin()
+        scene.rootNode.scanTree { node ->
+            val gameObject = node.findGameObject()
+            if (node is Geometry && gameObject?.isHighlighted() == true) {
+                HighlightRenderer.addNode(node, gameObject.getHighlightColor())
+            }
+        }
+        HighlightRenderer.finish()
 
         if (currentPickTarget != null) {
             ImGui.begin("Debug Info")

@@ -1,0 +1,23 @@
+#include "base/postproc.base.nks"
+
+#bind sampler 4
+
+#begin fragment
+    out vec4 color;
+    in vec2 texCoords;
+
+    uniform sampler2D sampler;
+    uniform vec2 direction;
+
+    void main() {
+        vec2 texelSize = 1.0 / vec2(textureSize(sampler, 0));
+
+        vec4 result;
+        for (int i = -3; i <= 3; ++i) {
+            vec2 offset = direction * vec2(float(i)) * texelSize;
+            result = max(result, texture(sampler, texCoords + offset));
+        }
+
+        color = result;
+    }
+#end fragment
