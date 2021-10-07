@@ -84,6 +84,7 @@ object AmongUsClient : NekoApp(
         playerController = CollidingPlayerController()
         guiManager.page = IngamePage()
         renderer.effectsPipeline.steps.add(CRTFilter().also { it.active = false })
+        AmbianceController.play()
     }
 
     override fun onRenderFrame() {

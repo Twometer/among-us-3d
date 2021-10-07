@@ -1,7 +1,7 @@
 package de.twometer.amogus.model
 
 enum class Location(val footstepSound: FootstepSound) {
-    Reactor(FootstepSound.Tile),
+    Reactor(FootstepSound.Glass),
     UpperEngine(FootstepSound.Glass),
     LowerEngine(FootstepSound.Glass),
     Security(FootstepSound.Tile),
