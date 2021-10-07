@@ -7,18 +7,26 @@ import de.twometer.amogus.model.ToolType
 import de.twometer.neko.scene.component.BaseComponent
 import de.twometer.neko.scene.nodes.Node
 
-open class GameObject : BaseComponent() {
+abstract class GameObject : BaseComponent() {
     override fun createInstance(): BaseComponent =
         throw UnsupportedOperationException("Cannot create new instances of completed game objects, because programmer was lazy.")
+
+    open fun canInteract(): Boolean {
+        return true
+    }
 }
 
-data class VentGameObject(val location: Location, val number: Int = 1) : GameObject()
+abstract class LocationBasedInteractableGameObject(protected open val location: Location) : GameObject() {
+    override fun canInteract(): Boolean = AmongUsClient.currentPlayerLocation == location
+}
 
-data class TaskGameObject(val location: Location, val taskType: TaskType) : GameObject()
+data class VentGameObject(override val location: Location, val number: Int = 1) : LocationBasedInteractableGameObject(location)
 
-data class SabotageGameObject(val location: Location, val sabotageType: SabotageType) : GameObject()
+data class TaskGameObject(override val location: Location, val taskType: TaskType) : LocationBasedInteractableGameObject(location)
 
-data class ToolGameObject(val location: Location, val toolType: ToolType) : GameObject()
+data class SabotageGameObject(override val location: Location, val sabotageType: SabotageType) : LocationBasedInteractableGameObject(location)
+
+data class ToolGameObject(override val location: Location, val toolType: ToolType) : LocationBasedInteractableGameObject(location)
 
 fun createGameObjectFromNodeName(name: String): GameObject? {
     val parts = name.split("_")

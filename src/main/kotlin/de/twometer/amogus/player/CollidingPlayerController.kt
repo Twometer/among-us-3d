@@ -1,5 +1,6 @@
 package de.twometer.amogus.player
 
+import de.twometer.amogus.client.AmongUsClient
 import de.twometer.neko.audio.SoundEngine
 import de.twometer.neko.core.NekoApp
 import de.twometer.neko.core.Window
@@ -17,7 +18,6 @@ class CollidingPlayerController : PlayerController {
     var slipperiness = 0.9f
     var height = 0.75f
 
-    private val collider = LineColliderLoader.load("collider.sml")
     private val velocity = Vector3f()
     private var bobTime = MathF.PI / 2
     private var prevBob = 0f
@@ -58,12 +58,12 @@ class CollidingPlayerController : PlayerController {
         velocity.mul(slipperiness)
 
         // Physics
-        collider.processPosition(scene.camera.position)
+        AmongUsClient.collider.processPosition(scene.camera.position)
 
         // View bobbing
         if (velocity.length() > 0.01) {
             bobTime += (velocity.length() * deltaTime).toFloat()
-            val viewBob = MathF.sin(bobTime * 420) * velocity.length() * 0.45f
+            val viewBob = MathF.sin(bobTime * 480) * velocity.length() * 0.45f
             scene.camera.position.y = height + viewBob
 
             if (prevBob < 0 && viewBob < 0 && viewBob > prevBob && !bobStop) {
@@ -91,8 +91,9 @@ class CollidingPlayerController : PlayerController {
     }
 
     private fun playFootstep() {
-        val rand = (MathF.rand() * 8).toInt() + 1
-        SoundEngine.play("Footsteps/Metal$rand.ogg")
+        val location = AmongUsClient.currentPlayerLocation
+        val rand = (MathF.rand() * location.footstepSound.number).toInt() + 1
+        SoundEngine.play("Footsteps/${location.footstepSound}$rand.ogg")
     }
 
 }

@@ -1,11 +1,10 @@
 package de.twometer.amogus.client
 
 import de.twometer.amogus.gui.IngamePage
-import de.twometer.amogus.player.CollidingPlayerController
+import de.twometer.amogus.model.Location
+import de.twometer.amogus.player.*
 import de.twometer.amogus.render.CRTFilter
 import de.twometer.amogus.res.SmlLoader
-import de.twometer.neko.audio.OpenAL
-import de.twometer.neko.audio.SoundEngine
 import de.twometer.neko.core.AppConfig
 import de.twometer.neko.core.NekoApp
 import de.twometer.neko.events.KeyPressEvent
@@ -15,7 +14,7 @@ import de.twometer.neko.res.ModelCache
 import de.twometer.neko.scene.Color
 import de.twometer.neko.scene.nodes.Geometry
 import de.twometer.neko.scene.nodes.PointLight
-import de.twometer.neko.scene.nodes.Sky
+import de.twometer.neko.util.MathExtensions.clone
 import imgui.ImGui
 import org.greenrobot.eventbus.Subscribe
 import org.joml.Vector3f
@@ -29,6 +28,14 @@ object AmongUsClient : NekoApp(
     )
 ) {
 
+    lateinit var collider: LineCollider
+    lateinit var boundsTester: BoundsTester
+
+    var currentPickTarget: GameObject? = null
+        private set
+    var currentPlayerLocation: Location = Location.Hallways
+        private set
+
     private var debugActive = false
 
     override fun onPreInit() {
@@ -37,6 +44,9 @@ object AmongUsClient : NekoApp(
     }
 
     override fun onPostInit() {
+        collider = LineColliderLoader.load("collider.sml")
+        boundsTester = BoundsTesterLoader.load("bounds.sml")
+
         // Load skybox and bind to unit 16
         val skybox = CubemapCache.get("skybox")
         skybox.bind(16)
@@ -79,12 +89,20 @@ object AmongUsClient : NekoApp(
     override fun onRenderFrame() {
         if (debugActive) showDebugWindow()
 
-        val hoverObject = pickEngine.pick()?.findGameObject()
-        if (hoverObject != null) {
+        updatePlayerTests()
+
+        if (currentPickTarget != null) {
             ImGui.begin("Debug Info")
-            ImGui.text("Hovering: $hoverObject")
+            ImGui.text("Hovering: $currentPickTarget")
             ImGui.end()
         }
+    }
+
+    private fun updatePlayerTests() {
+        val pickCandidate = pickEngine.pick()?.findGameObject()
+        currentPickTarget = if (pickCandidate != null && pickCandidate.canInteract()) pickCandidate else null
+        currentPlayerLocation =
+            Location.valueOf(boundsTester.findContainingBounds(scene.camera.position.clone()) ?: "Hallways")
     }
 
     @Subscribe
