@@ -10,12 +10,10 @@ import de.twometer.amogus.res.SmlLoader
 import de.twometer.neko.core.AppConfig
 import de.twometer.neko.core.NekoApp
 import de.twometer.neko.events.KeyPressEvent
-import de.twometer.neko.res.AnimationCache
-import de.twometer.neko.res.AssetManager
-import de.twometer.neko.res.CubemapCache
-import de.twometer.neko.res.ModelCache
+import de.twometer.neko.res.*
 import de.twometer.neko.scene.Color
 import de.twometer.neko.scene.MatKey
+import de.twometer.neko.scene.nodes.Billboard
 import de.twometer.neko.scene.nodes.Geometry
 import de.twometer.neko.scene.nodes.ModelNode
 import de.twometer.neko.scene.nodes.PointLight
@@ -99,6 +97,7 @@ object AmongUsClient : NekoApp(
             // Update materials
             it.updateMaterial("Suit.001") { mat ->
                 mat[MatKey.ColorSpecular] = Color(0.05f, 0.05f, 0.05f, 0.0f)
+                mat[MatKey.ColorDiffuse] = Color(0f, 1f, 0f, 0f)
             }
             it.updateMaterial("Visor.001") { mat ->
                 mat[MatKey.ColorSpecular] = Color(1.0f, 1.0f, 1.0f, 0.0f)
@@ -110,6 +109,11 @@ object AmongUsClient : NekoApp(
             it.transform.translation.set(12f, 0f, -15f)
             it.transform.rotation.rotateZ(MathF.toRadians(90f))
             it.playAnimation(it.animations[1])
+            it.attachChild(Billboard(FontCache.get("lucida"), "Dummy 1").also { nametag ->
+                nametag.transform.scale.set(5000f, 5000f, 5000f)
+                nametag.transform.translation.set(0f, 1.25f, 0f)
+            })
+            it.attachComponent(PlayerGameObject())
         })
 
         // Other configuration

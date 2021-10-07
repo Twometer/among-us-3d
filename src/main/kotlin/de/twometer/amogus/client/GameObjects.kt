@@ -4,11 +4,8 @@ import de.twometer.amogus.model.Location
 import de.twometer.amogus.model.SabotageType
 import de.twometer.amogus.model.TaskType
 import de.twometer.amogus.model.ToolType
-import de.twometer.neko.Neko
-import de.twometer.neko.core.NekoApp
 import de.twometer.neko.scene.Color
 import de.twometer.neko.scene.component.BaseComponent
-import de.twometer.neko.scene.nodes.Geometry
 import de.twometer.neko.scene.nodes.Node
 
 abstract class GameObject : BaseComponent() {
@@ -32,7 +29,14 @@ abstract class GameObject : BaseComponent() {
 }
 
 abstract class LocationBasedInteractableGameObject(protected open val location: Location) : GameObject() {
-    override fun canInteract(): Boolean = AmongUsClient.currentPlayerLocation == location || location.interactCheckExempt
+    override fun canInteract(): Boolean =
+        AmongUsClient.currentPlayerLocation == location || location.interactCheckExempt
+}
+
+class PlayerGameObject : GameObject() {
+    override fun isHighlighted(): Boolean {
+        return false // Highlight shader doesn't work for animated objects
+    }
 }
 
 data class VentGameObject(override val location: Location, val number: Int = 1) :
