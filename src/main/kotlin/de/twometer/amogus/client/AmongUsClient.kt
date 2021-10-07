@@ -1,6 +1,8 @@
 package de.twometer.amogus.client
 
 import de.twometer.amogus.gui.IngamePage
+import de.twometer.amogus.gui.PageManager
+import de.twometer.amogus.gui.TaskPage
 import de.twometer.amogus.model.Location
 import de.twometer.amogus.player.*
 import de.twometer.amogus.render.CRTFilter
@@ -10,6 +12,7 @@ import de.twometer.amogus.res.SmlLoader
 import de.twometer.neko.core.AppConfig
 import de.twometer.neko.core.NekoApp
 import de.twometer.neko.events.KeyPressEvent
+import de.twometer.neko.events.MouseClickEvent
 import de.twometer.neko.res.*
 import de.twometer.neko.scene.Color
 import de.twometer.neko.scene.MatKey
@@ -156,6 +159,19 @@ object AmongUsClient : NekoApp(
     fun onKeyPress(e: KeyPressEvent) {
         if (e.key == GLFW.GLFW_KEY_F3)
             debugActive = !debugActive
+        else if (e.key == GLFW.GLFW_KEY_ESCAPE)
+            PageManager.goBack()
+    }
+
+    @Subscribe
+    fun onMouseClick(e: MouseClickEvent) {
+        if (guiManager.isInputBlocked()) return
+        when (val clicked = currentPickTarget) {
+            null -> return
+            is TaskGameObject -> {
+                PageManager.push(TaskPage(clicked))
+            }
+        }
     }
 
 }
