@@ -62,7 +62,7 @@ class CollidingPlayerController : PlayerController {
         AmongUsClient.collider.processPosition(scene.camera.position)
 
         // View bobbing
-        val horizontalSpeed = prevPos.sub(scene.camera.position).also { it.y = 0f }.length()
+        val horizontalSpeed = prevPos.sub(scene.camera.position).also { it.y = 0f }.length().coerceAtMost(0.08f)
         prevPos.set(scene.camera.position)
         if (horizontalSpeed > 0.01) {
             bobTime += (horizontalSpeed * deltaTime).toFloat()
