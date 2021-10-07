@@ -18,6 +18,7 @@ class CollidingPlayerController : PlayerController {
     var slipperiness = 0.9f
     var height = 0.75f
 
+    private val prevPos = Vector3f()
     private val velocity = Vector3f()
     private var bobTime = MathF.PI / 2
     private var prevBob = 0f
@@ -61,9 +62,11 @@ class CollidingPlayerController : PlayerController {
         AmongUsClient.collider.processPosition(scene.camera.position)
 
         // View bobbing
-        if (velocity.length() > 0.01) {
-            bobTime += (velocity.length() * deltaTime).toFloat()
-            val viewBob = MathF.sin(bobTime * 480) * velocity.length() * 0.45f
+        val horizontalSpeed = prevPos.sub(scene.camera.position).also { it.y = 0f }.length()
+        prevPos.set(scene.camera.position)
+        if (horizontalSpeed > 0.01) {
+            bobTime += (horizontalSpeed * deltaTime).toFloat()
+            val viewBob = MathF.sin(bobTime * 480) * horizontalSpeed * 0.4f
             scene.camera.position.y = height + viewBob
 
             if (prevBob < 0 && viewBob < 0 && viewBob > prevBob && !bobStop) {
