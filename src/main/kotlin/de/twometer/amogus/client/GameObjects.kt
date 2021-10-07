@@ -32,7 +32,7 @@ abstract class GameObject : BaseComponent() {
 }
 
 abstract class LocationBasedInteractableGameObject(protected open val location: Location) : GameObject() {
-    override fun canInteract(): Boolean = AmongUsClient.currentPlayerLocation == location
+    override fun canInteract(): Boolean = AmongUsClient.currentPlayerLocation == location || location.interactCheckExempt
 }
 
 data class VentGameObject(override val location: Location, val number: Int = 1) :
