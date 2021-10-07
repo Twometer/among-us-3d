@@ -4,6 +4,8 @@ import de.twometer.amogus.gui.IngamePage
 import de.twometer.amogus.player.CollidingPlayerController
 import de.twometer.amogus.render.CRTFilter
 import de.twometer.amogus.res.SmlLoader
+import de.twometer.neko.audio.OpenAL
+import de.twometer.neko.audio.SoundEngine
 import de.twometer.neko.core.AppConfig
 import de.twometer.neko.core.NekoApp
 import de.twometer.neko.events.KeyPressEvent
@@ -35,8 +37,9 @@ object AmongUsClient : NekoApp(
     }
 
     override fun onPostInit() {
-        // Load skybox
-        scene.rootNode.attachChild(Sky(CubemapCache.get("skybox")))
+        // Load skybox and bind to unit 16
+        val skybox = CubemapCache.get("skybox")
+        skybox.bind(16)
 
         // Load map model
         scene.rootNode.attachChild(ModelCache.get("skeld.obj").also {
@@ -46,6 +49,11 @@ object AmongUsClient : NekoApp(
                     node.attachComponent(gameObject)
                 } else {
                     node.scanTree { g -> if (g is Geometry) g.canPick = false }
+                }
+            }
+            it.scanTree { node ->
+                if (node is Geometry && node.name == "Translucent_Glass_Blue.002") {
+                    node.material.shader = "geometry.sky_translucent.nks"
                 }
             }
         })
