@@ -14,12 +14,11 @@ import de.twometer.neko.core.NekoApp
 import de.twometer.neko.events.KeyPressEvent
 import de.twometer.neko.events.MouseClickEvent
 import de.twometer.neko.res.*
+import de.twometer.neko.scene.AABB
 import de.twometer.neko.scene.Color
 import de.twometer.neko.scene.MatKey
-import de.twometer.neko.scene.nodes.Billboard
-import de.twometer.neko.scene.nodes.Geometry
-import de.twometer.neko.scene.nodes.ModelNode
-import de.twometer.neko.scene.nodes.PointLight
+import de.twometer.neko.scene.component.BoundingBoxProviderComponent
+import de.twometer.neko.scene.nodes.*
 import de.twometer.neko.util.MathExtensions.clone
 import de.twometer.neko.util.MathF
 import imgui.ImGui
@@ -31,7 +30,8 @@ object AmongUsClient : NekoApp(
     AppConfig(
         windowWidth = 1280,
         windowHeight = 720,
-        windowTitle = "Among Us 3D"
+        windowTitle = "Among Us 3D",
+        windowIcon = "icon.png"
     )
 ) {
 
@@ -105,6 +105,13 @@ object AmongUsClient : NekoApp(
             it.updateMaterial("Visor.001") { mat ->
                 mat[MatKey.ColorSpecular] = Color(1.0f, 1.0f, 1.0f, 0.0f)
             }
+
+            // Apply custom bounding box
+            it.scanTree(ScanFilters.GEOMETRY) { geo ->
+                geo.attachComponent(BoundingBoxProviderComponent {
+                    AABB(Vector3f(-0.5f, 0f, -0.5f), Vector3f(0.5f, 0.85f, 0.5f))
+                })
+            }
         }
 
         // Add a demo astronaut instance
@@ -133,9 +140,10 @@ object AmongUsClient : NekoApp(
         updatePlayerTests()
 
         HighlightRenderer.begin()
-        scene.rootNode.scanTree { node ->
+        scene.rootNode.scanTree(ScanFilters.GEOMETRY) {
+            val node = it as Geometry
             val gameObject = node.findGameObject()
-            if (node is Geometry && gameObject?.isHighlighted() == true) {
+            if (gameObject?.isHighlighted() == true) {
                 HighlightRenderer.addNode(node, gameObject.getHighlightColor())
             }
         }
