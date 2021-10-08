@@ -1,10 +1,8 @@
 package de.twometer.amogus.client
 
-import de.twometer.amogus.gui.GuiApi
-import de.twometer.amogus.gui.IngamePage
-import de.twometer.amogus.gui.PageManager
-import de.twometer.amogus.gui.TaskPage
+import de.twometer.amogus.gui.*
 import de.twometer.amogus.model.Location
+import de.twometer.amogus.model.ToolType
 import de.twometer.amogus.player.*
 import de.twometer.amogus.render.CRTFilter
 import de.twometer.amogus.render.HighlightRenderer
@@ -22,10 +20,15 @@ import de.twometer.neko.scene.component.BoundingBoxProviderComponent
 import de.twometer.neko.scene.nodes.*
 import de.twometer.neko.util.MathExtensions.clone
 import de.twometer.neko.util.MathF
+import de.twometer.neko.util.Profiler
 import imgui.ImGui
+import imgui.type.ImString
 import org.greenrobot.eventbus.Subscribe
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW
+import org.lwjgl.glfw.GLFW.GLFW_KEY_PERIOD
+import org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_CONTROL
+import java.lang.RuntimeException
 
 object AmongUsClient : NekoApp(
     AppConfig(
@@ -44,8 +47,11 @@ object AmongUsClient : NekoApp(
         private set
     var currentPlayerLocation: Location = Location.Hallways
         private set
+    var noclip = false
 
     private var debugActive = false
+    private var consoleActive = false
+    private val currentCommand = ImString()
 
     override fun onPreInit() {
         AssetManager.registerPath("./assets")
@@ -156,6 +162,12 @@ object AmongUsClient : NekoApp(
             ImGui.text("Hovering: $currentPickTarget")
             ImGui.end()
         }
+        if (consoleActive) {
+            ImGui.begin("Debug console")
+            ImGui.inputText("Command", currentCommand)
+            ImGui.setKeyboardFocusHere()
+            ImGui.end()
+        }
     }
 
     private fun updatePlayerTests() {
@@ -167,20 +179,43 @@ object AmongUsClient : NekoApp(
 
     @Subscribe
     fun onKeyPress(e: KeyPressEvent) {
-        if (e.key == GLFW.GLFW_KEY_F3)
-            debugActive = !debugActive
-        else if (e.key == GLFW.GLFW_KEY_ESCAPE)
-            PageManager.goBack()
+        when {
+            e.key == GLFW.GLFW_KEY_F3 -> debugActive = !debugActive
+            e.key == GLFW.GLFW_KEY_ESCAPE -> PageManager.goBack()
+            e.key == GLFW_KEY_PERIOD && window.isKeyDown(GLFW_KEY_RIGHT_CONTROL) -> {
+                consoleActive = !consoleActive
+                cursorVisible = consoleActive
+            }
+            e.key == GLFW.GLFW_KEY_ENTER && consoleActive -> {
+                consoleActive = false
+                cursorVisible = false
+                runCommand(currentCommand.get())
+                currentCommand.set("")
+            }
+        }
     }
 
     @Subscribe
     fun onMouseClick(e: MouseClickEvent) {
-        if (guiManager.isInputBlocked()) return
+        if (guiManager.isInputBlocked() || cursorVisible) return
         when (val clicked = currentPickTarget) {
             null -> return
             is TaskGameObject -> {
                 PageManager.push(TaskPage(clicked))
             }
+            is ToolGameObject -> {
+                if (clicked.toolType == ToolType.Surveillance) PageManager.push(SurveillancePage())
+            }
+        }
+    }
+
+    private fun runCommand(command: String) {
+        when (command) {
+            "profiler" -> Profiler.enabled = !Profiler.enabled
+            "getpos" -> println("Position=${scene.camera.position} Rotation=${scene.camera.rotation}")
+            "respawn" -> scene.camera.position.set(10f, 0.75f, -15f)
+            "crash" -> throw RuntimeException("simulated crash")
+            "noclip" -> noclip = !noclip
         }
     }
 

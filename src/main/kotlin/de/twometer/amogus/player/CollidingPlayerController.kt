@@ -59,7 +59,8 @@ class CollidingPlayerController : PlayerController {
         velocity.mul(slipperiness)
 
         // Physics
-        AmongUsClient.collider.processPosition(scene.camera.position)
+        if (!AmongUsClient.noclip)
+            AmongUsClient.collider.processPosition(scene.camera.position)
 
         // View bobbing
         val horizontalSpeed = prevPos.sub(scene.camera.position).also { it.y = 0f }.length().coerceAtMost(0.08f)
