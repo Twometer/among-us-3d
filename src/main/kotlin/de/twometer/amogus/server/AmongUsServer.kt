@@ -4,8 +4,12 @@ import com.esotericsoftware.kryonet.Connection
 import com.esotericsoftware.kryonet.Listener
 import com.esotericsoftware.kryonet.Server
 import de.twometer.amogus.model.PlayerRole
+import de.twometer.amogus.model.PlayerTask
 import de.twometer.amogus.net.*
+import de.twometer.neko.util.MathF
+import de.twometer.neko.util.MathF.PI
 import mu.KotlinLogging
+import org.joml.Vector3f
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -109,45 +113,59 @@ object AmongUsServer : Server() {
                 client.session!!.findPlayer(msg.playerId)?.run {
                     this.alive = false
                     client.session!!.broadcast(OnPlayerKilled(this.id))
+                    checkVictory(client.session!!)
                 }
             }
             is StartGame -> {
                 if (!client.isHost) return
                 logger.info { "Player ${client.id} starting their game" }
                 val session = client.session!!
+                // ReZero
+                resetSession(session)
                 // Select impostors
                 repeat(session.config.impostorCount) {
                     selectImpostor(session)?.player?.role = PlayerRole.Impostor
                 }
                 // Gigasync
+                session.broadcast(OnSessionUpdate(session.config))
                 session.players.forEach {
                     session.broadcast(OnPlayerUpdate(it.id, it.username, it.color, it.role))
                 }
-
-                // todo generate tasks for everyone
-
-                session.broadcast(OnGameStarted())
+                assignSpawnPositions(session)
+                // And lezzgooooooooo :3
+                val commonTask = TaskGenerator.newCommonTask()
+                session.players.forEach {
+                    val tasks = ArrayList<PlayerTask>()
+                    tasks.add(commonTask)
+                    repeat(session.config.shortTasks) { tasks.add(TaskGenerator.newShortTask()) }
+                    repeat(session.config.longTasks) { tasks.add(TaskGenerator.newLongTask()) }
+                    tasks.shuffle()
+                    session.totalTaskStages += tasks.sumOf { task -> task.length }
+                    it.sendTCP(OnGameStarted(tasks))
+                }
             }
             is SabotageStart -> {
-                if (!client.inSession) return
+                val session = client.session ?: return
                 if (client.role != PlayerRole.Impostor) return
                 logger.info { "Impostor ${client.id} sabotaging ${msg.sabotage}" }
+
             }
             is SabotageFix -> {
-                if (!client.inSession) return
+                val session = client.session ?: return
 
             }
             is CompleteTaskStage -> {
-                if (!client.inSession) return
+                val session = client.session ?: return
                 if (client.role != PlayerRole.Crewmate) return
-                client.session!!.tasksCompleted++
-                checkVictory(client.session!!)
+                session.tasksCompleted++
+                checkVictory(session)
             }
             is CallMeeting -> {
-                if (!client.inSession) return
+                val session = client.session ?: return
                 logger.info { "Player ${client.id} called an emergency meeting (by_button = ${msg.byButton})" }
-                client.session!!.broadcast(OnEmergencyMeeting(client.id, msg.byButton))
-                client.session!!.votes.clear()
+                session.broadcast(OnEmergencyMeeting(client.id, msg.byButton))
+                session.votes.clear()
+                assignSpawnPositions(session)
             }
             is ChangePosition -> {
                 client.session?.broadcast(OnPlayerMove(client.id, msg.pos, msg.rot))
@@ -155,10 +173,22 @@ object AmongUsServer : Server() {
         }
     }
 
+    private fun assignSpawnPositions(session: ServerSession) {
+        val center = Vector3f(28.09f, 0.0f, -22.46f)
+        val radius = 1.7f
+        val angleIncrement = 2.0f * PI / session.players.size
+        var angle = 0f
+        session.players.forEach {
+            val pos = Vector3f(center).add(Vector3f(MathF.sin(angle) * radius, 0f, MathF.cos(angle)))
+            session.broadcast(OnPlayerMove(it.id, pos, 0f))
+            angle += angleIncrement
+        }
+    }
+
     private fun resetSession(session: ServerSession) {
         session.votes.clear()
         session.tasksCompleted = 0
-        session.totalTasks = 0
+        session.totalTaskStages = 0
         session.players.forEach {
             it.alive = true
             it.player.role = PlayerRole.Crewmate
@@ -168,8 +198,14 @@ object AmongUsServer : Server() {
     private fun selectImpostor(session: ServerSession): PlayerClient? =
         session.players.filter { it.role != PlayerRole.Impostor }.shuffled().firstOrNull()
 
-    private fun checkVictory(session: ServerSession): PlayerRole? {
-        if (session.tasksCompleted >= session.totalTasks)
+    private fun checkVictory(session: ServerSession) {
+        val winners = tryFindWinners(session) ?: return
+        session.broadcast(OnGameEnded(winners))
+        resetSession(session)
+    }
+
+    private fun tryFindWinners(session: ServerSession): PlayerRole? {
+        if (session.tasksCompleted >= session.totalTaskStages)
             return PlayerRole.Crewmate
         val alivePlayers = session.players.filter { it.alive }
         val numAliveImpostors = alivePlayers.count { it.role == PlayerRole.Impostor }

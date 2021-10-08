@@ -6,7 +6,7 @@ import de.twometer.amogus.model.PlayerColor
 class ServerSession(code: String, host: Int) : BaseSession<PlayerClient>(code, host) {
 
     var tasksCompleted = 0
-    var totalTasks = 0
+    var totalTaskStages = 0
     val votes = HashMap<Int, Int>()
     val isFull: Boolean = players.size >= PlayerColor.values().size
 

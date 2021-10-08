@@ -6,7 +6,7 @@ enum class TaskState {
     Completed
 }
 
-data class PlayerTask(val stages: List<TaskStage>) {
+data class PlayerTask(val stages: MutableList<TaskStage> = ArrayList()) {
     private var progress: Int = 0
     private var timerDst: Long = -1
 
