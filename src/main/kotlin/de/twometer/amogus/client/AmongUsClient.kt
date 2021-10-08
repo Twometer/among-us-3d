@@ -1,8 +1,15 @@
 package de.twometer.amogus.client
 
+import com.esotericsoftware.kryonet.Client
+import com.esotericsoftware.kryonet.Connection
+import com.esotericsoftware.kryonet.Listener
+import de.twometer.amogus.concurrency.Scheduler
 import de.twometer.amogus.gui.*
 import de.twometer.amogus.model.Location
 import de.twometer.amogus.model.ToolType
+import de.twometer.amogus.net.HandshakeRequest
+import de.twometer.amogus.net.HandshakeResponse
+import de.twometer.amogus.net.registerAllNetMessages
 import de.twometer.amogus.player.*
 import de.twometer.amogus.render.CRTFilter
 import de.twometer.amogus.render.HighlightRenderer
@@ -23,12 +30,17 @@ import de.twometer.neko.util.MathF
 import de.twometer.neko.util.Profiler
 import imgui.ImGui
 import imgui.type.ImString
+import mu.KotlinLogging
+import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.glfw.GLFW.GLFW_KEY_PERIOD
 import org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_CONTROL
-import java.lang.RuntimeException
+import java.util.function.Consumer
+import kotlin.system.exitProcess
+
+private val logger = KotlinLogging.logger {}
 
 object AmongUsClient : NekoApp(
     AppConfig(
@@ -42,6 +54,7 @@ object AmongUsClient : NekoApp(
     lateinit var collider: LineCollider
     lateinit var boundsTester: BoundsTester
     lateinit var astronautPrefab: ModelNode
+    lateinit var netClient: Client
 
     var currentPickTarget: GameObject? = null
         private set
@@ -52,6 +65,10 @@ object AmongUsClient : NekoApp(
     private var debugActive = false
     private var consoleActive = false
     private val currentCommand = ImString()
+    val packetConsumers = ArrayList<PacketConsumer<*>>()
+    val mainScheduler = Scheduler()
+
+    class PacketConsumer<T>(val packetClass: Class<T>, val consumer: Consumer<T>)
 
     override fun onPreInit() {
         AssetManager.registerPath("./assets")
@@ -136,10 +153,51 @@ object AmongUsClient : NekoApp(
         // Other configuration
         pickEngine.maxDistance = 1.8f
         playerController = CollidingPlayerController()
-        guiManager.page = IngamePage()
         guiManager.registerGlobalObject("_api", GuiApi())
+        guiManager.page = MainMenuPage()
         renderer.effectsPipeline.steps.add(CRTFilter().also { it.active = false })
-        AmbianceController.play()
+
+        // Networking
+        netClient = Client()
+        registerAllNetMessages(netClient.kryo)
+        netClient.start()
+        netClient.connect(5000, "localhost", 32783)
+        netClient.addListener(object : Listener() {
+            override fun received(p0: Connection?, p1: Any?) {
+                handlePacket(p1!!)
+            }
+        })
+
+        send(HandshakeRequest(2))
+        waitFor<HandshakeResponse> {
+            if (!it.accepted) {
+                logger.error { "Invalid protocol" }
+                exitProcess(0)
+            }
+            logger.info { "Player id assigned: ${it.playerId}" }
+        }
+    }
+
+    private fun handlePacket(packet: Any) {
+        EventBus.getDefault().post(packet)
+        synchronized(packetConsumers) {
+            val iter = packetConsumers.iterator()
+            while (iter.hasNext()) {
+                val consumer = iter.next()
+                if (consumer.packetClass == packet.javaClass) {
+                    consumer.consumer as Consumer<Any>
+                    consumer.consumer.accept(packet)
+                }
+            }
+        }
+    }
+
+    fun send(obj: Any) = netClient.sendTCP(obj)
+
+    inline fun <reified T> waitFor(consumer: Consumer<T>) {
+        synchronized(packetConsumers) {
+            packetConsumers.add(PacketConsumer(T::class.java, consumer))
+        }
     }
 
     override fun onRenderFrame() {
@@ -168,6 +226,8 @@ object AmongUsClient : NekoApp(
             ImGui.setKeyboardFocusHere()
             ImGui.end()
         }
+
+        mainScheduler.update()
     }
 
     private fun updatePlayerTests() {
@@ -205,6 +265,10 @@ object AmongUsClient : NekoApp(
             }
             is ToolGameObject -> {
                 if (clicked.toolType == ToolType.Surveillance) PageManager.push(SurveillancePage())
+                else if (clicked.toolType == ToolType.Emergency) PageManager.push(CallMeetingPage())
+            }
+            is SabotageGameObject -> {
+                PageManager.push(FixSabotagePage(clicked))
             }
         }
     }

@@ -16,7 +16,7 @@ fun main(args: Array<String>) {
 
     when (if (args.isNotEmpty()) args[0] else "client") {
         "client" -> AmongUsClient.run()
-        "server" -> AmongUsServer.run()
+        "server" -> AmongUsServer.main()
         else -> println("Invalid startup option")
     }
 }
