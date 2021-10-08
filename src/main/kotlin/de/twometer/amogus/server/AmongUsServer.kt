@@ -3,9 +3,8 @@ package de.twometer.amogus.server
 import com.esotericsoftware.kryonet.Connection
 import com.esotericsoftware.kryonet.Listener
 import com.esotericsoftware.kryonet.Server
-import de.twometer.amogus.net.HandshakeRequest
-import de.twometer.amogus.net.HandshakeResponse
-import de.twometer.amogus.net.registerAllNetMessages
+import de.twometer.amogus.model.PlayerRole
+import de.twometer.amogus.net.*
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
@@ -33,18 +32,153 @@ object AmongUsServer : Server() {
         })
     }
 
-    private fun handle(client: PlayerClient, obj: Any) {
-        when (obj) {
+    override fun newConnection(): Connection {
+        return PlayerClient()
+    }
+
+    // God function lets go
+    private fun handle(client: PlayerClient, msg: Any) {
+        when (msg) {
             is HandshakeRequest -> {
                 client.player.id = playerIdCounter.incrementAndGet()
-                client.sendTCP(HandshakeResponse(obj.version == 2, client.player.id))
-                logger.info { "Player #${client.player.id} connected" }
+                client.sendTCP(HandshakeResponse(msg.version == 2, client.player.id))
+                logger.info { "Player #${client.id} connected" }
+            }
+            is SessionCreateRequest -> {
+                val code = CodeGenerator.newSessionCode()
+                val session = ServerSession(code, client.id)
+                sessions[code] = session
+                client.sendTCP(SessionCreateResponse(true, code))
+                logger.info { "Player ${client.id} created session ${session.code}" }
+            }
+            is SessionJoinRequest -> {
+                val session = sessions[msg.code]
+                if (session == null)
+                    client.sendTCP(SessionJoinResponse(false, "Session does not exist"))
+                else if (session.players.any { it.username.equals(msg.username, true) })
+                    client.sendTCP(SessionJoinResponse(false, "Username is taken"))
+                else if (msg.username.isBlank())
+                    client.sendTCP(SessionJoinResponse(false, "Invalid username"))
+                else if (session.isFull)
+                    client.sendTCP(SessionJoinResponse(false, "Lobby full"))
+                else {
+                    logger.info { "Player ${client.id} joining session ${session.code}" }
+                    client.session = session
+                    client.player.username = msg.username
+                    client.player.role = PlayerRole.Crewmate
+                    client.player.color = session.randomColor()
+                    client.sendTCP(SessionJoinResponse(true))
+                    session.players.forEach {
+                        client.sendTCP(OnPlayerJoin(it.id))
+                        client.sendTCP(OnPlayerUpdate(it.id, it.username, it.color, it.role))
+                    }
+                    client.sendTCP(OnSessionUpdate(session.config))
+                    session.players.add(client)
+                    session.broadcast(OnPlayerJoin(client.id))
+                    session.broadcast(OnPlayerUpdate(client.id, client.username, client.color, client.role))
+                }
+            }
+            is SessionConfigureRequest -> {
+                if (!client.isHost) return
+                logger.info { "Player ${client.id} reconfiguring their session" }
+                client.session!!.config = msg.config
+                client.sendTCP(SessionConfigureResponse(true))
+                client.session!!.broadcast(OnSessionUpdate(msg.config))
+            }
+            is ColorChangeRequest -> {
+                if (!client.inSession) return
+                logger.info { "Player ${client.id} attempting to change their color from ${client.color} to ${msg.newColor}" }
+                if (client.session!!.players.any { c -> c.color == msg.newColor })
+                    client.sendTCP(ColorChangeResponse(false))
+                else {
+                    client.player.color = msg.newColor
+                    client.session!!.broadcast(OnPlayerUpdate(client.id, client.username, client.color, client.role))
+                    client.sendTCP(ColorChangeResponse(true))
+                }
+            }
+            is CastVote -> {
+                if (!client.inSession) return
+                logger.info { "Player ${client.id} casting vote for ${msg.playerId}" }
+                client.session!!.broadcast(OnPlayerVoted(client.id, msg.playerId))
+                client.session!!.votes[client.id] = msg.playerId
+            }
+            is KillPlayer -> {
+                if (!client.inSession) return
+                if (client.role != PlayerRole.Impostor) return
+                logger.info { "Impostor ${client.id} killing player ${msg.playerId}" }
+                client.session!!.findPlayer(msg.playerId)?.run {
+                    this.alive = false
+                    client.session!!.broadcast(OnPlayerKilled(this.id))
+                }
+            }
+            is StartGame -> {
+                if (!client.isHost) return
+                logger.info { "Player ${client.id} starting their game" }
+                val session = client.session!!
+                // Select impostors
+                repeat(session.config.impostorCount) {
+                    selectImpostor(session)?.player?.role = PlayerRole.Impostor
+                }
+                // Gigasync
+                session.players.forEach {
+                    session.broadcast(OnPlayerUpdate(it.id, it.username, it.color, it.role))
+                }
+
+                // todo generate tasks for everyone
+
+                session.broadcast(OnGameStarted())
+            }
+            is SabotageStart -> {
+                if (!client.inSession) return
+                if (client.role != PlayerRole.Impostor) return
+                logger.info { "Impostor ${client.id} sabotaging ${msg.sabotage}" }
+            }
+            is SabotageFix -> {
+                if (!client.inSession) return
+
+            }
+            is CompleteTaskStage -> {
+                if (!client.inSession) return
+                if (client.role != PlayerRole.Crewmate) return
+                client.session!!.tasksCompleted++
+                checkVictory(client.session!!)
+            }
+            is CallMeeting -> {
+                if (!client.inSession) return
+                logger.info { "Player ${client.id} called an emergency meeting (by_button = ${msg.byButton})" }
+                client.session!!.broadcast(OnEmergencyMeeting(client.id, msg.byButton))
+                client.session!!.votes.clear()
+            }
+            is ChangePosition -> {
+                client.session?.broadcast(OnPlayerMove(client.id, msg.pos, msg.rot))
             }
         }
     }
 
-
-    override fun newConnection(): Connection {
-        return PlayerClient()
+    private fun resetSession(session: ServerSession) {
+        session.votes.clear()
+        session.tasksCompleted = 0
+        session.totalTasks = 0
+        session.players.forEach {
+            it.alive = true
+            it.player.role = PlayerRole.Crewmate
+        }
     }
+
+    private fun selectImpostor(session: ServerSession): PlayerClient? =
+        session.players.filter { it.role != PlayerRole.Impostor }.shuffled().firstOrNull()
+
+    private fun checkVictory(session: ServerSession): PlayerRole? {
+        if (session.tasksCompleted >= session.totalTasks)
+            return PlayerRole.Crewmate
+        val alivePlayers = session.players.filter { it.alive }
+        val numAliveImpostors = alivePlayers.count { it.role == PlayerRole.Impostor }
+        val numAliveCrewmates = alivePlayers.count { it.role == PlayerRole.Crewmate }
+        return when {
+            numAliveImpostors == 0 -> PlayerRole.Crewmate                   // Crewmates ejected all impostors off the ship
+            numAliveImpostors >= numAliveCrewmates -> PlayerRole.Impostor   // Not enough crewmates to vote any impostor off -> loss
+            else -> null                                                    // The game is still on.
+        }
+    }
+
 }

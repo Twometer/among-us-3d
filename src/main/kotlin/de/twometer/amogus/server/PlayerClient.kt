@@ -9,6 +9,7 @@ import de.twometer.amogus.model.PlayerRole
 class PlayerClient : IPlayer, Connection() {
 
     val player = Player()
+    var session: ServerSession? = null
 
     override val id: Int
         get() = player.id
@@ -18,6 +19,7 @@ class PlayerClient : IPlayer, Connection() {
         get() = player.role
     override val color: PlayerColor
         get() = player.color
-
-
+    val inSession get() = session != null
+    val isHost get() = session?.host == id
+    var alive = true
 }
