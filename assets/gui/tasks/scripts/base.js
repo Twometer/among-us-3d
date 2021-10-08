@@ -74,7 +74,7 @@ function _RegInit(cb) {
     }
 }
 
-window.onload = function() {
+function OnLoad() {
     for (let cb of callbacks) {
         try {
             cb();
@@ -86,9 +86,10 @@ window.onload = function() {
     callbacks = [];
 }
 
+
 _RegInit(function() {
     RunAlignments();
-    OnLoaded();
+    if (typeof OnLoaded !== 'undefined') OnLoaded();
 })
 
 function shuffle(a) {

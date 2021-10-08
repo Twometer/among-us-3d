@@ -1,5 +1,6 @@
 package de.twometer.amogus.client
 
+import de.twometer.amogus.gui.GuiApi
 import de.twometer.amogus.gui.IngamePage
 import de.twometer.amogus.gui.PageManager
 import de.twometer.amogus.gui.TaskPage
@@ -130,6 +131,7 @@ object AmongUsClient : NekoApp(
         pickEngine.maxDistance = 1.8f
         playerController = CollidingPlayerController()
         guiManager.page = IngamePage()
+        guiManager.registerGlobalObject("_api", GuiApi())
         renderer.effectsPipeline.steps.add(CRTFilter().also { it.active = false })
         AmbianceController.play()
     }
