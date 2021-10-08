@@ -2,6 +2,9 @@ package de.twometer.amogus
 
 import de.twometer.amogus.client.AmongUsClient
 import de.twometer.amogus.server.AmongUsServer
+import mu.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
 
 fun main(args: Array<String>) {
     println(
@@ -11,12 +14,17 @@ fun main(args: Array<String>) {
  / __ |/  ' \/ _ \/ _ \/ _ `/ / /_/ (_-<  _/_ </ // /
 /_/ |_/_/_/_/\___/_//_/\_, /  \____/___/ /____/____/ 
                       /___/                          
+  made by Twometer Game Studios x nekotec
+
     """.trimIndent()
     )
 
-    when (if (args.isNotEmpty()) args[0] else "client") {
+    val configuration = if (args.isNotEmpty()) args[0] else "client"
+    logger.info { "Attempting to start configuration '$configuration'" }
+
+    when (configuration) {
         "client" -> AmongUsClient.run()
         "server" -> AmongUsServer.main()
-        else -> println("Invalid startup option")
+        else -> logger.error { "Invalid startup configuration" }
     }
 }

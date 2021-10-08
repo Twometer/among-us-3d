@@ -34,6 +34,8 @@ object AmongUsServer : Server() {
                 logger.info { "Client connected from ${p0!!.remoteAddressTCP}" }
             }
         })
+
+        logger.info { "Server started and bound" }
     }
 
     override fun newConnection(): Connection {
