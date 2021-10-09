@@ -80,12 +80,12 @@
 <body>
 <h1>Customize</h1>
 <div class="container">
-    <div class="tab-panel">
+    <div class="tab-panel" id="tabPanel">
         <button class="tab selected">Player</button><button class="tab">Game</button>
     </div>
     <div class="tab-content" id="tab-0">
         <h2>Player color</h2>
-        <div class="color-box selected"></div>
+        <div class="color-box"></div>
         <div class="color-box"></div>
         <div class="color-box"></div>
         <div class="color-box"></div>
@@ -190,10 +190,18 @@
 
     var colorboxes = document.getElementsByClassName('color-box');
 
-	function setColorTaken(idx, taken) {
-		if (taken) colorboxes.classList.add('taken');
-		else colorboxes.classList.remove('taken');
-	}
+    function selectColor(idx) {
+        colorboxes[idx].classList.add('selected');
+    }
+
+    function setIsHost(host) {
+        if (!host)
+            document.getElementById('tabPanel').style.display = 'none';
+    }
+
+    function setConfig(config) {
+        _values = config;
+    }
 
 	function setColorBox(idx, str, name) {
 		colorboxes[idx].style.backgroundColor = str;
@@ -213,18 +221,16 @@
         _remote.setConfig(JSON.stringify(_values));
     }
 	
-    function OnLoaded() {
+    function initialize() {
         var elements = document.getElementsByClassName("auto-update");
 		for (const elem of elements) {
 			const target = elem.getAttribute('target');
-			var xmul = elem.getAttribute('mul');
-			if (xmul == null) xmul = 1.0;
-			const mul = xmul;
-			var xdec = elem.getAttribute('dec');
-			if (xdec == null) xdec = 1;
-			const dec = xdec;
+			const mul = elem.getAttribute('mul') || 1.0;
+			const dec = elem.getAttribute('dec') || 1.0;
+
 			const targetElem = document.getElementById(target);
 			const ext = elem.getAttribute('ext');
+			targetElem.value = _values[target] / mul;
 			targetElem.oninput = function() {
 				var val = (targetElem.value * mul).toFixed(dec);
 				elem.innerHTML = val + ext;

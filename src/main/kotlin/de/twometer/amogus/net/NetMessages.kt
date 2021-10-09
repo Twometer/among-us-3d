@@ -80,7 +80,7 @@ class OnVoteResults(val ejected: Int = 0)
 class OnGameStarted(val tasks: List<PlayerTask> = ArrayList())
 class OnGameEnded(val winners: PlayerRole = PlayerRole.Crewmate)
 class OnTaskProgress(val progress: Float = 0.0f)
-class OnPlayerMove(val id: Int = 0, val pos: Vector3f, val rot: Float)
+class OnPlayerMove(val id: Int = 0, val pos: Vector3f = Vector3f(), val rot: Float = 0f)
 class OnHostChanged(val id: Int = 0)
 
 // Actions

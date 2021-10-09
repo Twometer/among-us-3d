@@ -5,7 +5,7 @@ data class SessionConfig(
     val playerSpeed: Float = 1.0f,
     val playerVision: Float = 1.0f,
     val impostorVision: Float = 1.25f,
-    val killCountdown: Int = 25,
+    val killCooldown: Int = 25,
     val emergencyMeetings: Int = 1,
     val confirmEjects: Boolean = true,
     val votingTime: Int = 45,

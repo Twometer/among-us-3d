@@ -5,10 +5,7 @@ import com.esotericsoftware.kryonet.Connection
 import com.esotericsoftware.kryonet.Listener
 import de.twometer.amogus.concurrency.Scheduler
 import de.twometer.amogus.gui.*
-import de.twometer.amogus.model.IPlayer
-import de.twometer.amogus.model.Location
-import de.twometer.amogus.model.Player
-import de.twometer.amogus.model.ToolType
+import de.twometer.amogus.model.*
 import de.twometer.amogus.net.*
 import de.twometer.amogus.player.*
 import de.twometer.amogus.render.CRTFilter
@@ -283,25 +280,28 @@ object AmongUsClient : NekoApp(
             "profiler" -> Profiler.enabled = !Profiler.enabled
             "getpos" -> println("Position=${scene.camera.position} Rotation=${scene.camera.rotation}")
             "respawn" -> scene.camera.position.set(10f, 0.75f, -15f)
-            "crash" -> throw RuntimeException("simulated crash")
+            "crash" -> mainScheduler.runNow { throw RuntimeException("simulated crash") }
             "noclip" -> noclip = !noclip
             "ingame" -> PageManager.push(IngamePage())
+            "impostor" -> session?.myself?.apply { role = PlayerRole.Impostor }
         }
     }
 
     /// Packet handling ///
     @Subscribe
     fun onSessionJoined(e: SessionJoinResponse) {
-        if (e.accepted)
+        if (e.accepted) {
             session = ClientSession()
-        else {
+            logger.debug { "Initialized new empty session, reason: SessionJoinResponse.accepted == true" }
+        } else {
             session = null
-            logger.info { "Failed to join session: ${e.reason}" }
+            logger.debug { "Failed to join session, reason: ${e.reason}" }
         }
     }
 
     @Subscribe
     fun onSessionUpdate(e: OnSessionUpdate) {
+        logger.debug { "Update session: code=${e.code}; host=${e.host}; config=${e.config}" }
         session!!.code = e.code
         session!!.host = e.host
         session!!.config = e.config
@@ -309,6 +309,7 @@ object AmongUsClient : NekoApp(
 
     @Subscribe
     fun onPlayerJoin(e: OnPlayerJoin) {
+        logger.debug { "Added new empty player, id=${e.id}" }
         session!!.players.add(Player().also {
             it.id = e.id
         })
@@ -316,6 +317,7 @@ object AmongUsClient : NekoApp(
 
     @Subscribe
     fun onPlayerUpdate(e: OnPlayerUpdate) {
+        logger.debug { "Updated player ${e.id} (self?=${e.id == myPlayerId}) to color=${e.color}; role=${e.role}; user=${e.username}" }
         session?.findPlayer(e.id)?.apply {
             color = e.color
             role = e.role
@@ -325,7 +327,16 @@ object AmongUsClient : NekoApp(
 
     @Subscribe
     fun onPlayerLeave(e: OnPlayerLeave) {
+        logger.debug { "Player ${e.id} leaving current session" }
         session!!.players.removeIf { it.id == e.id }
+    }
+
+    @Subscribe
+    fun onPlayerMove(e: OnPlayerMove) {
+        session?.findPlayer(e.id)?.apply {
+            position.set(e.pos)
+            rotation = e.rot
+        }
     }
 
 }
