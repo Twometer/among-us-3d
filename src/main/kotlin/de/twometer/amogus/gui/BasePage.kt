@@ -14,6 +14,8 @@ open class BasePage(path: String) : Page(path) {
             PageManager.goBack()
     }
 
+    protected fun runOnUiThread(runnable: Runnable) = AmongUsClient.mainScheduler.runNow(runnable)
+
     protected fun showLoading(msg: String) {
         call("showDialog", "loading")
         setElementText("loadingMessage", msg)

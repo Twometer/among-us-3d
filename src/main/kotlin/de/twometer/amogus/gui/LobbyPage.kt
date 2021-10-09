@@ -1,7 +1,6 @@
 package de.twometer.amogus.gui
 
 import de.twometer.amogus.client.AmongUsClient
-import de.twometer.amogus.net.OnPlayerJoin
 import de.twometer.amogus.net.OnPlayerLeave
 import de.twometer.amogus.net.OnPlayerUpdate
 import de.twometer.amogus.net.StartGame
@@ -26,13 +25,15 @@ class LobbyPage : BasePage("Lobby.html") {
 
     @Subscribe
     fun onPlayerLeave(e: OnPlayerLeave) {
-        call("removePlayer", e.id)
+        runOnUiThread { call("removePlayer", e.id) }
     }
 
     @Subscribe
     fun onPlayerUpdate(e: OnPlayerUpdate) {
-        call("removePlayer", e.id)
-        call("addPlayer", e.id, e.username, e.color.name)
+        runOnUiThread {
+            call("removePlayer", e.id)
+            call("addPlayer", e.id, e.username, e.color.name)
+        }
     }
 
     fun customize() {
