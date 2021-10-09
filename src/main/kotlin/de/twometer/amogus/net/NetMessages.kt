@@ -91,4 +91,4 @@ class SabotageStart(val sabotage: SabotageType = SabotageType.Comms)
 class SabotageFix(val sabotage: SabotageType = SabotageType.Comms, val active: Boolean = false)
 class CompleteTaskStage
 class CallMeeting(val byButton: Boolean = false)
-class ChangePosition(val pos: Vector3f, val rot: Float)
+class ChangePosition(val pos: Vector3f = Vector3f(), val rot: Float = 0.0f)

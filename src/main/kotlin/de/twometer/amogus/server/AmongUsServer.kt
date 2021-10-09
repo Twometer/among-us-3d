@@ -171,18 +171,18 @@ object AmongUsServer : Server() {
                 assignSpawnPositions(session)
             }
             is ChangePosition -> {
-                client.session?.broadcast(OnPlayerMove(client.id, msg.pos, msg.rot))
+                client.session?.broadcastExcept(OnPlayerMove(client.id, msg.pos, msg.rot), client.id)
             }
         }
     }
 
     private fun assignSpawnPositions(session: ServerSession) {
         val center = Vector3f(28.09f, 0.0f, -22.46f)
-        val radius = 1.7f
+        val radius = 2.25f
         val angleIncrement = 2.0f * PI / session.players.size
         var angle = 0f
         session.players.forEach {
-            val pos = Vector3f(center).add(Vector3f(MathF.sin(angle) * radius, 0f, MathF.cos(angle)))
+            val pos = Vector3f(center).add(MathF.sin(angle) * radius, 0f, MathF.cos(angle) * radius)
             session.broadcast(OnPlayerMove(it.id, pos, 0f))
             angle += angleIncrement
         }

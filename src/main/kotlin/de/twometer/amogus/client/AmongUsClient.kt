@@ -24,7 +24,6 @@ import de.twometer.neko.scene.MatKey
 import de.twometer.neko.scene.component.BoundingBoxProviderComponent
 import de.twometer.neko.scene.nodes.*
 import de.twometer.neko.util.MathExtensions.clone
-import de.twometer.neko.util.MathF
 import de.twometer.neko.util.Profiler
 import imgui.ImGui
 import imgui.type.ImString
@@ -36,6 +35,7 @@ import org.lwjgl.glfw.GLFW
 import org.lwjgl.glfw.GLFW.GLFW_KEY_PERIOD
 import org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_CONTROL
 import java.util.function.Consumer
+import kotlin.math.abs
 import kotlin.system.exitProcess
 
 private val logger = KotlinLogging.logger {}
@@ -45,7 +45,8 @@ object AmongUsClient : NekoApp(
         windowWidth = 1280,
         windowHeight = 720,
         windowTitle = "Among Us 3D",
-        windowIcon = "icon.png"
+        windowIcon = "icon.png",
+        timerSpeed = 20
     )
 ) {
 
@@ -114,7 +115,6 @@ object AmongUsClient : NekoApp(
         astronautPrefab = ModelCache.get("astronaut.fbx").also {
             // Transform for our game
             it.transform.scale.set(0.000035) // so basically, this number is very smol.
-            it.transform.rotation.rotateX(MathF.toRadians(90f))
 
             // Load animations
             it.animations.clear()
@@ -124,7 +124,6 @@ object AmongUsClient : NekoApp(
             // Update materials
             it.updateMaterial("Suit.001") { mat ->
                 mat[MatKey.ColorSpecular] = Color(0.05f, 0.05f, 0.05f, 0.0f)
-                mat[MatKey.ColorDiffuse] = Color(0f, 1f, 0f, 0f)
             }
             it.updateMaterial("Visor.001") { mat ->
                 mat[MatKey.ColorSpecular] = Color(1.0f, 1.0f, 1.0f, 0.0f)
@@ -138,18 +137,6 @@ object AmongUsClient : NekoApp(
             }
         }
 
-        // Add a demo astronaut instance
-        scene.rootNode.attachChild(astronautPrefab.createInstance().also {
-            it.transform.translation.set(12f, 0f, -15f)
-            it.transform.rotation.rotateZ(MathF.toRadians(90f))
-            it.playAnimation(it.animations[1])
-            it.attachChild(Billboard(FontCache.get("lucida"), "Dummy 1").also { nametag ->
-                nametag.transform.scale.set(5000f, 5000f, 5000f)
-                nametag.transform.translation.set(0f, 1.25f, 0f)
-            })
-            it.attachComponent(PlayerGameObject())
-        })
-
         // Other configuration
         pickEngine.maxDistance = 1.8f
         playerController = CollidingPlayerController()
@@ -161,7 +148,7 @@ object AmongUsClient : NekoApp(
         netClient = Client()
         registerAllNetMessages(netClient.kryo)
         netClient.start()
-        netClient.connect(5000, "localhost", 32783)
+        netClient.connect(5000, "10.0.2.140", 32783)
         netClient.addListener(object : Listener() {
             override fun received(p0: Connection?, p1: Any?) {
                 handlePacket(p1!!)
@@ -176,6 +163,34 @@ object AmongUsClient : NekoApp(
             }
             logger.info { "Player id assigned: ${it.playerId}" }
             myPlayerId = it.playerId
+        }
+
+        StateManager.changeGameState(GameState.Menus)
+    }
+
+    fun createAstronautInstance(position: Vector3f, rotation: Float, name: String, color: PlayerColor): ModelNode {
+        val instance = astronautPrefab.createInstance().also {
+            it.transform.translation.set(position)
+            it.transform.rotation.rotateZ(rotation)
+            it.playAnimation(it.animations[1])
+            it.attachChild(Billboard(FontCache.get("lucida"), name).also { nametag ->
+                nametag.transform.scale.set(5000f, 5000f, 5000f)
+                nametag.transform.translation.set(0f, 1.25f, 0f)
+            })
+            it.updateMaterial("Suit.001") { mat ->
+                mat[MatKey.ColorDiffuse] = color.color
+            }
+            it.attachComponent(PlayerGameObject())
+        }
+        scene.rootNode.attachChild(instance)
+        return instance
+    }
+
+    fun ModelNode.updateAstronautInstance(name: String, color: PlayerColor) {
+        val nametag = this.children.first { it is Billboard } as Billboard
+        nametag.text = name
+        updateMaterial("Suit.001") {
+            it[MatKey.ColorDiffuse] = color.color
         }
     }
 
@@ -288,6 +303,20 @@ object AmongUsClient : NekoApp(
         }
     }
 
+    override fun onTimerTick() {
+        if (StateManager.gameState == GameState.Ingame) {
+            send(ChangePosition(scene.camera.position, scene.camera.rotation.x))
+        }
+    }
+
+    @Subscribe
+    fun onGameStateChange(e: GameStateChangedEvent) {
+        if (e.new == GameState.Ingame)
+            AmbianceController.play()
+        else
+            AmbianceController.stop()
+    }
+
     /// Packet handling ///
     @Subscribe
     fun onSessionJoined(e: SessionJoinResponse) {
@@ -337,6 +366,18 @@ object AmongUsClient : NekoApp(
         session?.findPlayer(e.id)?.apply {
             position.set(e.pos)
             rotation = e.rot
+            node?.apply {
+                val xdif = abs(transform.translation.x - e.pos.x)
+                val ydif = abs(transform.translation.z - e.pos.z)
+                val difSquared = xdif * xdif + ydif * ydif
+                transform.translation.x = e.pos.x
+                transform.translation.z = e.pos.z
+                transform.rotation.identity().rotateX(1.5708f).rotateZ(-e.rot)
+                if (difSquared < 0.01)
+                    playAnimation(animations[0])
+                else
+                    playAnimation(animations[1])
+            }
         }
         if (e.id == myPlayerId) {
             scene.camera.position.x = e.pos.x
@@ -354,7 +395,19 @@ object AmongUsClient : NekoApp(
         self.lastMeetingCalled = System.currentTimeMillis()
         self.state = PlayerState.Alive
         session!!.taskProgress = 0f
-        mainScheduler.runNow { PageManager.overwrite(RoleRevealPage()) }
+        mainScheduler.runNow {
+            PageManager.overwrite(RoleRevealPage())
+
+            logger.debug { "Creating player model instances for current session" }
+            scene.rootNode.detachAll { it is ModelNode && it.components.containsKey(PlayerGameObject::class.java) }
+            session!!.players
+                .filter { it.id != myPlayerId }
+                .forEach {
+                    it.node = createAstronautInstance(it.position, it.rotation, it.username, it.color)
+                }
+            createAstronautInstance(Vector3f(12f, 0f, -15f), 1.45f, "Test Subject", PlayerColor.LightBlue)
+        }
+        StateManager.changeGameState(GameState.Ingame)
     }
 
     @Subscribe

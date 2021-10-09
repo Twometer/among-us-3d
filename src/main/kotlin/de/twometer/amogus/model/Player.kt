@@ -1,5 +1,6 @@
 package de.twometer.amogus.model
 
+import de.twometer.neko.scene.nodes.ModelNode
 import org.joml.Vector3f
 
 class Player : IPlayer {
@@ -13,4 +14,5 @@ class Player : IPlayer {
     var emergencyMeetings = 0
     var lastMeetingCalled = 0L
     var tasks: List<PlayerTask> = ArrayList()
+    var node: ModelNode? = null
 }

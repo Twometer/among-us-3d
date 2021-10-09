@@ -23,7 +23,7 @@ object LineColliderLoader {
 
 class LineCollider(private val lineSegments: List<LineSegment>) {
 
-    private val playerRadius = 0.2f
+    private val playerRadius = 0.28f
     private val playerRadiusSq = playerRadius * playerRadius
 
     fun processPosition(pos: Vector3f) {
