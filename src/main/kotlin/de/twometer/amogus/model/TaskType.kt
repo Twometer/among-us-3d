@@ -1,6 +1,9 @@
 package de.twometer.amogus.model
 
 enum class TaskType {
+    // Invalid
+    Invalid,
+
     // General
     AcceptPower,
     DataTransfer,

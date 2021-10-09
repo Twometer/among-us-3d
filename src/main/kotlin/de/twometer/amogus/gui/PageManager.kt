@@ -23,4 +23,9 @@ object PageManager {
         stack.clear()
     }
 
+    fun overwrite(page: Page) {
+        push(page)
+        stack.clear()
+    }
+
 }

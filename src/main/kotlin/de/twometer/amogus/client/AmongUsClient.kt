@@ -12,6 +12,7 @@ import de.twometer.amogus.render.CRTFilter
 import de.twometer.amogus.render.HighlightRenderer
 import de.twometer.amogus.render.updateMaterial
 import de.twometer.amogus.res.SmlLoader
+import de.twometer.neko.audio.SoundEngine
 import de.twometer.neko.core.AppConfig
 import de.twometer.neko.core.NekoApp
 import de.twometer.neko.events.KeyPressEvent
@@ -337,6 +338,38 @@ object AmongUsClient : NekoApp(
             position.set(e.pos)
             rotation = e.rot
         }
+        if (e.id == myPlayerId) {
+            scene.camera.position.x = e.pos.x
+            scene.camera.position.z = e.pos.z
+            scene.camera.rotation.x = e.rot
+        }
+    }
+
+    @Subscribe
+    fun onGameStarted(e: OnGameStarted) {
+        logger.debug { "Received game start command from server. Server assigned tasks: ${e.tasks}" }
+        val self = session!!.myself
+        self.tasks = e.tasks
+        self.emergencyMeetings = session!!.config.emergencyMeetings
+        self.lastMeetingCalled = System.currentTimeMillis()
+        self.state = PlayerState.Alive
+        session!!.taskProgress = 0f
+        mainScheduler.runNow { PageManager.overwrite(RoleRevealPage()) }
+    }
+
+    @Subscribe
+    fun onKill(e: OnPlayerKilled) {
+        session?.findPlayer(e.id)?.apply { state = PlayerState.Ghost }
+    }
+
+    @Subscribe
+    fun onTaskProgressChanged(e: OnTaskProgress) {
+        session!!.taskProgress = e.progress
+    }
+
+    @Subscribe
+    fun onEmergencyMeeting(e: OnEmergencyMeeting) {
+        SoundEngine.play(if (e.byButton) "EmergencyMeeting.ogg" else "EmergencyBody.ogg")
     }
 
 }

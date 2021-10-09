@@ -45,4 +45,4 @@ data class PlayerTask(val stages: MutableList<TaskStage> = ArrayList()) {
 
 }
 
-data class TaskStage(val location: Location, val taskType: TaskType)
+data class TaskStage(val location: Location = Location.Invalid, val taskType: TaskType = TaskType.Invalid)

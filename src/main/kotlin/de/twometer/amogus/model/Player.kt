@@ -11,4 +11,6 @@ class Player : IPlayer {
     var rotation = 0f
     var state: PlayerState = PlayerState.Alive
     var emergencyMeetings = 0
+    var lastMeetingCalled = 0L
+    var tasks: List<PlayerTask> = ArrayList()
 }

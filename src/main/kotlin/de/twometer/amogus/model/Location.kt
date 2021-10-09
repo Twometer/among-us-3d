@@ -15,5 +15,6 @@ enum class Location(val footstepSound: FootstepSound, val interactCheckExempt: B
     O2(FootstepSound.Tile, true),
     Navigation(FootstepSound.Tile),
     Weapons(FootstepSound.Tile),
-    Hallways(FootstepSound.Metal)
+    Hallways(FootstepSound.Metal),
+    Invalid(FootstepSound.Metal)
 }

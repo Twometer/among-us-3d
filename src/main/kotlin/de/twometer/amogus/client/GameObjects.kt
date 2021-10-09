@@ -47,7 +47,11 @@ data class VentGameObject(override val location: Location, val number: Int = 1) 
 }
 
 data class TaskGameObject(override val location: Location, val taskType: TaskType) :
-    LocationBasedInteractableGameObject(location)
+    LocationBasedInteractableGameObject(location) {
+    override fun isHighlighted(): Boolean {
+        return AmongUsClient.session?.myself?.tasks?.any { it.nextStage.location == location && it.nextStage.taskType == taskType } == true
+    }
+}
 
 data class SabotageGameObject(override val location: Location, val sabotageType: SabotageType) :
     LocationBasedInteractableGameObject(location)
