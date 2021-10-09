@@ -1,6 +1,6 @@
 package de.twometer.amogus.model
 
-abstract class BaseSession<P : IPlayer>(val code: String, var host: Int) {
+abstract class BaseSession<P : IPlayer>(var code: String = "", var host: Int = IPlayer.INVALID_PLAYER_ID) {
     val players = ArrayList<P>()
     var config = SessionConfig()
 

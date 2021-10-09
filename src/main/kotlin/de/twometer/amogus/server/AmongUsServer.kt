@@ -78,7 +78,7 @@ object AmongUsServer : Server() {
                         client.sendTCP(OnPlayerJoin(it.id))
                         client.sendTCP(OnPlayerUpdate(it.id, it.username, it.color, it.role))
                     }
-                    client.sendTCP(OnSessionUpdate(session.config))
+                    client.sendTCP(OnSessionUpdate(session.code, session.host, session.config))
                     session.players.add(client)
                     session.broadcast(OnPlayerJoin(client.id))
                     session.broadcast(OnPlayerUpdate(client.id, client.username, client.color, client.role))
@@ -87,9 +87,10 @@ object AmongUsServer : Server() {
             is SessionConfigureRequest -> {
                 if (!client.isHost) return
                 logger.info { "Player ${client.id} reconfiguring their session" }
-                client.session!!.config = msg.config
+                val session = client.session!!
+                session.config = msg.config
                 client.sendTCP(SessionConfigureResponse(true))
-                client.session!!.broadcast(OnSessionUpdate(msg.config))
+                session.broadcast(OnSessionUpdate(session.code, session.host, session.config))
             }
             is ColorChangeRequest -> {
                 if (!client.inSession) return
@@ -129,7 +130,7 @@ object AmongUsServer : Server() {
                     selectImpostor(session)?.player?.role = PlayerRole.Impostor
                 }
                 // Gigasync
-                session.broadcast(OnSessionUpdate(session.config))
+                session.broadcast(OnSessionUpdate(session.code, session.host, session.config))
                 session.players.forEach {
                     session.broadcast(OnPlayerUpdate(it.id, it.username, it.color, it.role))
                 }

@@ -73,7 +73,7 @@ class OnPlayerUpdate(
 )
 
 class OnPlayerKilled(val id: Int = 0)
-class OnSessionUpdate(val config: SessionConfig = SessionConfig())
+class OnSessionUpdate(val code: String = "", val host: Int = IPlayer.INVALID_PLAYER_ID, val config: SessionConfig = SessionConfig())
 class OnEmergencyMeeting(val caller: Int = 0, val byButton: Boolean = false)
 class OnPlayerVoted(val src: Int = 0, val dst: Int = 0)
 class OnVoteResults(val ejected: Int = 0)

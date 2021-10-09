@@ -5,11 +5,11 @@ import com.esotericsoftware.kryonet.Connection
 import com.esotericsoftware.kryonet.Listener
 import de.twometer.amogus.concurrency.Scheduler
 import de.twometer.amogus.gui.*
+import de.twometer.amogus.model.IPlayer
 import de.twometer.amogus.model.Location
+import de.twometer.amogus.model.Player
 import de.twometer.amogus.model.ToolType
-import de.twometer.amogus.net.HandshakeRequest
-import de.twometer.amogus.net.HandshakeResponse
-import de.twometer.amogus.net.registerAllNetMessages
+import de.twometer.amogus.net.*
 import de.twometer.amogus.player.*
 import de.twometer.amogus.render.CRTFilter
 import de.twometer.amogus.render.HighlightRenderer
@@ -61,6 +61,8 @@ object AmongUsClient : NekoApp(
     var currentPlayerLocation: Location = Location.Hallways
         private set
     var noclip = false
+    var session: ClientSession? = null
+    var myPlayerId = IPlayer.INVALID_PLAYER_ID
 
     private var debugActive = false
     private var consoleActive = false
@@ -175,21 +177,24 @@ object AmongUsClient : NekoApp(
                 exitProcess(0)
             }
             logger.info { "Player id assigned: ${it.playerId}" }
+            myPlayerId = it.playerId
         }
     }
 
     private fun handlePacket(packet: Any) {
         EventBus.getDefault().post(packet)
+        val acceptedConsumers = ArrayList<PacketConsumer<Any>>()
         synchronized(packetConsumers) {
             val iter = packetConsumers.iterator()
             while (iter.hasNext()) {
                 val consumer = iter.next()
                 if (consumer.packetClass == packet.javaClass) {
-                    consumer.consumer as Consumer<Any>
-                    consumer.consumer.accept(packet)
+                    acceptedConsumers.add(consumer as PacketConsumer<Any>)
+                    iter.remove()
                 }
             }
         }
+        acceptedConsumers.forEach { mainScheduler.runNow { it.consumer.accept(packet) } }
     }
 
     fun send(obj: Any) = netClient.sendTCP(obj)
@@ -280,7 +285,47 @@ object AmongUsClient : NekoApp(
             "respawn" -> scene.camera.position.set(10f, 0.75f, -15f)
             "crash" -> throw RuntimeException("simulated crash")
             "noclip" -> noclip = !noclip
+            "ingame" -> PageManager.push(IngamePage())
         }
+    }
+
+    /// Packet handling ///
+    @Subscribe
+    fun onSessionJoined(e: SessionJoinResponse) {
+        if (e.accepted)
+            session = ClientSession()
+        else {
+            session = null
+            logger.info { "Failed to join session: ${e.reason}" }
+        }
+    }
+
+    @Subscribe
+    fun onSessionUpdate(e: OnSessionUpdate) {
+        session!!.code = e.code
+        session!!.host = e.host
+        session!!.config = e.config
+    }
+
+    @Subscribe
+    fun onPlayerJoin(e: OnPlayerJoin) {
+        session!!.players.add(Player().also {
+            it.id = e.id
+        })
+    }
+
+    @Subscribe
+    fun onPlayerUpdate(e: OnPlayerUpdate) {
+        session?.findPlayer(e.id)?.apply {
+            color = e.color
+            role = e.role
+            username = e.username
+        }
+    }
+
+    @Subscribe
+    fun onPlayerLeave(e: OnPlayerLeave) {
+        session!!.players.removeIf { it.id == e.id }
     }
 
 }

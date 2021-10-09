@@ -31,7 +31,7 @@ class ScheduledTask(val time: Long, val runnable: Runnable) {
 class Scheduler {
     private val tasks = ArrayList<ScheduledTask>()
 
-    fun run(runnable: Runnable) {
+    fun runNow(runnable: Runnable) {
         runLater(0, runnable)
     }
 
