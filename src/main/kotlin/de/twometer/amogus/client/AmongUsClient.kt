@@ -24,6 +24,7 @@ import de.twometer.neko.scene.MatKey
 import de.twometer.neko.scene.component.BoundingBoxProviderComponent
 import de.twometer.neko.scene.nodes.*
 import de.twometer.neko.util.MathExtensions.clone
+import de.twometer.neko.util.MathF
 import de.twometer.neko.util.Profiler
 import imgui.ImGui
 import imgui.type.ImString
@@ -246,6 +247,21 @@ object AmongUsClient : NekoApp(
         }
 
         mainScheduler.update()
+
+        session?.players?.forEach {
+            val progress = MathF.clamp(0.0f, 1.0f, (System.currentTimeMillis() - it.lastUpdate) / 50.0f)
+            val position = MathF.lerp(it.prevPosition, it.position, progress)
+            val rotation = MathF.lerp(it.prevRotation, it.rotation, progress)
+            it.node?.apply {
+                transform.translation.x = position.x
+                transform.translation.z = position.z
+                transform.rotation.identity().rotateX(1.5708f).rotateZ(-rotation)
+                if (it.speedSquared < 0.001)
+                    playAnimation(animations[0])
+                else
+                    playAnimation(animations[1])
+            }
+        }
     }
 
     private fun updatePlayerTests() {
@@ -364,20 +380,11 @@ object AmongUsClient : NekoApp(
     @Subscribe
     fun onPlayerMove(e: OnPlayerMove) {
         session?.findPlayer(e.id)?.apply {
+            prevPosition.set(position)
             position.set(e.pos)
+            prevRotation = rotation
             rotation = e.rot
-            node?.apply {
-                val xdif = abs(transform.translation.x - e.pos.x)
-                val ydif = abs(transform.translation.z - e.pos.z)
-                val difSquared = xdif * xdif + ydif * ydif
-                transform.translation.x = e.pos.x
-                transform.translation.z = e.pos.z
-                transform.rotation.identity().rotateX(1.5708f).rotateZ(-e.rot)
-                if (difSquared < 0.01)
-                    playAnimation(animations[0])
-                else
-                    playAnimation(animations[1])
-            }
+            lastUpdate = System.currentTimeMillis()
         }
         if (e.id == myPlayerId) {
             scene.camera.position.x = e.pos.x

@@ -15,7 +15,7 @@ class CollidingPlayerController : PlayerController {
 
     var speed = 2.5f
     var sensitivity = 0.25f
-    var slipperiness = 0.9f
+    var slipperiness = 0.5f
     var height = 0.75f
 
     private val prevPos = Vector3f()
