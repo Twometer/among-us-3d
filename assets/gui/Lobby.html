@@ -77,8 +77,10 @@
 
     function removePlayer(id) {
         var element = document.getElementById(id);
-        element.parentNode.removeChild(element);
+        if (element)
+            element.parentNode.removeChild(element);
     }
+
 
 </script>
 
