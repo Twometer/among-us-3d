@@ -9,7 +9,7 @@ class RoleRevealPage : BasePage(path = "RoleReveal.html") {
         val me = AmongUsClient.session!!.myself
         call("setRole", me.role.name)
         AmongUsClient.session!!.players
-            .filter { it.id != me.id }
+            .filter { it.role == me.role }
             .forEach { call("addTeammate", it.username) }
         SoundEngine.play("RoleReveal.ogg")
         AmongUsClient.mainScheduler.runLater(4700L) {
