@@ -46,23 +46,41 @@
     <img src="img/Banner.png" width="600">
 
     <h3>Game</h3>
-    <p>Among Us was made by Innersloth</p>
-    <p>This 3D edition was made by Twometer</p>
-    <p>(Not an official version, just a fan)</p>
+    <p>Among Us was made by &copy; Innersloth LLC</p>
+    <p>This <b>inofficial</b> 3D edition was made by Twometer</p>
 
     <h3>Content</h3>
-    <p>Sounds and textures are from the original game</p>
-    <p>Map was made by 'Sketchup Aprendizaje Latinoamerica' on Sketchfab</p>
-    <p>Credits song: 'Show Yourself' by CG5 - check him out on YT :3</p>
-    <p>Fonts used: InYourFaceJoffrey, DotMatrix, IndieFlower</p>
-    <p>Playtesters: ...</p>
+    <p>Sounds and textures are from the original game and &copy; Innersloth</p>
+    <p>Map was made by 'Sketchup Aprendizaje Latinoamerica' on Sketchfab and slightly modified</p>
+    <p>Credits song: 'Show Yourself' by CG5 (check him out on YouTube :3)</p>
+    <p>Fonts used: InYourFaceJoffrey, DotMatrix, IndieFlower, Lucida</p>
+    <p>Playtesters: [hier könnte ihre Werbung stehen]</p>
 
     <h3>Technology</h3>
     <p>Used libraries</p>
-    <p>LWJGL<br>STB<br>Assimp<br>JOML<br>EventBus<br>Ultralight<br>Kryonet<br>GSON</p>
-    <p>Powered by the Neko 3D Game Engine <span id="nekoVersion"></span></p>
-    <p style="color: rgba(255,255,255,0.25)">you're a sneaky little impostor :P</p>
-    <button onclick="_remote.back()">Back</button>
+    <p>LWJGL (Assimp, GLFW, Meow, OpenAL/GL, STB)<br>JOML<br>Greenrobot EventBus<br>Ultralight<br>Kryonet<br>GSON<br>ImGUI</p>
+    <p>Powered by the Neko 3D Game Engine version <span id="nekoVersion"></span></p>
+    <p id="bullshit" style="color: rgba(255,255,255,0.25); font-size: 1.65rem;" onclick="randomBs();"></p>
+    <button onclick="_remote.close()">Back</button>
 </div>
 </body>
+<script>
+    const bullshit_array = [
+        "Runs best on Nvidia's RTX 5090 RTX+ Pro Max Ultra GPUs for only $69,420.69",
+        "you're a sneaky little impostor :P",
+        "eine Rolle Stacheldraht.",
+        "Bezüglich der Bitrate des Credits songs: https://de.wikipedia.org/wiki/Krebs_(Musik)",
+        "sell your kidney today, get your nvidia card tomorrow",
+        "i can feel it in my bones",
+        "direkt nach Minuten wieder AIDS aus der Dose",
+        "extraordinaire",
+        "mamma mia marcello thats-a not how you enter a vent",
+        "one more 'cannot read property of undefined' i swear to god",
+        "undefined"
+    ]
+    function randomBs() {
+        document.getElementById('bullshit').innerText = bullshit_array[Math.floor(Math.random() * bullshit_array.length)];
+    }
+    randomBs();
+</script>
 </html>

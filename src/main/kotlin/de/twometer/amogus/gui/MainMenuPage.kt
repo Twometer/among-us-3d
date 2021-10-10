@@ -53,7 +53,7 @@ class MainMenuPage : BasePage("MainMenu.html") {
     }
 
     fun credits() {
-
+        PageManager.push(CreditsPage())
     }
 
     fun quit() {
