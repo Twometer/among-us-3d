@@ -316,7 +316,9 @@ object AmongUsClient : NekoApp(
         when (val clicked = currentPickTarget) {
             null -> return
             is TaskGameObject -> {
-                PageManager.push(TaskPage(clicked))
+                val task = session!!.myself.findTask(clicked.location, clicked.taskType)
+                if (task != null)
+                    PageManager.push(TaskPage(clicked, task))
             }
             is ToolGameObject -> {
                 if (clicked.toolType == ToolType.Surveillance) PageManager.push(SurveillancePage())

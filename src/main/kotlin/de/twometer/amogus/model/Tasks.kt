@@ -7,7 +7,8 @@ enum class TaskState {
 }
 
 data class PlayerTask(val stages: MutableList<TaskStage> = ArrayList()) {
-    private var progress: Int = 0
+    var progress: Int = 0
+        private set
     private var timerDst: Long = -1
 
     val isMultiStage get() = length > 1
@@ -28,11 +29,11 @@ data class PlayerTask(val stages: MutableList<TaskStage> = ArrayList()) {
 
     val lastStage get() = stages.last()
 
-    val timerRunning get() = timerDst != -1L && !timerEnded
+    val isTimerRunning get() = timerDst != -1L && !isTimerEnded
 
-    val timerEnded get() = timerDst != -1L && timerDst <= System.currentTimeMillis()
+    val isTimerEnded get() = timerDst != -1L && timerDst <= System.currentTimeMillis()
 
-    val remainingTime get() = if (timerDst == -1L || timerEnded) 0L else ((System.currentTimeMillis() - timerDst) / 1000.0).toLong()
+    val remainingTime get() = if (timerDst == -1L || isTimerEnded) 0L else ((System.currentTimeMillis() - timerDst) / 1000.0).toLong()
 
     fun advance() {
         require(!isCompleted) { "Cannot advance a completed task" }

@@ -1,9 +1,6 @@
 package de.twometer.amogus.client
 
-import de.twometer.amogus.model.Location
-import de.twometer.amogus.model.SabotageType
-import de.twometer.amogus.model.TaskType
-import de.twometer.amogus.model.ToolType
+import de.twometer.amogus.model.*
 import de.twometer.neko.scene.Color
 import de.twometer.neko.scene.component.BaseComponent
 import de.twometer.neko.scene.nodes.Node
@@ -44,12 +41,21 @@ data class VentGameObject(override val location: Location, val number: Int = 1) 
     override fun getHighlightColor(): Color {
         return Color(1f, 0.15f, 0.15f, 1f)
     }
+
+    override fun canInteract(): Boolean {
+        return AmongUsClient.session?.myself?.role == PlayerRole.Impostor
+    }
 }
 
-data class TaskGameObject(override val location: Location, val taskType: TaskType) :
+data class TaskGameObject(public override val location: Location, val taskType: TaskType) :
     LocationBasedInteractableGameObject(location) {
     override fun isHighlighted(): Boolean {
-        return AmongUsClient.session?.myself?.tasks?.any { it.nextStage.location == location && it.nextStage.taskType == taskType } == true
+        val task = AmongUsClient.session?.myselfOrNull?.findTask(location, taskType)
+        return canInteract() && task != null
+    }
+
+    override fun canInteract(): Boolean {
+        return AmongUsClient.session?.myself?.role == PlayerRole.Crewmate
     }
 }
 

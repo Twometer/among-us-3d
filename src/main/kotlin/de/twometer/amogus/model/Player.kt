@@ -8,7 +8,7 @@ class Player : IPlayer {
     override var username = ""
     override var role: PlayerRole = PlayerRole.Crewmate
     override var color: PlayerColor = PlayerColor.Red
-    val prevPosition: Vector3f = Vector3f(0f,0f,0f)
+    val prevPosition: Vector3f = Vector3f(0f, 0f, 0f)
     val position: Vector3f = Vector3f(0f, 0f, 0f)
     var prevRotation = 0f
     var rotation = 0f
@@ -19,4 +19,10 @@ class Player : IPlayer {
     var lastMeetingCalled = 0L
     var tasks: List<PlayerTask> = ArrayList()
     var node: ModelNode? = null
+    var killCooldown: Int = 0
+
+    fun findTask(location: Location, type: TaskType): PlayerTask? = tasks.firstOrNull {
+        val nextStage = it.nextStage
+        !it.isCompleted && !it.isTimerRunning && nextStage.location == location && nextStage.taskType == type
+    }
 }

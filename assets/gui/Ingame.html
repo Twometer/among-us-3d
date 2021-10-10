@@ -246,11 +246,11 @@
         document.getElementById(id).style.display = vis ? s : 'none';
     }
 
-    function OnLoaded() {
+    function OnLoad() {
         var hint = document.getElementById('rolehint');
         if (impostor) hint.style.color = "red";
         else hint.style.color = "lightskyblue";
-        if (ghost) hint.innerText = "You're a Ghost.";
+        if (ghost) hint.innerText = "You're a ghost.";
         else if (impostor) hint.innerText = "You're an impostor";
         else hint.innerText = "You're a crewmate";
     }

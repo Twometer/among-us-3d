@@ -143,7 +143,7 @@ object AmongUsServer : Server() {
                     repeat(session.config.shortTasks) { tasks.add(TaskGenerator.newShortTask()) }
                     repeat(session.config.longTasks) { tasks.add(TaskGenerator.newLongTask()) }
                     tasks.shuffle()
-                    session.totalTaskStages += tasks.sumOf { task -> task.length }
+                    if (it.role != PlayerRole.Impostor) session.totalTaskStages += tasks.sumOf { task -> task.length }
                     it.sendTCP(OnGameStarted(tasks))
                 }
             }
@@ -161,7 +161,8 @@ object AmongUsServer : Server() {
                 val session = client.session ?: return
                 if (client.role != PlayerRole.Crewmate) return
                 session.tasksCompleted++
-                checkVictory(session)
+                session.broadcast(OnTaskProgress(session.tasksCompleted / session.totalTaskStages.toFloat()))
+                //checkVictory(session)
             }
             is CallMeeting -> {
                 val session = client.session ?: return
