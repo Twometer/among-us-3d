@@ -39,6 +39,10 @@
                 <th>Light render distance</th>
                 <td><input type="range" min="0" max="50" value="35" class="slider" id="lightRenderDist"></td>
             </tr>
+            <tr>
+                <th>Depth Fog</th>
+                <td><input type="checkbox" id="depthFogActive"/></td>
+            </tr>
         </table>
 
         <div class="button-panel">
@@ -57,6 +61,7 @@
     var fxaaActive = document.getElementById('fxaaActive');
     var vignetteActive = document.getElementById('vignetteActive');
     var lightRenderDist = document.getElementById('lightRenderDist');
+    var depthFogActive = document.getElementById('depthFogActive');
 
     function set(s) {
         volume.value = s.volume;
@@ -67,6 +72,7 @@
         fxaaActive.checked = s.fxaaActive;
         vignetteActive.checked = s.vignetteActive;
         lightRenderDist.value = s.lightRenderDist;
+        depthFogActive.checked = s.depthFogActive;
     }
 
     function apply() {
@@ -79,6 +85,7 @@
             fxaaActive: fxaaActive.checked,
             vignetteActive: vignetteActive.checked,
             lightRenderDist: lightRenderDist.value,
+            depthFogActive: depthFogActive.checked
         }
         _remote.apply(JSON.stringify(settings));
     }

@@ -10,7 +10,8 @@ data class GameConfig(
     var ssrActive: Boolean = true,
     var fxaaActive: Boolean = true,
     var vignetteActive: Boolean = true,
-    var lightRenderDist: Int = 35
+    var lightRenderDist: Int = 35,
+    var depthFogActive: Boolean = true
 ) {
     companion object {
         const val FILE_NAME = "settings.json"
@@ -25,5 +26,6 @@ data class GameConfig(
         fxaaActive = other.fxaaActive
         vignetteActive = other.vignetteActive
         lightRenderDist = other.lightRenderDist
+        depthFogActive = other.depthFogActive
     }
 }

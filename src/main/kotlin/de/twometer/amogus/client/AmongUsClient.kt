@@ -9,6 +9,7 @@ import de.twometer.amogus.model.*
 import de.twometer.amogus.net.*
 import de.twometer.amogus.player.*
 import de.twometer.amogus.render.CRTFilter
+import de.twometer.amogus.render.DepthFogFilter
 import de.twometer.amogus.render.HighlightRenderer
 import de.twometer.amogus.render.updateMaterial
 import de.twometer.amogus.res.SmlLoader
@@ -82,6 +83,7 @@ object AmongUsClient : NekoApp(
     var gameConfig = GameConfig()
     private var prevCtrl: PlayerController? = null
     private var hitboxes = false
+    var visionRadius = 6.0f
 
     class PacketConsumer<T>(val packetClass: Class<T>, val consumer: Consumer<T>)
 
@@ -160,6 +162,7 @@ object AmongUsClient : NekoApp(
         playerController = CollidingPlayerController()
         guiManager.registerGlobalObject("_api", GuiApi())
         guiManager.page = MainMenuPage()
+        renderer.effectsPipeline.steps.add(DepthFogFilter())
         renderer.effectsPipeline.steps.add(CRTFilter().also { it.active = false })
 
         // Networking
@@ -184,6 +187,7 @@ object AmongUsClient : NekoApp(
         }
 
         StateManager.changeGameState(GameState.Menus)
+        applyConfig()
     }
 
     fun applyConfig() {
@@ -193,6 +197,7 @@ object AmongUsClient : NekoApp(
         renderer.effectsPipeline.findStep<SSR>().active = gameConfig.ssrActive
         renderer.effectsPipeline.findStep<FXAA>().active = gameConfig.fxaaActive
         renderer.effectsPipeline.findStep<Vignette>().active = gameConfig.vignetteActive
+        renderer.effectsPipeline.findStep<DepthFogFilter>().active = gameConfig.depthFogActive
         renderer.lightRadius = gameConfig.lightRenderDist
         fpsLimit = gameConfig.maxFps
     }
@@ -296,6 +301,7 @@ object AmongUsClient : NekoApp(
                 position.y -= 10f
             val config = session!!.config
             val visionRadius = 6.8f * (if (self.role == PlayerRole.Impostor) config.impostorVision else config.playerVision)
+            this.visionRadius = visionRadius
             if (it.position.distanceSquared(scene.camera.position) > visionRadius * visionRadius && self.state == PlayerState.Alive)
                 position.y -= 10f
 

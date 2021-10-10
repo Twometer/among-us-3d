@@ -1,0 +1,26 @@
+#include "base/postproc.base.nks"
+#include "base/depth_util.nks"
+
+#bind sampler 4
+#bind gDepth  0
+
+#begin fragment
+    out vec4 color;
+    in vec2 texCoords;
+
+    uniform float visionRadius;
+    uniform sampler2D sampler;
+    uniform sampler2D gDepth;
+
+    float linearize_depth(float d,float zNear,float zFar)
+    {
+        float z_n = 2.0 * d - 1.0;
+        return 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
+    }
+
+    void main() {
+        float depth = linearize_depth(texture(gDepth, texCoords).r, 0.1, 150);
+        float fogFactor = max(1.0 - smoothstep(visionRadius - 1.5, visionRadius + 1.5, depth), 0.4);
+        color = vec4(texture(sampler, texCoords).rgb * fogFactor, 1.0);
+    }
+#end fragment
