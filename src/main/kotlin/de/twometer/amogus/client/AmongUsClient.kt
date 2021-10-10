@@ -17,6 +17,7 @@ import de.twometer.neko.core.AppConfig
 import de.twometer.neko.core.NekoApp
 import de.twometer.neko.events.KeyPressEvent
 import de.twometer.neko.events.MouseClickEvent
+import de.twometer.neko.render.pipeline.*
 import de.twometer.neko.res.*
 import de.twometer.neko.scene.AABB
 import de.twometer.neko.scene.Color
@@ -35,8 +36,9 @@ import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.glfw.GLFW.GLFW_KEY_PERIOD
 import org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_CONTROL
+import org.lwjgl.openal.AL10.AL_GAIN
+import org.lwjgl.openal.AL10.alListenerf
 import java.util.function.Consumer
-import kotlin.math.abs
 import kotlin.system.exitProcess
 
 private val logger = KotlinLogging.logger {}
@@ -69,6 +71,7 @@ object AmongUsClient : NekoApp(
     private val currentCommand = ImString()
     val packetConsumers = ArrayList<PacketConsumer<*>>()
     val mainScheduler = Scheduler()
+    var gameConfig = GameConfig()
 
     class PacketConsumer<T>(val packetClass: Class<T>, val consumer: Consumer<T>)
 
@@ -138,6 +141,9 @@ object AmongUsClient : NekoApp(
             }
         }
 
+        // Game config
+        gameConfig = WorkingDirectory.load(GameConfig.FILE_NAME, GameConfig::class.java, gameConfig)!!
+
         // Other configuration
         pickEngine.maxDistance = 1.8f
         playerController = CollidingPlayerController()
@@ -167,6 +173,21 @@ object AmongUsClient : NekoApp(
         }
 
         StateManager.changeGameState(GameState.Menus)
+    }
+
+    fun applyConfig() {
+        alListenerf(AL_GAIN, gameConfig.volume / 100.0f)
+        renderer.effectsPipeline.findStep<AmbientOcclusion>().active = gameConfig.aoActive
+        renderer.effectsPipeline.findStep<Bloom>().active = gameConfig.bloomActive
+        renderer.effectsPipeline.findStep<SSR>().active = gameConfig.ssrActive
+        renderer.effectsPipeline.findStep<FXAA>().active = gameConfig.fxaaActive
+        renderer.effectsPipeline.findStep<Vignette>().active = gameConfig.vignetteActive
+        renderer.lightRadius = gameConfig.lightRenderDist
+        fpsLimit = gameConfig.maxFps
+    }
+
+    fun saveConfig() {
+        WorkingDirectory.store(GameConfig.FILE_NAME, gameConfig)
     }
 
     fun createAstronautInstance(position: Vector3f, rotation: Float, name: String, color: PlayerColor): ModelNode {

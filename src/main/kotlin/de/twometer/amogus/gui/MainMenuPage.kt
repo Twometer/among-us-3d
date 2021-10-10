@@ -11,10 +11,13 @@ private val logger = KotlinLogging.logger {}
 
 class MainMenuPage : BasePage("MainMenu.html") {
 
-    private var username: String = ""
-
     fun updateUsername(name: String) {
-        username = name
+        AmongUsClient.gameConfig.username = name
+        AmongUsClient.saveConfig()
+    }
+
+    override fun onLoaded() {
+        setElementProperty("username", "value", AmongUsClient.gameConfig.username)
     }
 
     fun createGame() {
@@ -36,7 +39,7 @@ class MainMenuPage : BasePage("MainMenu.html") {
         }
 
         showLoading("Joining...")
-        AmongUsClient.send(SessionJoinRequest(code, username))
+        AmongUsClient.send(SessionJoinRequest(code, AmongUsClient.gameConfig.username))
         AmongUsClient.waitFor<SessionJoinResponse> {
             if (!it.accepted)
                 showError(it.reason)
@@ -46,7 +49,7 @@ class MainMenuPage : BasePage("MainMenu.html") {
     }
 
     fun settings() {
-
+        PageManager.push(SettingsPage())
     }
 
     fun credits() {

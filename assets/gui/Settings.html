@@ -12,60 +12,73 @@
                 <td><input type="range" min="0" max="99" value="75" class="slider" id="volume"></td>
             </tr>
             <tr>
-                <th>Ambient Occlusion</th>
-                <td><input type="checkbox" id="useAo"/></td>
+                <th>FPS limit</th>
+                <td><input type="range" min="0" max="120" value="60" class="slider" id="maxFps"></td>
             </tr>
             <tr>
-                <th>AO Quality</th>
-                <td><input type="range" min="1" max="64" value="11" class="slider" id="aoSamples"></td>
+                <th>Ambient Occlusion</th>
+                <td><input type="checkbox" id="aoActive"/></td>
             </tr>
             <tr>
                 <th>Bloom</th>
-                <td><input type="checkbox" id="useBloom"/></td>
+                <td><input type="checkbox" id="bloomActive"/></td>
+            </tr>
+            <tr>
+                <th>Reflections</th>
+                <td><input type="checkbox" id="ssrActive"/></td>
+            </tr>
+            <tr>
+                <th>Anti Aliasing</th>
+                <td><input type="checkbox" id="fxaaActive"/></td>
             </tr>
             <tr>
                 <th>Vignette</th>
-                <td><input type="checkbox" id="useVignette"/></td>
+                <td><input type="checkbox" id="vignetteActive"/></td>
             </tr>
             <tr>
-                <th>FXAA</th>
-                <td><input type="checkbox" id="useFxaa"/></td>
+                <th>Light render distance</th>
+                <td><input type="range" min="0" max="50" value="35" class="slider" id="lightRenderDist"></td>
             </tr>
         </table>
 
         <div class="button-panel">
             <button onclick="apply()">Apply</button>
-            <button onclick="_remote.back()">Cancel</button>
+            <button onclick="_remote.close()">Cancel</button>
         </div>
 
     </div>
 </body>
 <script>
     var volume = document.getElementById('volume');
-    var useAo = document.getElementById('useAo');
-    var aoSamples = document.getElementById('aoSamples');
-    var useBloom = document.getElementById('useBloom');
-    var useVignette = document.getElementById('useVignette');
-    var useFXAA = document.getElementById('useFxaa');
+    var maxFps = document.getElementById('maxFps');
+    var aoActive = document.getElementById('aoActive');
+    var bloomActive = document.getElementById('bloomActive');
+    var ssrActive = document.getElementById('ssrActive');
+    var fxaaActive = document.getElementById('fxaaActive');
+    var vignetteActive = document.getElementById('vignetteActive');
+    var lightRenderDist = document.getElementById('lightRenderDist');
 
     function set(s) {
-        console.log(s.useBloom);
         volume.value = s.volume;
-        useAo.checked = s.useAO;
-        aoSamples.value = s.aoSamples;
-        useBloom.checked = s.useBloom;
-        useVignette.checked = s.useVignette;
-        useFxaa.checked = s.useFxaa;
+        maxFps.value = s.maxFps;
+        aoActive.checked = s.aoActive;
+        bloomActive.checked = s.bloomActive;
+        ssrActive.checked = s.ssrActive;
+        fxaaActive.checked = s.fxaaActive;
+        vignetteActive.checked = s.vignetteActive;
+        lightRenderDist.value = s.lightRenderDist;
     }
 
     function apply() {
         var settings = {
             volume: volume.value,
-            useAO: useAo.checked,
-            aoSamples: aoSamples.value,
-            useBloom: useBloom.checked,
-            useVignette: useVignette.checked,
-            useFxaa: useFxaa.checked
+            maxFps: maxFps.value,
+            aoActive: aoActive.checked,
+            bloomActive: bloomActive.checked,
+            ssrActive: ssrActive.checked,
+            fxaaActive: fxaaActive.checked,
+            vignetteActive: vignetteActive.checked,
+            lightRenderDist: lightRenderDist.value,
         }
         _remote.apply(JSON.stringify(settings));
     }
