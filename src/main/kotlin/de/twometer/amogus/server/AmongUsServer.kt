@@ -174,6 +174,14 @@ object AmongUsServer : Server() {
             is ChangePosition -> {
                 client.session?.broadcastExcept(OnPlayerMove(client.id, msg.pos, msg.rot), client.id)
             }
+            is ChangeCameraState -> {
+                val session = client.session ?: return
+                synchronized(session.surveillanceLock) {
+                    if (msg.inCams) session.surveillancePlayers++
+                    else if (session.surveillancePlayers > 0) session.surveillancePlayers--
+                    session.broadcast(OnSurveillanceChanged(session.surveillancePlayers > 0))
+                }
+            }
         }
     }
 

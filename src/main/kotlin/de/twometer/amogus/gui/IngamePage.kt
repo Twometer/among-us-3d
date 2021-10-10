@@ -6,6 +6,7 @@ import de.twometer.amogus.client.TaskFormatter
 import de.twometer.amogus.client.VentGameObject
 import de.twometer.amogus.model.PlayerRole
 import de.twometer.amogus.model.PlayerState
+import de.twometer.amogus.net.OnSurveillanceChanged
 import de.twometer.amogus.net.OnTaskProgress
 import de.twometer.neko.events.Events
 import de.twometer.neko.events.TickEvent
@@ -18,6 +19,7 @@ class IngamePage : BasePage("Ingame.html") {
         call("setImpostor", me.role == PlayerRole.Impostor)
         call("setGhost", me.state == PlayerState.Ghost)
         call("setTaskProgress", AmongUsClient.session!!.taskProgress)
+        call("setSurveillance", AmongUsClient.session!!.surveillanceActive)
         me.tasks.forEach {
             val state = when {
                 it.progress == 0 -> 0
@@ -38,6 +40,13 @@ class IngamePage : BasePage("Ingame.html") {
     fun onProgressChanged(e: OnTaskProgress) {
         runOnUiThread {
             call("setTaskProgress", e.progress)
+        }
+    }
+
+    @Subscribe
+    fun onSurveillanceChange(e: OnSurveillanceChanged) {
+        runOnUiThread {
+            call("setSurveillance", e.surveillance)
         }
     }
 

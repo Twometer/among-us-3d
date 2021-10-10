@@ -2,9 +2,12 @@ package de.twometer.amogus.server
 
 import de.twometer.amogus.model.BaseSession
 import de.twometer.amogus.model.PlayerColor
+import java.util.concurrent.atomic.AtomicInteger
 
 class ServerSession(code: String, host: Int) : BaseSession<PlayerClient>(code, host) {
 
+    var surveillanceLock = Any()
+    var surveillancePlayers = 0
     var tasksCompleted = 0
     var totalTaskStages = 0
     val votes = HashMap<Int, Int>()

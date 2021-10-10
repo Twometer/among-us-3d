@@ -29,6 +29,7 @@ fun registerAllNetMessages(kryo: Kryo) {
     kryo.register(OnTaskProgress::class.java)
     kryo.register(OnPlayerMove::class.java)
     kryo.register(OnHostChanged::class.java)
+    kryo.register(OnSurveillanceChanged::class.java)
 
     kryo.register(CastVote::class.java)
     kryo.register(KillPlayer::class.java)
@@ -38,6 +39,7 @@ fun registerAllNetMessages(kryo: Kryo) {
     kryo.register(CompleteTaskStage::class.java)
     kryo.register(CallMeeting::class.java)
     kryo.register(ChangePosition::class.java)
+    kryo.register(ChangeCameraState::class.java)
 
     kryo.register(SessionConfig::class.java)
     kryo.register(Location::class.java)
@@ -82,6 +84,7 @@ class OnGameEnded(val winners: PlayerRole = PlayerRole.Crewmate)
 class OnTaskProgress(val progress: Float = 0.0f)
 class OnPlayerMove(val id: Int = 0, val pos: Vector3f = Vector3f(), val rot: Float = 0f)
 class OnHostChanged(val id: Int = 0)
+class OnSurveillanceChanged(val surveillance: Boolean = false)
 
 // Actions
 class CastVote(val playerId: Int = 0)
@@ -92,3 +95,4 @@ class SabotageFix(val sabotage: SabotageType = SabotageType.Comms, val active: B
 class CompleteTaskStage
 class CallMeeting(val byButton: Boolean = false)
 class ChangePosition(val pos: Vector3f = Vector3f(), val rot: Float = 0.0f)
+class ChangeCameraState(val inCams: Boolean = false)

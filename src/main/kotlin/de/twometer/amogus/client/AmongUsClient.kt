@@ -17,6 +17,8 @@ import de.twometer.neko.core.AppConfig
 import de.twometer.neko.core.NekoApp
 import de.twometer.neko.events.KeyPressEvent
 import de.twometer.neko.events.MouseClickEvent
+import de.twometer.neko.player.DefaultPlayerController
+import de.twometer.neko.player.PlayerController
 import de.twometer.neko.render.pipeline.*
 import de.twometer.neko.res.*
 import de.twometer.neko.scene.AABB
@@ -62,6 +64,7 @@ object AmongUsClient : NekoApp(
         private set
     var currentPlayerLocation: Location = Location.Hallways
         private set
+    var nosend = false
     var noclip = false
     var session: ClientSession? = null
     var myPlayerId = IPlayer.INVALID_PLAYER_ID
@@ -72,6 +75,7 @@ object AmongUsClient : NekoApp(
     val packetConsumers = ArrayList<PacketConsumer<*>>()
     val mainScheduler = Scheduler()
     var gameConfig = GameConfig()
+    private var prevCtrl: PlayerController? = null
 
     class PacketConsumer<T>(val packetClass: Class<T>, val consumer: Consumer<T>)
 
@@ -337,13 +341,22 @@ object AmongUsClient : NekoApp(
             "respawn" -> scene.camera.position.set(10f, 0.75f, -15f)
             "crash" -> mainScheduler.runNow { throw RuntimeException("simulated crash") }
             "noclip" -> noclip = !noclip
-            "ingame" -> PageManager.push(IngamePage())
+            "ingame" -> PageManager.overwrite(IngamePage())
             "impostor" -> session?.myself?.apply { role = PlayerRole.Impostor }
+            "freecam" -> {
+                if (prevCtrl != null) {
+                    playerController = prevCtrl!!
+                    prevCtrl = null
+                } else {
+                    prevCtrl = playerController
+                    playerController = DefaultPlayerController()
+                }
+            }
         }
     }
 
     override fun onTimerTick() {
-        if (StateManager.gameState == GameState.Ingame) {
+        if (StateManager.gameState == GameState.Ingame && !nosend) {
             send(ChangePosition(scene.camera.position, scene.camera.rotation.x))
         }
     }
@@ -453,6 +466,11 @@ object AmongUsClient : NekoApp(
     @Subscribe
     fun onEmergencyMeeting(e: OnEmergencyMeeting) {
         SoundEngine.play(if (e.byButton) "EmergencyMeeting.ogg" else "EmergencyBody.ogg")
+    }
+
+    @Subscribe
+    fun onSurveillanceChanged(e: OnSurveillanceChanged) {
+        session!!.surveillanceActive = e.surveillance
     }
 
 }

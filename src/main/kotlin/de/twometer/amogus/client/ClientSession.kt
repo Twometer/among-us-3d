@@ -9,5 +9,6 @@ class ClientSession : BaseSession<Player>() {
     val myselfOrNull get() = findPlayer(AmongUsClient.myPlayerId)
     val myselfIsHost get() = host == AmongUsClient.myPlayerId
     var taskProgress: Float = 0f
+    var surveillanceActive: Boolean = false
 
 }

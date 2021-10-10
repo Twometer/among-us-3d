@@ -236,6 +236,10 @@
         updateKillCooldownHint();
     }
 
+    function setSurveillance(sur) {
+        setVisibility('monitor', sur, 'block');
+    }
+
     function setImpostor(imp) {
         impostor = imp;
         setVisibility('itm-2', imp, 'inline-block');
