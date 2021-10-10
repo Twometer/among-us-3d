@@ -34,8 +34,9 @@ class CollidingPlayerController : PlayerController {
             return
 
         var speedMul = AmongUsClient.session?.config?.playerSpeed ?: 1.0f
-        if (AmongUsClient.session?.myself?.state == PlayerState.Ghost)
-            speedMul *= 1.5f
+        val isGhost = AmongUsClient.session?.myselfOrNull?.state == PlayerState.Ghost
+        if (isGhost)
+            speedMul *= 1.75f
         var speed = this.speed * deltaTime.toFloat() * speedMul
         val sensitivity = this.sensitivity * deltaTime.toFloat()
 
@@ -71,10 +72,11 @@ class CollidingPlayerController : PlayerController {
         prevPos.set(scene.camera.position)
         if (horizontalSpeed > 0.01) {
             bobTime += (horizontalSpeed * deltaTime).toFloat()
-            val viewBob = MathF.sin(bobTime * 480) * horizontalSpeed * 0.4f
+            val bobMultiplier = if (isGhost) 100 else 480
+            val viewBob = MathF.sin(bobTime * bobMultiplier) * horizontalSpeed * 0.4f
             scene.camera.position.y = height + viewBob
 
-            if (prevBob < 0 && viewBob < 0 && viewBob > prevBob && !bobStop) {
+            if (prevBob < 0 && viewBob < 0 && viewBob > prevBob && !bobStop && !isGhost) {
                 bobStop = true
                 playFootstep()
             }

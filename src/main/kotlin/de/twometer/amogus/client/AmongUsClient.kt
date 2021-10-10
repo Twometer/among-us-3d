@@ -290,8 +290,15 @@ object AmongUsClient : NekoApp(
             val progress = MathF.clamp(0.0f, 1.0f, (System.currentTimeMillis() - it.lastUpdate) / 50.0f)
             val position = MathF.lerp(it.prevPosition, it.position, progress)
             val rotation = MathF.lerp(it.prevRotation, it.rotation, progress)
-            if (it.state == PlayerState.Ghost && session!!.myself.state == PlayerState.Alive)
+
+            val self = session!!.myself
+            if (it.state == PlayerState.Ghost && self.state == PlayerState.Alive)
                 position.y -= 10f
+            val config = session!!.config
+            val visionRadius = 6.8f * (if (self.role == PlayerRole.Impostor) config.impostorVision else config.playerVision)
+            if (it.position.distanceSquared(scene.camera.position) > visionRadius * visionRadius && self.state == PlayerState.Alive)
+                position.y -= 10f
+
             it.node?.apply {
                 transform.translation.set(position)
                 transform.rotation.identity().rotateX(1.5708f).rotateZ(-rotation)
