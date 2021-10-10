@@ -68,6 +68,7 @@ object AmongUsClient : NekoApp(
     var noclip = false
     var session: ClientSession? = null
     var myPlayerId = IPlayer.INVALID_PLAYER_ID
+    var netY = 0.0f
 
     private var debugActive = false
     private var consoleActive = false
@@ -278,8 +279,7 @@ object AmongUsClient : NekoApp(
             val position = MathF.lerp(it.prevPosition, it.position, progress)
             val rotation = MathF.lerp(it.prevRotation, it.rotation, progress)
             it.node?.apply {
-                transform.translation.x = position.x
-                transform.translation.z = position.z
+                transform.translation.set(position)
                 transform.rotation.identity().rotateX(1.5708f).rotateZ(-rotation)
                 if (it.speedSquared < 0.001)
                     playAnimation(animations[0])
@@ -290,7 +290,7 @@ object AmongUsClient : NekoApp(
     }
 
     private fun updatePlayerTests() {
-        val pickCandidate = pickEngine.pick()?.findGameObject()
+        val pickCandidate = if (guiManager.page is VentPage) null else pickEngine.pick()?.findGameObject()
         currentPickTarget = if (pickCandidate != null && pickCandidate.canInteract()) pickCandidate else null
         currentPlayerLocation =
             Location.valueOf(boundsTester.findContainingBounds(scene.camera.position.clone()) ?: "Hallways")
@@ -319,6 +319,9 @@ object AmongUsClient : NekoApp(
         if (guiManager.isInputBlocked() || cursorVisible) return
         when (val clicked = currentPickTarget) {
             null -> return
+            is VentGameObject -> {
+                PageManager.push(VentPage(clicked))
+            }
             is TaskGameObject -> {
                 val task = session!!.myself.findTask(clicked.location, clicked.taskType)
                 if (task != null)
@@ -357,7 +360,9 @@ object AmongUsClient : NekoApp(
 
     override fun onTimerTick() {
         if (StateManager.gameState == GameState.Ingame && !nosend) {
-            send(ChangePosition(scene.camera.position, scene.camera.rotation.x))
+            val pos = scene.camera.position.clone()
+            pos.y = netY
+            send(ChangePosition(pos, scene.camera.rotation.x))
         }
     }
 

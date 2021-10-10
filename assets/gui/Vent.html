@@ -34,9 +34,8 @@
 </style>
 <body>
 <div id="btncontainer">
-    <h1>You are in a vent</h1>
-    <button onclick="_remote.exitVentMode()">Exit Vent</button>
-    <h2>Available locations</h2>
+    <h1>You are in a vent in <span id="curlocation">$current_location</span></h1>
+    <h2>Press [Esc] to exit the vent here, or [Space] to crawl to <span id="nextlocation">$next_location</span></h2>
 </div>
 </body>
 <script>

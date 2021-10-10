@@ -36,7 +36,7 @@ class PlayerGameObject : GameObject() {
     }
 }
 
-data class VentGameObject(override val location: Location, val number: Int = 1) :
+data class VentGameObject(public override val location: Location, val number: Int = 1) :
     LocationBasedInteractableGameObject(location) {
     override fun getHighlightColor(): Color {
         return Color(1f, 0.15f, 0.15f, 1f)

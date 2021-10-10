@@ -19,6 +19,10 @@ class SmlRow(private val data: List<String>) {
         return Vector3f(parts[0].toFloat(), parts[1].toFloat(), parts[2].toFloat())
     }
 
+    fun readInt(): Int {
+        return readString().toInt()
+    }
+
     fun readFloat(): Float {
         return readString().toFloat()
     }
