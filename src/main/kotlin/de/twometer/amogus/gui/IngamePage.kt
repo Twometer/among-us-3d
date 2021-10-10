@@ -9,8 +9,10 @@ import de.twometer.amogus.model.PlayerState
 import de.twometer.amogus.net.OnSurveillanceChanged
 import de.twometer.amogus.net.OnTaskProgress
 import de.twometer.neko.events.Events
+import de.twometer.neko.events.KeyPressEvent
 import de.twometer.neko.events.TickEvent
 import org.greenrobot.eventbus.Subscribe
+import org.lwjgl.glfw.GLFW
 
 class IngamePage : BasePage("Ingame.html") {
 
@@ -34,6 +36,15 @@ class IngamePage : BasePage("Ingame.html") {
 
     override fun onUnloaded() {
         Events.unregister(this)
+    }
+
+    @Subscribe
+    fun onKeyPress(e: KeyPressEvent) {
+        if (e.key == GLFW.GLFW_KEY_ESCAPE) {
+            runOnUiThread {
+                PageManager.push(PausePage())
+            }
+        }
     }
 
     @Subscribe
