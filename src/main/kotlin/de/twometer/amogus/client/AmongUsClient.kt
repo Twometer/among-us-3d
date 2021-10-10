@@ -48,7 +48,7 @@ private val logger = KotlinLogging.logger {}
 object AmongUsClient : NekoApp(
     AppConfig(
         windowWidth = 1280,
-        windowHeight = 720,
+        windowHeight = 920,
         windowTitle = "Among Us 3D",
         windowIcon = "icon.png",
         timerSpeed = 20
