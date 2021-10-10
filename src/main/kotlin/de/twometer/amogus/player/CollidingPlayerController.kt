@@ -32,7 +32,8 @@ class CollidingPlayerController : PlayerController {
         if (!window.isFocused() || NekoApp.the.cursorVisible)
             return
 
-        var speed = this.speed * deltaTime.toFloat()
+        val speedMul = AmongUsClient.session?.config?.playerSpeed ?: 1.0f
+        var speed = this.speed * deltaTime.toFloat() * speedMul
         val sensitivity = this.sensitivity * deltaTime.toFloat()
 
         if (window.isKeyDown(GLFW.GLFW_KEY_LEFT_CONTROL)) {
