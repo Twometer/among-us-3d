@@ -30,7 +30,13 @@ abstract class LocationBasedInteractableGameObject(protected open val location: 
         AmongUsClient.currentPlayerLocation == location || location.interactCheckExempt
 }
 
-class PlayerGameObject : GameObject() {
+class PlayerGameObject(val id: Int) : GameObject() {
+    override fun canInteract(): Boolean {
+        return AmongUsClient.session?.myselfOrNull?.role == PlayerRole.Impostor
+                && AmongUsClient.session?.myselfOrNull?.state == PlayerState.Alive
+                && AmongUsClient.session?.findPlayer(id)?.state == PlayerState.Alive
+    }
+
     override fun isHighlighted(): Boolean {
         return false // Highlight shader doesn't work for animated objects
     }
@@ -43,7 +49,7 @@ data class VentGameObject(public override val location: Location, val number: In
     }
 
     override fun canInteract(): Boolean {
-        return AmongUsClient.session?.myself?.role == PlayerRole.Impostor
+        return AmongUsClient.session?.myselfOrNull?.role == PlayerRole.Impostor
     }
 }
 
@@ -55,7 +61,7 @@ data class TaskGameObject(public override val location: Location, val taskType: 
     }
 
     override fun canInteract(): Boolean {
-        return AmongUsClient.session?.myself?.role == PlayerRole.Crewmate
+        return AmongUsClient.session?.myselfOrNull?.role == PlayerRole.Crewmate
     }
 }
 

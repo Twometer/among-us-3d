@@ -19,6 +19,7 @@ object AmongUsServer : Server() {
 
     private val sessions = ConcurrentHashMap<String, ServerSession>()
     private val playerIdCounter = AtomicInteger()
+    private const val disableVictory = true
 
     fun main() {
         registerAllNetMessages(kryo)
@@ -162,7 +163,7 @@ object AmongUsServer : Server() {
                 if (client.role != PlayerRole.Crewmate) return
                 session.tasksCompleted++
                 session.broadcast(OnTaskProgress(session.tasksCompleted / session.totalTaskStages.toFloat()))
-                //checkVictory(session)
+                checkVictory(session)
             }
             is CallMeeting -> {
                 val session = client.session ?: return
@@ -211,6 +212,7 @@ object AmongUsServer : Server() {
         session.players.filter { it.role != PlayerRole.Impostor }.shuffled().firstOrNull()
 
     private fun checkVictory(session: ServerSession) {
+        if (disableVictory) return
         val winners = tryFindWinners(session) ?: return
         session.broadcast(OnGameEnded(winners))
         resetSession(session)

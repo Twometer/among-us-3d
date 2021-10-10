@@ -1,0 +1,54 @@
+<html>
+<head>
+
+</head>
+<style>
+	html,body {
+		padding:0;
+		margin: 0;
+		animation: scaleup .2s;
+	}
+    body {
+		background-image: url('img/WallpaperDeath.png');
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: 100%;
+		
+    }
+    div {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+	}
+	h1 {
+        color: red;
+        font-family: 'In your face, Joffrey!';
+        font-size: 60px;
+        text-align: center;
+    }
+	h2 {
+		color: red;
+        font-family: 'In your face, Joffrey!';
+        font-size: 30px;
+        text-align: center;
+		opacity: .3;
+	}
+	@keyframes scaleup {
+		0% {
+			opacity: 0;
+			background-size: 0%;
+		}
+		100% {
+			opacity: 1;
+			background-size: 100%;
+		}
+	}
+</style>
+<body>
+<div>
+    <h1>YOU DIED</h1>
+	<h2>that sucks, bro</h2>
+</div>
+</body>
+</html>

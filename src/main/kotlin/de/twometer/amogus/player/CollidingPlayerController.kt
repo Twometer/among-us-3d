@@ -1,6 +1,7 @@
 package de.twometer.amogus.player
 
 import de.twometer.amogus.client.AmongUsClient
+import de.twometer.amogus.model.PlayerState
 import de.twometer.neko.audio.SoundEngine
 import de.twometer.neko.core.NekoApp
 import de.twometer.neko.core.Window
@@ -32,7 +33,9 @@ class CollidingPlayerController : PlayerController {
         if (!window.isFocused() || NekoApp.the.cursorVisible)
             return
 
-        val speedMul = AmongUsClient.session?.config?.playerSpeed ?: 1.0f
+        var speedMul = AmongUsClient.session?.config?.playerSpeed ?: 1.0f
+        if (AmongUsClient.session?.myself?.state == PlayerState.Ghost)
+            speedMul *= 1.5f
         var speed = this.speed * deltaTime.toFloat() * speedMul
         val sensitivity = this.sensitivity * deltaTime.toFloat()
 

@@ -17,8 +17,10 @@ import de.twometer.neko.core.AppConfig
 import de.twometer.neko.core.NekoApp
 import de.twometer.neko.events.KeyPressEvent
 import de.twometer.neko.events.MouseClickEvent
+import de.twometer.neko.events.RenderForwardEvent
 import de.twometer.neko.player.DefaultPlayerController
 import de.twometer.neko.player.PlayerController
+import de.twometer.neko.render.Primitives
 import de.twometer.neko.render.pipeline.*
 import de.twometer.neko.res.*
 import de.twometer.neko.scene.AABB
@@ -34,12 +36,14 @@ import imgui.type.ImString
 import mu.KotlinLogging
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
+import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.glfw.GLFW.GLFW_KEY_PERIOD
 import org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_CONTROL
 import org.lwjgl.openal.AL10.AL_GAIN
 import org.lwjgl.openal.AL10.alListenerf
+import org.lwjgl.opengl.GL11
 import java.util.function.Consumer
 import kotlin.system.exitProcess
 
@@ -77,6 +81,7 @@ object AmongUsClient : NekoApp(
     val mainScheduler = Scheduler()
     var gameConfig = GameConfig()
     private var prevCtrl: PlayerController? = null
+    private var hitboxes = false
 
     class PacketConsumer<T>(val packetClass: Class<T>, val consumer: Consumer<T>)
 
@@ -141,7 +146,8 @@ object AmongUsClient : NekoApp(
             // Apply custom bounding box
             it.scanTree(ScanFilters.GEOMETRY) { geo ->
                 geo.attachComponent(BoundingBoxProviderComponent {
-                    AABB(Vector3f(-0.5f, 0f, -0.5f), Vector3f(0.5f, 0.85f, 0.5f))
+                    val scalar = 185f
+                    AABB(Vector3f(-0.5f, 0f, -0.5f).mul(scalar), Vector3f(0.5f, 1.85f, 0.5f).mul(scalar))
                 })
             }
         }
@@ -195,7 +201,13 @@ object AmongUsClient : NekoApp(
         WorkingDirectory.store(GameConfig.FILE_NAME, gameConfig)
     }
 
-    fun createAstronautInstance(position: Vector3f, rotation: Float, name: String, color: PlayerColor): ModelNode {
+    fun createAstronautInstance(
+        position: Vector3f,
+        rotation: Float,
+        name: String,
+        color: PlayerColor,
+        pid: Int
+    ): ModelNode {
         val instance = astronautPrefab.createInstance().also {
             it.transform.translation.set(position)
             it.transform.rotation.rotateZ(rotation)
@@ -207,7 +219,7 @@ object AmongUsClient : NekoApp(
             it.updateMaterial("Suit.001") { mat ->
                 mat[MatKey.ColorDiffuse] = color.color
             }
-            it.attachComponent(PlayerGameObject())
+            it.attachComponent(PlayerGameObject(pid))
         }
         scene.rootNode.attachChild(instance)
         return instance
@@ -278,6 +290,8 @@ object AmongUsClient : NekoApp(
             val progress = MathF.clamp(0.0f, 1.0f, (System.currentTimeMillis() - it.lastUpdate) / 50.0f)
             val position = MathF.lerp(it.prevPosition, it.position, progress)
             val rotation = MathF.lerp(it.prevRotation, it.rotation, progress)
+            if (it.state == PlayerState.Ghost && session!!.myself.state == PlayerState.Alive)
+                position.y -= 10f
             it.node?.apply {
                 transform.translation.set(position)
                 transform.rotation.identity().rotateX(1.5708f).rotateZ(-rotation)
@@ -334,7 +348,30 @@ object AmongUsClient : NekoApp(
             is SabotageGameObject -> {
                 PageManager.push(FixSabotagePage(clicked))
             }
+            is PlayerGameObject -> {
+                SoundEngine.play("ImpostorKill.ogg")
+                send(KillPlayer(clicked.id))
+            }
         }
+    }
+
+    @Subscribe
+    fun onRenderForward(e: RenderForwardEvent) {
+        if (!hitboxes) return
+        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE)
+        val shader = ShaderCache.get("debug.nks")
+        shader.bind()
+
+        scene.rootNode.scanTree {
+            if (it is Geometry) {
+                val aabb = it.aabb!!.transform(it.compositeTransform.matrix)
+                shader["modelMatrix"] =
+                    Matrix4f().translate(aabb.center).scale(aabb.sizeX * 0.5f, aabb.sizeY * 0.5f, aabb.sizeZ * 0.5f)
+                Primitives.unitCube.render()
+            }
+        }
+
+        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL)
     }
 
     private fun runCommand(command: String) {
@@ -354,6 +391,9 @@ object AmongUsClient : NekoApp(
                     prevCtrl = playerController
                     playerController = DefaultPlayerController()
                 }
+            }
+            "hitboxes" -> {
+                hitboxes = !hitboxes
             }
         }
     }
@@ -451,9 +491,18 @@ object AmongUsClient : NekoApp(
             session!!.players
                 .filter { it.id != myPlayerId }
                 .forEach {
-                    it.node = createAstronautInstance(it.position, it.rotation, it.username, it.color)
+                    it.node = createAstronautInstance(it.position, it.rotation, it.username, it.color, it.id)
                 }
-            createAstronautInstance(Vector3f(12f, 0f, -15f), 1.45f, "Test Subject", PlayerColor.LightBlue)
+
+            createAstronautInstance(
+                Vector3f(12f, 0f, -15f),
+                1.45f,
+                "Test Subject",
+                PlayerColor.LightBlue,
+                IPlayer.INVALID_PLAYER_ID
+            ).also {
+                it.transform.rotation.identity().rotateX(1.57f)
+            }
         }
         StateManager.changeGameState(GameState.Ingame)
     }
@@ -461,6 +510,12 @@ object AmongUsClient : NekoApp(
     @Subscribe
     fun onKill(e: OnPlayerKilled) {
         session?.findPlayer(e.id)?.apply { state = PlayerState.Ghost }
+        mainScheduler.runNow {
+            if (e.id == myPlayerId) {
+                SoundEngine.play("KillMusic.ogg")
+                PageManager.overwrite(DeathPage())
+            }
+        }
     }
 
     @Subscribe
