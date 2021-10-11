@@ -3,8 +3,7 @@ package de.twometer.amogus.server
 import com.esotericsoftware.kryonet.Connection
 import com.esotericsoftware.kryonet.Listener
 import com.esotericsoftware.kryonet.Server
-import de.twometer.amogus.model.PlayerRole
-import de.twometer.amogus.model.PlayerTask
+import de.twometer.amogus.model.*
 import de.twometer.amogus.net.*
 import de.twometer.neko.util.MathF
 import de.twometer.neko.util.MathF.PI
@@ -115,7 +114,7 @@ object AmongUsServer : Server() {
                 if (client.role != PlayerRole.Impostor) return
                 logger.info { "Impostor ${client.id} killing player ${msg.playerId}" }
                 client.session!!.findPlayer(msg.playerId)?.run {
-                    this.alive = false
+                    player.state = PlayerState.Ghost
                     client.session!!.broadcast(OnPlayerKilled(this.id))
                     checkVictory(client.session!!)
                 }
@@ -183,6 +182,18 @@ object AmongUsServer : Server() {
                     session.broadcast(OnSurveillanceChanged(session.surveillancePlayers > 0))
                 }
             }
+            is RequestEjectionResult -> {
+                val session = client.session ?: return
+                synchronized(session.votingTimerLock) {
+                    session.votingTimerCompletePlayers++
+                    if (session.votingTimerCompletePlayers >= session.players.size) {
+                        val ejectionResult = session.determineEjection()
+                        logger.info { "Session ${session.code} voted for $ejectionResult" }
+                        session.broadcast(OnEjectionResult(ejectionResult))
+                        session.votingTimerCompletePlayers = 0
+                    }
+                }
+            }
         }
     }
 
@@ -202,8 +213,10 @@ object AmongUsServer : Server() {
         session.votes.clear()
         session.tasksCompleted = 0
         session.totalTaskStages = 0
+        session.surveillancePlayers = 0
+        session.votingTimerCompletePlayers = 0
         session.players.forEach {
-            it.alive = true
+            it.player.state = PlayerState.Alive
             it.player.role = PlayerRole.Crewmate
         }
     }
@@ -221,13 +234,44 @@ object AmongUsServer : Server() {
     private fun tryFindWinners(session: ServerSession): PlayerRole? {
         if (session.tasksCompleted >= session.totalTaskStages)
             return PlayerRole.Crewmate
-        val alivePlayers = session.players.filter { it.alive }
+        val alivePlayers = session.players.filter { it.state == PlayerState.Alive }
         val numAliveImpostors = alivePlayers.count { it.role == PlayerRole.Impostor }
         val numAliveCrewmates = alivePlayers.count { it.role == PlayerRole.Crewmate }
         return when {
             numAliveImpostors == 0 -> PlayerRole.Crewmate                   // Crewmates ejected all impostors off the ship
             numAliveImpostors >= numAliveCrewmates -> PlayerRole.Impostor   // Not enough crewmates to vote any impostor off -> loss
             else -> null                                                    // The game is still on.
+        }
+    }
+
+    private fun ServerSession.determineEjection(): EjectResult {
+        if (votes.isEmpty())
+            return EjectResult(EjectResultType.Tie)
+
+        // Create map of <PlayerId: Int, NumVotes: Int>
+        val accumulatedVotes = HashMap<Int, Int>()
+        votes.entries.forEach {
+            val numVotes = accumulatedVotes[it.value]
+            if (numVotes != null)
+                accumulatedVotes[it.value] = numVotes + 1
+            else
+                accumulatedVotes[it.value] = 1
+        }
+
+        // Create list of MapEntry<PlayerId, NumVotes>, sorted by NumVotes
+        val sortedVotes = accumulatedVotes.entries.sortedBy { it.value }
+
+        // Get the top two entries
+        val highestVotes = sortedVotes[0]
+        val secondHighestVotes = sortedVotes.getOrNull(1)
+
+        // Determine the ejection result
+        return if (secondHighestVotes?.value == highestVotes.value) {
+            EjectResult(EjectResultType.Tie)
+        } else if (highestVotes.key == IPlayer.INVALID_PLAYER_ID) {
+            EjectResult(EjectResultType.Skipped)
+        } else {
+            EjectResult(EjectResultType.Ejected, highestVotes.key)
         }
     }
 

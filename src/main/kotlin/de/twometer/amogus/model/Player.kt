@@ -14,7 +14,7 @@ class Player : IPlayer {
     var rotation = 0f
     var lastUpdate: Long = 0L
     val speedSquared get() = position.distanceSquared(prevPosition)
-    var state: PlayerState = PlayerState.Alive
+    override var state: PlayerState = PlayerState.Alive
     var emergencyMeetings = 0
     var lastMeetingCalled = 0L
     var tasks: List<PlayerTask> = ArrayList()

@@ -16,33 +16,35 @@
 </body>
 <script src="scripts/base.js"></script>
 <script>
-var target = $('target');
-var rand = Math.random() * 2 * Math.PI;
+    function OnLoaded() {
+        var target = $('target');
+        var rand = Math.random() * 2 * Math.PI;
 
-var x = Math.sin(rand) * 180 * (Math.random() + 0.25);
-var y = Math.cos(rand) * 180 * (Math.random() + 0.25);
-var cx = _baseW / 2;
-var cy = _baseH / 2;
+        var x = Math.sin(rand) * 180 * (Math.random() + 0.25);
+        var y = Math.cos(rand) * 180 * (Math.random() + 0.25);
+        var cx = _baseW / 2;
+        var cy = _baseH / 2;
 
-function setPos(x, y) {
-    target.style.left = x - target.offsetWidth/2;
-    target.style.top = y - target.offsetHeight/2;
-}
+        function setPos(x, y) {
+            target.style.left = x - target.offsetWidth/2;
+            target.style.top = y - target.offsetHeight/2;
+        }
 
-setPos(cx+x,cy+y);
+        setPos(cx+x,cy+y);
 
-document.onclick = function(e) {
-    var x = e.clientX / 1.5 - _baseX;
-    var y = (e.clientY / 1.5 - _baseY);
-    setPos(x,y);
+        document.onclick = function(e) {
+            var x = e.clientX / 1.5 - _baseX;
+            var y = (e.clientY / 1.5 - _baseY);
+            setPos(x,y);
 
-    var dx = x - cx;
-    var dy = y - cy;
-    var distToCenter = Math.sqrt(dx*dx+dy*dy);
-    if (distToCenter < 15) {
-        setPos(cx,cy);
-        _remote.taskComplete();
+            var dx = x - cx;
+            var dy = y - cy;
+            var distToCenter = Math.sqrt(dx*dx+dy*dy);
+            if (distToCenter < 15) {
+                setPos(cx,cy);
+                _remote.taskComplete();
+            }
+        }
     }
-}
 </script>
 </html>

@@ -6,8 +6,10 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class ServerSession(code: String, host: Int) : BaseSession<PlayerClient>(code, host) {
 
-    var surveillanceLock = Any()
+    val surveillanceLock = Any()
     var surveillancePlayers = 0
+    val votingTimerLock = Any()
+    var votingTimerCompletePlayers = 0
     var tasksCompleted = 0
     var totalTaskStages = 0
     val votes = HashMap<Int, Int>()

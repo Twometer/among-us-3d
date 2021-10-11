@@ -19,7 +19,8 @@ class PlayerClient : IPlayer, Connection() {
         get() = player.role
     override val color: PlayerColor
         get() = player.color
+    override val state get() = player.state
     val inSession get() = session != null
     val isHost get() = session?.host == id
-    var alive = true
+
 }

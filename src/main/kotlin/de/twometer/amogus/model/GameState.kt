@@ -5,5 +5,5 @@ enum class GameState {
     Menus,
     Credits,
     Ingame,
-    Emergency,
+    GameOver,
 }

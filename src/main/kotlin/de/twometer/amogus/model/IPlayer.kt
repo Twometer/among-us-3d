@@ -10,4 +10,5 @@ interface IPlayer {
     val username: String
     val role: PlayerRole
     val color: PlayerColor
+    val state: PlayerState
 }

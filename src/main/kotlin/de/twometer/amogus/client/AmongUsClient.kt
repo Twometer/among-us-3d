@@ -584,6 +584,7 @@ object AmongUsClient : NekoApp(
                 PageManager.overwrite(DeathPage())
             }
         }
+        logger.debug { "${killedPlayer.username} was killed" }
     }
 
     @Subscribe
@@ -596,12 +597,27 @@ object AmongUsClient : NekoApp(
         SoundEngine.play(if (e.byButton) "EmergencyMeeting.ogg" else "EmergencyBody.ogg")
         mainScheduler.runNow {
             clearCorpses()
+            PageManager.overwrite(EmergencyPage(e.caller))
         }
     }
 
     @Subscribe
     fun onSurveillanceChanged(e: OnSurveillanceChanged) {
         session!!.surveillanceActive = e.surveillance
+    }
+
+    @Subscribe
+    fun onEjectionResult(e: OnEjectionResult) {
+        if (e.result.type == EjectResultType.Ejected) {
+            val ejectedPlayer = session?.findPlayer(e.result.player) ?: return
+            ejectedPlayer.apply { state = PlayerState.Ghost }
+            logger.debug { "${ejectedPlayer.username} was ejected" }
+        }
+    }
+
+    @Subscribe
+    fun onGameEnd(e: OnGameEnded) {
+
     }
 
 }
