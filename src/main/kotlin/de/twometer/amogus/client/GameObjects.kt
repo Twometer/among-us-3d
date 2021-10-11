@@ -71,11 +71,21 @@ data class TaskGameObject(public override val location: Location, val taskType: 
     }
 }
 
-data class SabotageGameObject(override val location: Location, val sabotageType: SabotageType) :
-    LocationBasedInteractableGameObject(location)
+data class SabotageGameObject(public override val location: Location, val sabotageType: SabotageType) :
+    LocationBasedInteractableGameObject(location) {
+    override fun canInteract(): Boolean {
+        return super.canInteract() && sabotageType == AmongUsClient.currentSabotage
+    }
+}
 
 data class ToolGameObject(override val location: Location, val toolType: ToolType) :
-    LocationBasedInteractableGameObject(location)
+    LocationBasedInteractableGameObject(location) {
+    override fun canInteract(): Boolean {
+        if (toolType == ToolType.Emergency && (AmongUsClient.currentSabotage != null || AmongUsClient.session?.myselfOrNull?.state == PlayerState.Ghost))
+            return false
+        return super.canInteract()
+    }
+}
 
 fun createGameObjectFromNodeName(name: String): GameObject? {
     val parts = name.split("_")

@@ -30,6 +30,7 @@ fun registerAllNetMessages(kryo: Kryo) {
     kryo.register(OnHostChanged::class.java)
     kryo.register(OnSurveillanceChanged::class.java)
     kryo.register(OnEjectionResult::class.java)
+    kryo.register(OnSabotageChanged::class.java)
 
     kryo.register(CastVote::class.java)
     kryo.register(KillPlayer::class.java)
@@ -51,6 +52,7 @@ fun registerAllNetMessages(kryo: Kryo) {
     kryo.register(PlayerColor::class.java)
     kryo.register(EjectResult::class.java)
     kryo.register(EjectResultType::class.java)
+    kryo.register(SabotageType::class.java)
     kryo.register(Vector3f::class.java)
     kryo.register(ArrayList::class.java)
 }
@@ -78,7 +80,12 @@ class OnPlayerUpdate(
 )
 
 class OnPlayerKilled(val id: Int = 0)
-class OnSessionUpdate(val code: String = "", val host: Int = IPlayer.INVALID_PLAYER_ID, val config: SessionConfig = SessionConfig())
+class OnSessionUpdate(
+    val code: String = "",
+    val host: Int = IPlayer.INVALID_PLAYER_ID,
+    val config: SessionConfig = SessionConfig()
+)
+
 class OnEmergencyMeeting(val caller: Int = 0, val byButton: Boolean = false)
 class OnPlayerVoted(val src: Int = 0, val dst: Int = 0)
 class OnGameStarted(val tasks: List<PlayerTask> = ArrayList())
@@ -88,13 +95,14 @@ class OnPlayerMove(val id: Int = 0, val pos: Vector3f = Vector3f(), val rot: Flo
 class OnHostChanged(val id: Int = 0)
 class OnSurveillanceChanged(val surveillance: Boolean = false)
 class OnEjectionResult(val result: EjectResult = EjectResult(EjectResultType.Skipped))
+class OnSabotageChanged(val sabotage: SabotageType? = null, val code: String = "nani")
 
 // Actions
 class CastVote(val playerId: Int = 0)
 class KillPlayer(val playerId: Int = 0)
 class StartGame
 class SabotageStart(val sabotage: SabotageType = SabotageType.Comms)
-class SabotageFix(val sabotage: SabotageType = SabotageType.Comms, val active: Boolean = false)
+class SabotageFix(val location: Location = Location.Invalid, val fixing: Boolean = false)
 class CompleteTaskStage
 class CallMeeting(val byButton: Boolean = false)
 class ChangePosition(val pos: Vector3f = Vector3f(), val rot: Float = 0.0f)

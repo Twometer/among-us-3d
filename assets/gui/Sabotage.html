@@ -20,14 +20,19 @@
 var sabs = _('sabotage');
 for (const elem of sabs) {
     elem.onclick = function() {
-        setCooldown(elem.id);
         _remote.sabotage(elem.id);
     }
 }
 
-function setCooldown(sab) {
-    for (const elem of sabs)
-        elem.style.opacity = 0.5;
+function setCooldown(remain) {
+    if (remain > 0) {
+        for (const elem of sabs)
+            elem.style.opacity = 0.5;
+    }
+    else {
+        for (const elem of sabs)
+            elem.style.opacity = 1.0;
+    }
 }
 </script>
 </html>

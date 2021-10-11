@@ -3,6 +3,7 @@ package de.twometer.amogus.gui
 import de.twometer.amogus.client.*
 import de.twometer.amogus.model.PlayerRole
 import de.twometer.amogus.model.PlayerState
+import de.twometer.amogus.model.SabotageType
 import de.twometer.amogus.net.OnSurveillanceChanged
 import de.twometer.amogus.net.OnTaskProgress
 import de.twometer.neko.events.Events
@@ -68,7 +69,13 @@ class IngamePage : BasePage("Ingame.html") {
                 call("setTask", i, TaskFormatter.formatTask(task))
         }
 
+        call("setSabotageCooldown", AmongUsClient.sabotageCooldown)
         call("setKillCooldown", me.killCooldown)
+        if (AmongUsClient.currentSabotage != null)
+            call("setSabotage", TaskFormatter.formatSabotage(AmongUsClient.currentSabotage!!, AmongUsClient.currentSabotageTime))
+        else
+            call("setSabotage", "")
+        call("setCommsSabotaged", AmongUsClient.currentSabotage == SabotageType.Comms)
 
         when (AmongUsClient.currentPickTarget) {
             is PlayerGameObject -> call("setMainAction", "Kill")

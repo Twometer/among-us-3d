@@ -25,21 +25,19 @@ class ScheduledTask(val time: Long, val runnable: Runnable) {
         return id
     }
 
-
 }
 
-class Scheduler {
+open class Scheduler {
     private val tasks = ArrayList<ScheduledTask>()
 
-    fun runNow(runnable: Runnable) {
-        runLater(0, runnable)
-    }
+    fun runNow(runnable: Runnable): ScheduledTask = runLater(0, runnable)
 
-    fun runLater(delay: Long, runnable: Runnable) {
+    fun runLater(delay: Long, runnable: Runnable): ScheduledTask {
         val task = ScheduledTask(System.currentTimeMillis() + delay, runnable)
         synchronized(tasks) {
             tasks.add(task)
         }
+        return task
     }
 
     fun cancel(task: ScheduledTask) {

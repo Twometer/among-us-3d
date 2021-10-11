@@ -1,7 +1,10 @@
 package de.twometer.amogus.server
 
+import de.twometer.amogus.concurrency.ScheduledTask
 import de.twometer.amogus.model.BaseSession
+import de.twometer.amogus.model.Location
 import de.twometer.amogus.model.PlayerColor
+import de.twometer.amogus.model.SabotageType
 import java.util.concurrent.atomic.AtomicInteger
 
 class ServerSession(code: String, host: Int) : BaseSession<PlayerClient>(code, host) {
@@ -14,6 +17,12 @@ class ServerSession(code: String, host: Int) : BaseSession<PlayerClient>(code, h
     var totalTaskStages = 0
     val votes = HashMap<Int, Int>()
     val isFull: Boolean = players.size >= PlayerColor.values().size
+
+    val sabotageLock = Any()
+    var currentSabotage: SabotageType? = null
+    var sabotageKillTask: ScheduledTask? = null
+    var sabotageFixedLocations = HashSet<Location>()
+    var sabotageFixingPlayers = 0
 
     fun broadcast(packet: Any) {
         players.forEach { it.sendTCP(packet) }

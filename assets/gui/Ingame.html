@@ -179,16 +179,10 @@
     <div class="action-item" id="itm-2">
         <img id="action2" src="img/ActionSabotage.png">
         <div class="action-hint">
-            Q
+            <span id="sabotage-cooldown-Q">Q</span>
+            <span id="sabotage-cooldown-timer" style="display: none;">29</span>
         </div>
     </div>
-
-   <!--<div class="action-item">
-        <img id="action1" src="img/ActionReport.png">
-        <div class="action-hint">
-            R
-        </div>
-    </div>-->
 
     <div class="action-item">
         <img id="action0" src="img/ActionUse.png">
@@ -210,6 +204,17 @@
     function setGhost(g) {
         ghost = g;
         //setVisiblity('action1', !g, 'block);
+    }
+
+    function setSabotageCooldown(d) {
+        document.getElementById('sabotage-cooldown-timer').innerText = d;
+        if (d > 0) {
+            document.getElementById('sabotage-cooldown-timer').style.display = 'inline';
+            document.getElementById('sabotage-cooldown-Q').style.display = 'none';
+        } else {
+            document.getElementById('sabotage-cooldown-timer').style.display = 'none';
+            document.getElementById('sabotage-cooldown-Q').style.display = 'inline';
+        }
     }
 
     function setKillCooldown(cd) {

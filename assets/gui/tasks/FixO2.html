@@ -8,9 +8,10 @@
             color: white;
             font-size: 40px;
         }
+
         #todayscode {
             font-family: "Indie Flower";
-            transform: translate(350px, 105px) rotateZ(-28deg) ;
+            transform: translate(350px, 105px) rotateZ(-28deg);
         }
     </style>
 </head>
@@ -62,6 +63,7 @@
                 if (inx.innerText == code) {
                     inx.innerText = "ACCEPTED";
                     _remote.setFixing(true);
+                    setTimeout(() => {_remote.close();}, 800);
                 } else {
                     inx.innerText = "INVALID CODE";
                     setTimeout(() => { inx.innerText = ''; locked=false;}, 1000);
@@ -71,5 +73,6 @@
             }
         }
     }
+
 </script>
 </html>

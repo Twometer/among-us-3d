@@ -99,6 +99,7 @@
         if (Math.abs(_dialVal) < 0.07 && !lock) {
             console.log("Complete");
             _remote.setFixing(true);
+            setTimeout(() => {_remote.close();}, 800);
             _dialVal = 0;
             lock = true;
         }

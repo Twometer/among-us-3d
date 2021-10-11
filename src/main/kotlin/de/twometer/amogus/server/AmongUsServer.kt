@@ -3,6 +3,7 @@ package de.twometer.amogus.server
 import com.esotericsoftware.kryonet.Connection
 import com.esotericsoftware.kryonet.Listener
 import com.esotericsoftware.kryonet.Server
+import de.twometer.amogus.concurrency.AsyncScheduler
 import de.twometer.amogus.model.*
 import de.twometer.amogus.net.*
 import de.twometer.neko.util.MathF
@@ -11,6 +12,7 @@ import mu.KotlinLogging
 import org.joml.Vector3f
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.log
 
 private val logger = KotlinLogging.logger {}
 
@@ -19,6 +21,7 @@ object AmongUsServer : Server() {
     private val sessions = ConcurrentHashMap<String, ServerSession>()
     private val playerIdCounter = AtomicInteger()
     private const val disableVictory = false
+    private val scheduler = AsyncScheduler()
 
     fun main() {
         registerAllNetMessages(kryo)
@@ -36,6 +39,8 @@ object AmongUsServer : Server() {
         })
 
         logger.info { "Server started and bound" }
+
+        scheduler.start()
     }
 
     override fun newConnection(): Connection {
@@ -150,12 +155,58 @@ object AmongUsServer : Server() {
             is SabotageStart -> {
                 val session = client.session ?: return
                 if (client.role != PlayerRole.Impostor) return
-                logger.info { "Impostor ${client.id} sabotaging ${msg.sabotage}" }
+                synchronized(session.sabotageLock) {
+                    if (session.currentSabotage != null) return
+                    session.currentSabotage = msg.sabotage
+                    logger.info { "Impostor ${client.id} sabotaging ${msg.sabotage}" }
+                    session.broadcast(OnSabotageChanged(msg.sabotage, CodeGenerator.newO2Code()))
+                    if (msg.sabotage.critical) {
+                        logger.debug { "Starting kill task" }
+                        session.sabotageKillTask = scheduler.runLater(45000) {
+                            logger.debug { "Sabotage to ${msg.sabotage} killed everyone" }
 
+                            // Kill everyone!
+                            session.players.forEach {
+                                if (it.role == PlayerRole.Crewmate) it.player.state = PlayerState.Ghost
+                            }
+
+                            // And let the victory check do the rest
+                            checkVictory(session)
+                        }
+                    }
+                }
+                logger.debug { "Sabotage started" }
             }
             is SabotageFix -> {
                 val session = client.session ?: return
+                logger.debug { "Sabotage fix request handler called" }
+                synchronized(session.sabotageLock) {
+                    val sabotage = session.currentSabotage ?: return
+                    if (!sabotage.critical && msg.fixing) {
+                        logger.debug { "Player ${client.id} fixed $sabotage" }
+                        session.clearSabotage()
+                    } else if (sabotage == SabotageType.O2) {
+                        if (msg.fixing)
+                            session.sabotageFixedLocations.add(msg.location)
 
+                        logger.debug { "Player ${client.id} entered ${session.sabotageFixedLocations.size}/2 O2 codes" }
+
+                        if (session.sabotageFixedLocations.size == 2) {
+                            session.clearSabotage()
+                        }
+                    } else if (sabotage == SabotageType.Reactor) {
+                        if (msg.fixing)
+                            session.sabotageFixingPlayers ++
+                        else
+                            session.sabotageFixingPlayers --
+
+                        logger.debug { "${session.sabotageFixingPlayers}/2 players fixing reactor meltdown" }
+
+                        if (session.sabotageFixingPlayers == 2) {
+                            session.clearSabotage()
+                        }
+                    }
+                }
             }
             is CompleteTaskStage -> {
                 val session = client.session ?: return
@@ -218,10 +269,20 @@ object AmongUsServer : Server() {
         session.totalTaskStages = 0
         session.surveillancePlayers = 0
         session.votingTimerCompletePlayers = 0
+        session.clearSabotage()
         session.players.forEach {
             it.player.state = PlayerState.Alive
             it.player.role = PlayerRole.Crewmate
         }
+    }
+
+    private fun ServerSession.clearSabotage() {
+        currentSabotage = null
+        sabotageKillTask?.also { scheduler.cancel(it) }
+        sabotageKillTask = null
+        sabotageFixedLocations.clear()
+        sabotageFixingPlayers = 0
+        broadcast(OnSabotageChanged(null))
     }
 
     private fun selectImpostor(session: ServerSession): PlayerClient? =

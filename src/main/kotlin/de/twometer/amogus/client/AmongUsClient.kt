@@ -40,9 +40,7 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.joml.Matrix4f
 import org.joml.Vector3f
-import org.lwjgl.glfw.GLFW
-import org.lwjgl.glfw.GLFW.GLFW_KEY_PERIOD
-import org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_CONTROL
+import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.openal.AL10.AL_GAIN
 import org.lwjgl.openal.AL10.alListenerf
 import org.lwjgl.opengl.GL11
@@ -87,6 +85,14 @@ object AmongUsClient : NekoApp(
     private var hitboxes = false
     var visionRadius = 6.0f
     private val perSecondTimer: Timer = Timer(1)
+    var currentSabotage: SabotageType? = null
+    var currentSabotageTime = 45
+    var currentSabotageCode = "0000"
+    private var sabotageBlink = false
+
+    private const val sabotageCooldownResetValue = 16
+    var sabotageCooldown = sabotageCooldownResetValue + 7
+
 
     class PacketConsumer<T>(val packetClass: Class<T>, val consumer: Consumer<T>)
 
@@ -334,8 +340,10 @@ object AmongUsClient : NekoApp(
             if (it.state == PlayerState.Ghost && self.state == PlayerState.Alive)
                 position.y -= 10f
             val config = session!!.config
-            val visionRadius =
+            var visionRadius =
                 6.8f * (if (self.role == PlayerRole.Impostor) config.impostorVision else config.playerVision)
+            if (self.state == PlayerState.Ghost) visionRadius *= 10f
+            if (currentSabotage == SabotageType.Lights && self.role != PlayerRole.Impostor) visionRadius = 2f
             this.visionRadius = visionRadius
             if (it.position.distanceSquared(scene.camera.position) > visionRadius * visionRadius && self.state == PlayerState.Alive)
                 position.y -= 10f
@@ -368,17 +376,20 @@ object AmongUsClient : NekoApp(
     @Subscribe
     fun onKeyPress(e: KeyPressEvent) {
         when {
-            e.key == GLFW.GLFW_KEY_F3 -> debugActive = !debugActive
-            e.key == GLFW.GLFW_KEY_ESCAPE -> PageManager.goBack()
+            e.key == GLFW_KEY_F3 -> debugActive = !debugActive
+            e.key == GLFW_KEY_ESCAPE -> PageManager.goBack()
             e.key == GLFW_KEY_PERIOD && window.isKeyDown(GLFW_KEY_RIGHT_CONTROL) -> {
                 consoleActive = !consoleActive
                 cursorVisible = consoleActive
             }
-            e.key == GLFW.GLFW_KEY_ENTER && consoleActive -> {
+            e.key == GLFW_KEY_ENTER && consoleActive -> {
                 consoleActive = false
                 cursorVisible = false
                 runCommand(currentCommand.get())
                 currentCommand.set("")
+            }
+            e.key == GLFW_KEY_Q && sabotageCooldown <= 0 && guiManager.page is IngamePage && currentSabotage == null && session?.myselfOrNull?.role == PlayerRole.Impostor -> {
+                PageManager.push(SabotagePage())
             }
         }
     }
@@ -475,6 +486,42 @@ object AmongUsClient : NekoApp(
         val self = session.myselfOrNull ?: return
         if (self.killCooldown > 0)
             self.killCooldown--
+        if (sabotageCooldown > 0)
+            sabotageCooldown--
+
+        if (currentSabotage == SabotageType.Lights) {
+            scene.rootNode.scanTree(ScanFilters.LIGHT) {
+                val light = (it as PointLight)
+                if (light.color.r >= 1.0f && light.color.g >= 1.0f && light.color.b >= 1.0f)
+                    it.active = false
+            }
+        } else {
+            scene.rootNode.scanTree(ScanFilters.LIGHT) {
+                (it as PointLight).active = true
+            }
+        }
+
+        if (currentSabotage?.critical == true) {
+            sabotageBlink = !sabotageBlink
+            if (sabotageBlink)
+                SoundEngine.play("Alarm.ogg")
+            if (currentSabotageTime > 0)
+                currentSabotageTime--
+            setLightsBlinkingRed(sabotageBlink)
+        } else setLightsBlinkingRed(false)
+    }
+
+    private fun setLightsBlinkingRed(red: Boolean) {
+        scene.rootNode.scanTree(ScanFilters.LIGHT) {
+            val light = it as PointLight
+            if (red) {
+                if (light.color.r >= 1.0f && light.color.g >= 1.0f && light.color.b >= 1.0f)
+                    light.color = Color(1f, 0f, 0f, 1f)
+            } else {
+                if (light.color.r >= 1.0f && light.color.g < 0.1f && light.color.b < 0.1f)
+                    light.color = Color(1f, 1f, 1f, 1f)
+            }
+        }
     }
 
     @Subscribe
@@ -555,6 +602,7 @@ object AmongUsClient : NekoApp(
         self.lastMeetingCalled = System.currentTimeMillis()
         self.state = PlayerState.Alive
         session!!.taskProgress = 0f
+        sabotageCooldown = sabotageCooldownResetValue
         mainScheduler.runNow {
             PageManager.overwrite(RoleRevealPage())
 
@@ -634,15 +682,23 @@ object AmongUsClient : NekoApp(
 
     @Subscribe
     fun onGameEnd(e: OnGameEnded) {
-        logger.debug { "Received game end command from server. Winners: ${e.winners}" }
         StateManager.changeGameState(GameState.GameOver)
         session!!.winners = e.winners
+        logger.debug { "Received game end command from server. Winners: ${e.winners}" }
         mainScheduler.runNow {
             val currentPage = guiManager.page
             if (currentPage !is EmergencyPage && currentPage !is EjectPage && currentPage !is GameEndPage) {
                 PageManager.overwrite(GameEndPage())
             }
         }
+    }
+
+    @Subscribe
+    fun onSabotageChanged(e: OnSabotageChanged) {
+        currentSabotage = e.sabotage
+        currentSabotageCode = e.code
+        currentSabotageTime = 45
+        sabotageCooldown = sabotageCooldownResetValue
     }
 
 }
