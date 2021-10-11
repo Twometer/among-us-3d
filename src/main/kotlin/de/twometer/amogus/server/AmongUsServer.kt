@@ -18,7 +18,7 @@ object AmongUsServer : Server() {
 
     private val sessions = ConcurrentHashMap<String, ServerSession>()
     private val playerIdCounter = AtomicInteger()
-    private const val disableVictory = true
+    private const val disableVictory = false
 
     fun main() {
         registerAllNetMessages(kryo)
@@ -191,6 +191,9 @@ object AmongUsServer : Server() {
                         logger.info { "Session ${session.code} voted for $ejectionResult" }
                         session.broadcast(OnEjectionResult(ejectionResult))
                         session.votingTimerCompletePlayers = 0
+                        if (ejectionResult.type == EjectResultType.Ejected)
+                            session.findPlayer(ejectionResult.player)?.player?.state = PlayerState.Ghost
+                        checkVictory(session)
                     }
                 }
             }

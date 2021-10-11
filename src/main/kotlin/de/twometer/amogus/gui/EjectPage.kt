@@ -35,7 +35,7 @@ class EjectPage(val result: EjectResult) : BasePage("Eject.html") {
 
     override fun close() {
         if (StateManager.gameState == GameState.GameOver)
-        // TODO PageManager.overwrite()
+            PageManager.overwrite(GameEndPage())
         else
             PageManager.overwrite(IngamePage())
     }

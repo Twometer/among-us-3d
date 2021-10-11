@@ -535,6 +535,7 @@ object AmongUsClient : NekoApp(
         logger.debug { "Received game start command from server. Server assigned tasks: ${e.tasks}" }
         val self = session!!.myself
         self.tasks = e.tasks
+        self.killCooldown = session!!.config.killCooldown
         self.emergencyMeetings = session!!.config.emergencyMeetings
         self.lastMeetingCalled = System.currentTimeMillis()
         self.state = PlayerState.Alive
@@ -545,6 +546,7 @@ object AmongUsClient : NekoApp(
             logger.debug { "Creating player model instances for current session" }
             clearCorpses()
             scene.rootNode.detachAll { it is ModelNode && it.components.containsKey(PlayerGameObject::class.java) }
+            session!!.players.forEach { it.state = PlayerState.Alive }
             session!!.players
                 .filter { it.id != myPlayerId }
                 .forEach {
@@ -617,7 +619,15 @@ object AmongUsClient : NekoApp(
 
     @Subscribe
     fun onGameEnd(e: OnGameEnded) {
-
+        logger.debug { "Received game end command from server. Winners: ${e.winners}" }
+        StateManager.changeGameState(GameState.GameOver)
+        session!!.winners = e.winners
+        mainScheduler.runNow {
+            val currentPage = guiManager.page
+            if (currentPage !is EmergencyPage && currentPage !is EjectPage && currentPage !is GameEndPage) {
+                PageManager.overwrite(GameEndPage())
+            }
+        }
     }
 
 }
