@@ -42,6 +42,12 @@ class PlayerGameObject(val id: Int) : GameObject() {
     }
 }
 
+data class CorpseGameObject(val playerId: Int) : GameObject() {
+    override fun canInteract(): Boolean {
+        return AmongUsClient.session?.myselfOrNull?.state == PlayerState.Alive
+    }
+}
+
 data class VentGameObject(public override val location: Location, val number: Int = 1) :
     LocationBasedInteractableGameObject(location) {
     override fun getHighlightColor(): Color {

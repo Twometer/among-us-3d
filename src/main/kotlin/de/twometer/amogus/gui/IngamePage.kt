@@ -1,9 +1,6 @@
 package de.twometer.amogus.gui
 
-import de.twometer.amogus.client.AmongUsClient
-import de.twometer.amogus.client.PlayerGameObject
-import de.twometer.amogus.client.TaskFormatter
-import de.twometer.amogus.client.VentGameObject
+import de.twometer.amogus.client.*
 import de.twometer.amogus.model.PlayerRole
 import de.twometer.amogus.model.PlayerState
 import de.twometer.amogus.net.OnSurveillanceChanged
@@ -76,6 +73,7 @@ class IngamePage : BasePage("Ingame.html") {
         when (AmongUsClient.currentPickTarget) {
             is PlayerGameObject -> call("setMainAction", "Kill")
             is VentGameObject -> call("setMainAction", "Vent")
+            is CorpseGameObject -> call("setMainAction", "Report")
             else -> call("setMainAction", "Use")
         }
     }

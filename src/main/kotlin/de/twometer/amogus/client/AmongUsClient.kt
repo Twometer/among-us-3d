@@ -63,6 +63,7 @@ object AmongUsClient : NekoApp(
     lateinit var collider: LineCollider
     lateinit var boundsTester: BoundsTester
     lateinit var astronautPrefab: ModelNode
+    lateinit var corpsePrefab: ModelNode
     lateinit var netClient: Client
 
     var currentPickTarget: GameObject? = null
@@ -154,6 +155,20 @@ object AmongUsClient : NekoApp(
             }
         }
 
+        // Load dead body
+        corpsePrefab = ModelCache.get("corpse.obj").also {
+            it.transform.scale.set(0.4f)
+            it.updateMaterial("Suit") { mat ->
+                mat[MatKey.ColorSpecular] = Color(0.05f, 0.05f, 0.05f, 0.0f)
+            }
+            it.updateMaterial("Bone") { mat ->
+                mat[MatKey.ColorSpecular] = Color(0.05f, 0.05f, 0.05f, 0.0f)
+            }
+            it.updateMaterial("Blood") { mat ->
+                mat[MatKey.ColorSpecular] = Color(0.5f, 0.5f, 0.5f, 0.0f)
+            }
+        }
+
         // Game config
         gameConfig = WorkingDirectory.load(GameConfig.FILE_NAME, GameConfig::class.java, gameConfig)!!
 
@@ -206,7 +221,7 @@ object AmongUsClient : NekoApp(
         WorkingDirectory.store(GameConfig.FILE_NAME, gameConfig)
     }
 
-    fun createAstronautInstance(
+    private fun createAstronautInstance(
         position: Vector3f,
         rotation: Float,
         name: String,
@@ -215,7 +230,7 @@ object AmongUsClient : NekoApp(
     ): ModelNode {
         val instance = astronautPrefab.createInstance().also {
             it.transform.translation.set(position)
-            it.transform.rotation.rotateZ(rotation)
+            it.transform.rotation.rotateX(rotation)
             it.playAnimation(it.animations[1])
             it.attachChild(Billboard(FontCache.get("lucida"), name).also { nametag ->
                 nametag.transform.scale.set(5000f, 5000f, 5000f)
@@ -228,6 +243,23 @@ object AmongUsClient : NekoApp(
         }
         scene.rootNode.attachChild(instance)
         return instance
+    }
+
+    private fun createCorpseInstance(
+        position: Vector3f,
+        rotation: Float,
+        color: PlayerColor,
+        playerId: Int
+    ): ModelNode {
+        return corpsePrefab.createInstance().also {
+            it.transform.translation.set(position)
+            it.transform.rotation.rotateZ(rotation)
+            it.updateMaterial("Suit") { mat ->
+                mat[MatKey.ColorDiffuse] = color.color
+            }
+            it.attachComponent(CorpseGameObject(playerId))
+            scene.rootNode.attachChild(it)
+        }
     }
 
     fun ModelNode.updateAstronautInstance(name: String, color: PlayerColor) {
@@ -300,7 +332,8 @@ object AmongUsClient : NekoApp(
             if (it.state == PlayerState.Ghost && self.state == PlayerState.Alive)
                 position.y -= 10f
             val config = session!!.config
-            val visionRadius = 6.8f * (if (self.role == PlayerRole.Impostor) config.impostorVision else config.playerVision)
+            val visionRadius =
+                6.8f * (if (self.role == PlayerRole.Impostor) config.impostorVision else config.playerVision)
             this.visionRadius = visionRadius
             if (it.position.distanceSquared(scene.camera.position) > visionRadius * visionRadius && self.state == PlayerState.Alive)
                 position.y -= 10f
@@ -321,6 +354,13 @@ object AmongUsClient : NekoApp(
         currentPickTarget = if (pickCandidate != null && pickCandidate.canInteract()) pickCandidate else null
         currentPlayerLocation =
             Location.valueOf(boundsTester.findContainingBounds(scene.camera.position.clone()) ?: "Hallways")
+    }
+
+    private fun clearCorpses() {
+        scene.rootNode.detachAll {
+            it is ModelNode &&
+                    it.components.containsKey(CorpseGameObject::class.java)
+        }
     }
 
     @Subscribe
@@ -364,6 +404,9 @@ object AmongUsClient : NekoApp(
             is PlayerGameObject -> {
                 SoundEngine.play("ImpostorKill.ogg")
                 send(KillPlayer(clicked.id))
+            }
+            is CorpseGameObject -> {
+                send(CallMeeting(false))
             }
         }
     }
@@ -500,6 +543,7 @@ object AmongUsClient : NekoApp(
             PageManager.overwrite(RoleRevealPage())
 
             logger.debug { "Creating player model instances for current session" }
+            clearCorpses()
             scene.rootNode.detachAll { it is ModelNode && it.components.containsKey(PlayerGameObject::class.java) }
             session!!.players
                 .filter { it.id != myPlayerId }
@@ -507,6 +551,8 @@ object AmongUsClient : NekoApp(
                     it.node = createAstronautInstance(it.position, it.rotation, it.username, it.color, it.id)
                 }
 
+
+            /*
             createAstronautInstance(
                 Vector3f(12f, 0f, -15f),
                 1.45f,
@@ -516,13 +562,22 @@ object AmongUsClient : NekoApp(
             ).also {
                 it.transform.rotation.identity().rotateX(1.57f)
             }
+            createCorpseInstance(Vector3f(18.7f, 0f, -12.2f), 0f, PlayerColor.Lime, IPlayer.INVALID_PLAYER_ID)
+             */
         }
         StateManager.changeGameState(GameState.Ingame)
     }
 
     @Subscribe
     fun onKill(e: OnPlayerKilled) {
-        session?.findPlayer(e.id)?.apply { state = PlayerState.Ghost }
+        val killedPlayer = session?.findPlayer(e.id) ?: return
+        killedPlayer.apply { state = PlayerState.Ghost }
+        createCorpseInstance(
+            Vector3f(killedPlayer.position.x, 0f, killedPlayer.position.z),
+            killedPlayer.rotation,
+            killedPlayer.color,
+            killedPlayer.id
+        )
         mainScheduler.runNow {
             if (e.id == myPlayerId) {
                 SoundEngine.play("KillMusic.ogg")
@@ -539,6 +594,9 @@ object AmongUsClient : NekoApp(
     @Subscribe
     fun onEmergencyMeeting(e: OnEmergencyMeeting) {
         SoundEngine.play(if (e.byButton) "EmergencyMeeting.ogg" else "EmergencyBody.ogg")
+        mainScheduler.runNow {
+            clearCorpses()
+        }
     }
 
     @Subscribe
