@@ -317,7 +317,7 @@ object AmongUsClient : NekoApp(
         }
         HighlightRenderer.finish()
 
-        if (currentPickTarget != null) {
+        if (currentPickTarget != null && debugActive) {
             ImGui.begin("Debug Info")
             ImGui.text("Hovering: $currentPickTarget")
             ImGui.end()
