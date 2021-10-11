@@ -32,6 +32,7 @@ import de.twometer.neko.scene.nodes.*
 import de.twometer.neko.util.MathExtensions.clone
 import de.twometer.neko.util.MathF
 import de.twometer.neko.util.Profiler
+import de.twometer.neko.util.Timer
 import imgui.ImGui
 import imgui.type.ImString
 import mu.KotlinLogging
@@ -85,6 +86,7 @@ object AmongUsClient : NekoApp(
     private var prevCtrl: PlayerController? = null
     private var hitboxes = false
     var visionRadius = 6.0f
+    private val perSecondTimer: Timer = Timer(1)
 
     class PacketConsumer<T>(val packetClass: Class<T>, val consumer: Consumer<T>)
 
@@ -402,8 +404,10 @@ object AmongUsClient : NekoApp(
                 PageManager.push(FixSabotagePage(clicked))
             }
             is PlayerGameObject -> {
-                SoundEngine.play("ImpostorKill.ogg")
-                send(KillPlayer(clicked.id))
+                if (session?.myselfOrNull?.killCooldown == 0) {
+                    SoundEngine.play("ImpostorKill.ogg")
+                    send(KillPlayer(clicked.id))
+                }
             }
             is CorpseGameObject -> {
                 send(CallMeeting(false))
@@ -460,6 +464,17 @@ object AmongUsClient : NekoApp(
             pos.y = netY
             send(ChangePosition(pos, scene.camera.rotation.x))
         }
+        if (perSecondTimer.elapsed) {
+            perSecondTimer.reset()
+            handlePerSecondUpdate()
+        }
+    }
+
+    private fun handlePerSecondUpdate() {
+        val session = session ?: return
+        val self = session.myselfOrNull ?: return
+        if (self.killCooldown > 0)
+            self.killCooldown--
     }
 
     @Subscribe

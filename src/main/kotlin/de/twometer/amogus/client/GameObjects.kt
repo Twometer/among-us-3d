@@ -35,7 +35,6 @@ class PlayerGameObject(val id: Int) : GameObject() {
         return AmongUsClient.session?.myselfOrNull?.role == PlayerRole.Impostor
                 && AmongUsClient.session?.myselfOrNull?.state == PlayerState.Alive
                 && AmongUsClient.session?.findPlayer(id)?.state == PlayerState.Alive
-                && AmongUsClient.session?.myselfOrNull?.killCooldown == 0
     }
 
     override fun isHighlighted(): Boolean {
