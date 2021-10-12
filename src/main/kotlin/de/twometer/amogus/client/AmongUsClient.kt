@@ -188,11 +188,19 @@ object AmongUsClient : NekoApp(
         renderer.effectsPipeline.steps.add(DepthFogFilter())
         renderer.effectsPipeline.steps.add(CRTFilter().also { it.active = false })
 
+        connect()
+
+        StateManager.changeGameState(GameState.Menus)
+        applyConfig()
+    }
+
+    private fun connect() {
         // Networking
         netClient = Client()
         registerAllNetMessages(netClient.kryo)
+        val ip = System.getenv("AMOGUS_IP") ?: "10.0.2.140"
         netClient.start()
-        netClient.connect(5000, "10.0.2.140", 32783)
+        netClient.connect(5000, ip, 32783)
         netClient.addListener(object : Listener() {
             override fun received(p0: Connection?, p1: Any?) {
                 handlePacket(p1!!)
@@ -208,9 +216,18 @@ object AmongUsClient : NekoApp(
             logger.info { "Player id assigned: ${it.playerId}" }
             myPlayerId = it.playerId
         }
+    }
 
-        StateManager.changeGameState(GameState.Menus)
-        applyConfig()
+    fun leave() {
+        mainScheduler.runNow {
+            clearCorpses()
+            PageManager.overwrite(MainMenuPage())
+            StateManager.changeGameState(GameState.Menus)
+            netClient.close()
+            session = null
+            currentSabotage = null
+            connect()
+        }
     }
 
     fun applyConfig() {

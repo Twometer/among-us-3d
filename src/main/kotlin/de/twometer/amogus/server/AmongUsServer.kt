@@ -12,7 +12,6 @@ import mu.KotlinLogging
 import org.joml.Vector3f
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.math.log
 
 private val logger = KotlinLogging.logger {}
 
@@ -29,12 +28,35 @@ object AmongUsServer : Server() {
         bind(32783)
 
         addListener(object : Listener() {
-            override fun received(p0: Connection?, p1: Any?) {
-                handle(p0 as PlayerClient, p1!!)
+            override fun received(conn: Connection, msg: Any) {
+                handle(conn as PlayerClient, msg)
             }
 
-            override fun connected(p0: Connection?) {
-                logger.info { "Client connected from ${p0!!.remoteAddressTCP}" }
+            override fun connected(conn: Connection) {
+                logger.info { "Client connected from ${conn.remoteAddressTCP}" }
+            }
+
+            override fun disconnected(conn: Connection) {
+                val client = conn as PlayerClient
+                logger.info { "Player #${client.id} disconnected" }
+                val session = client.session ?: return
+
+                session.players.remove(client)
+                if (session.players.size == 0) {
+                    sessions.remove(session.code)
+                    logger.debug { "Session ${session.code} is now empty and was destroyed" }
+                    return
+                }
+
+                if (client.isHost) {
+                    logger.debug { "Finding new host for session ${session.code}" }
+                    val newHost = session.players.filter { !it.isHost }.shuffled().first()
+                    logger.debug { "Selected host: ${newHost.id}" }
+                    session.host = newHost.id
+                    session.broadcast(OnSessionUpdate(session.code, session.host, session.config))
+                }
+
+                checkVictory(session)
             }
         })
 
@@ -196,9 +218,9 @@ object AmongUsServer : Server() {
                         }
                     } else if (sabotage == SabotageType.Reactor) {
                         if (msg.fixing)
-                            session.sabotageFixingPlayers ++
+                            session.sabotageFixingPlayers++
                         else
-                            session.sabotageFixingPlayers --
+                            session.sabotageFixingPlayers--
 
                         logger.debug { "${session.sabotageFixingPlayers}/2 players fixing reactor meltdown" }
 

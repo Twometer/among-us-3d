@@ -3,6 +3,7 @@ package de.twometer.amogus.gui
 import de.twometer.amogus.client.AmongUsClient
 import de.twometer.amogus.net.OnPlayerLeave
 import de.twometer.amogus.net.OnPlayerUpdate
+import de.twometer.amogus.net.OnSessionUpdate
 import de.twometer.amogus.net.StartGame
 import de.twometer.neko.events.Events
 import org.greenrobot.eventbus.Subscribe
@@ -36,6 +37,11 @@ class LobbyPage : BasePage("Lobby.html") {
         }
     }
 
+    @Subscribe
+    fun onSessionUpdate(e: OnSessionUpdate) {
+        runOnUiThread { call("setIsHost", AmongUsClient.session!!.myselfIsHost) }
+    }
+
     fun customize() {
         PageManager.push(CustomizePage())
     }
@@ -45,7 +51,7 @@ class LobbyPage : BasePage("Lobby.html") {
     }
 
     fun disconnect() {
-
+        AmongUsClient.leave()
     }
 
 }

@@ -1,5 +1,7 @@
 package de.twometer.amogus.gui
 
+import de.twometer.amogus.client.AmongUsClient
+
 class PausePage : BasePage("Pause.html") {
 
     fun settings() {
@@ -7,7 +9,7 @@ class PausePage : BasePage("Pause.html") {
     }
 
     fun leaveSession() {
-
+        AmongUsClient.leave()
     }
 
 }
