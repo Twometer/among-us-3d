@@ -56,6 +56,8 @@ object AmongUsServer : Server() {
                     session.broadcast(OnSessionUpdate(session.code, session.host, session.config))
                 }
 
+                session.broadcast(OnPlayerLeave(client.id))
+
                 checkVictory(session)
             }
         })

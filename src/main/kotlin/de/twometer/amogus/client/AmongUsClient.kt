@@ -198,7 +198,7 @@ object AmongUsClient : NekoApp(
         // Networking
         netClient = Client()
         registerAllNetMessages(netClient.kryo)
-        val ip = System.getenv("AMOGUS_IP") ?: "10.0.2.140"
+        val ip = System.getenv("AMOGUS_IP") ?: "twometer.dev"
         netClient.start()
         netClient.connect(5000, ip, 32783)
         netClient.addListener(object : Listener() {
@@ -353,7 +353,7 @@ object AmongUsClient : NekoApp(
             val position = MathF.lerp(it.prevPosition, it.position, progress)
             val rotation = MathF.lerp(it.prevRotation, it.rotation, progress)
 
-            val self = session!!.myself
+            val self = session!!.myselfOrNull ?: return
             if (it.state == PlayerState.Ghost && self.state == PlayerState.Alive)
                 position.y -= 10f
             val config = session!!.config
@@ -465,12 +465,13 @@ object AmongUsClient : NekoApp(
     private fun runCommand(command: String) {
         when (command) {
             "profiler" -> Profiler.enabled = !Profiler.enabled
-            "getpos" -> println("Position=${scene.camera.position} Rotation=${scene.camera.rotation}")
+            "printpos" -> println("Position=${scene.camera.position} Rotation=${scene.camera.rotation}")
             "respawn" -> scene.camera.position.set(10f, 0.75f, -15f)
             "crash" -> mainScheduler.runNow { throw RuntimeException("simulated crash") }
             "noclip" -> noclip = !noclip
-            "ingame" -> PageManager.overwrite(IngamePage())
-            "impostor" -> session?.myself?.apply { role = PlayerRole.Impostor }
+            "gui.ingame" -> PageManager.overwrite(IngamePage())
+            "gui.main" -> PageManager.overwrite(MainMenuPage())
+            "spookyboi" -> session?.myselfOrNull?.state = PlayerState.Ghost
             "freecam" -> {
                 if (prevCtrl != null) {
                     playerController = prevCtrl!!
@@ -701,6 +702,8 @@ object AmongUsClient : NekoApp(
 
     @Subscribe
     fun onGameEnd(e: OnGameEnded) {
+        if (StateManager.gameState != GameState.Ingame)
+            return
         StateManager.changeGameState(GameState.GameOver)
         session!!.winners = e.winners
         logger.debug { "Received game end command from server. Winners: ${e.winners}" }
@@ -719,5 +722,6 @@ object AmongUsClient : NekoApp(
         currentSabotageTime = 45
         sabotageCooldown = sabotageCooldownResetValue
     }
+
 
 }

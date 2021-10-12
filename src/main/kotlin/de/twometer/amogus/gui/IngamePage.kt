@@ -15,7 +15,8 @@ import org.lwjgl.glfw.GLFW
 class IngamePage : BasePage("Ingame.html") {
 
     override fun onLoaded() {
-        val me = AmongUsClient.session!!.myself
+        val session = AmongUsClient.session ?: return
+        val me = session.myself
         call("setImpostor", me.role == PlayerRole.Impostor)
         call("setGhost", me.state == PlayerState.Ghost)
         call("setTaskProgress", AmongUsClient.session!!.taskProgress)
