@@ -12,6 +12,7 @@ import mu.KotlinLogging
 import org.joml.Vector3f
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.function.Supplier
 
 private val logger = KotlinLogging.logger {}
 
@@ -169,8 +170,8 @@ object AmongUsServer : Server() {
                 session.players.forEach {
                     val tasks = ArrayList<PlayerTask>()
                     tasks.add(commonTask)
-                    repeat(session.config.shortTasks) { tasks.add(TaskGenerator.newShortTask()) }
-                    repeat(session.config.longTasks) { tasks.add(TaskGenerator.newLongTask()) }
+                    repeat(session.config.shortTasks) { addUnique(tasks) { TaskGenerator.newShortTask() } }
+                    repeat(session.config.longTasks) { addUnique(tasks) { TaskGenerator.newLongTask() } }
                     tasks.shuffle()
                     if (it.role != PlayerRole.Impostor) session.totalTaskStages += tasks.sumOf { task -> task.length }
                     it.sendTCP(OnGameStarted(tasks))
@@ -361,6 +362,17 @@ object AmongUsServer : Server() {
         } else {
             EjectResult(EjectResultType.Ejected, highestVotes.key)
         }
+    }
+
+    private fun <T> addUnique(list: MutableList<T>, supplier: Supplier<T>) {
+        repeat(100) {
+            val newItem = supplier.get()
+            if (!list.contains(newItem)) {
+                list.add(newItem)
+                return
+            }
+        }
+        throw IllegalStateException("Could not add unique item to list after 100 tries")
     }
 
 }
