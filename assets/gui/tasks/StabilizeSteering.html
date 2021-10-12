@@ -16,8 +16,8 @@
 </body>
 <script src="scripts/base.js"></script>
 <script>
-    function OnLoaded() {
-        var target = $('target');
+    _RegInit(() => {
+		var target = $('target');
         var rand = Math.random() * 2 * Math.PI;
 
         var x = Math.sin(rand) * 180 * (Math.random() + 0.25);
@@ -45,6 +45,6 @@
                 _remote.taskComplete();
             }
         }
-    }
+	});
 </script>
 </html>

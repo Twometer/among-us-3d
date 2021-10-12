@@ -472,6 +472,9 @@ object AmongUsClient : NekoApp(
             "gui.ingame" -> PageManager.overwrite(IngamePage())
             "gui.main" -> PageManager.overwrite(MainMenuPage())
             "spookyboi" -> session?.myselfOrNull?.state = PlayerState.Ghost
+            "hitboxes" -> hitboxes = !hitboxes
+            "role.impostor" -> session?.myselfOrNull?.role = PlayerRole.Impostor
+            "role.crewmate" -> session?.myselfOrNull?.role = PlayerRole.Crewmate
             "freecam" -> {
                 if (prevCtrl != null) {
                     playerController = prevCtrl!!
@@ -480,9 +483,6 @@ object AmongUsClient : NekoApp(
                     prevCtrl = playerController
                     playerController = DefaultPlayerController()
                 }
-            }
-            "hitboxes" -> {
-                hitboxes = !hitboxes
             }
         }
     }
