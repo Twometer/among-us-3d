@@ -643,10 +643,12 @@ object AmongUsClient : NekoApp(
             killedPlayer.color,
             killedPlayer.id
         )
-        mainScheduler.runNow {
-            if (e.id == myPlayerId) {
+        if (e.id == myPlayerId) {
+            mainScheduler.runLater(100) {
                 SoundEngine.play("KillMusic.ogg")
-                PageManager.overwrite(DeathPage())
+                if (StateManager.gameState == GameState.Ingame) {
+                    PageManager.overwrite(DeathPage())
+                }
             }
         }
         logger.debug { "${killedPlayer.username} was killed" }
