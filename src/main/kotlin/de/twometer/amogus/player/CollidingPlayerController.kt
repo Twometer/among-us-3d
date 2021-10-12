@@ -37,7 +37,8 @@ class CollidingPlayerController : PlayerController {
         val isGhost = AmongUsClient.session?.myselfOrNull?.state == PlayerState.Ghost
         if (isGhost)
             speedMul *= 1.75f
-        var speed = this.speed * deltaTime.toFloat() * speedMul
+        val frameSpeedBase = this.speed * deltaTime.toFloat()
+        var speed = frameSpeedBase * speedMul
         val sensitivity = this.sensitivity * deltaTime.toFloat()
 
         if (window.isKeyDown(GLFW.GLFW_KEY_LEFT_CONTROL)) {
@@ -68,12 +69,17 @@ class CollidingPlayerController : PlayerController {
             AmongUsClient.collider.processPosition(scene.camera.position)
 
         // View bobbing
-        val horizontalSpeed = prevPos.sub(scene.camera.position).also { it.y = 0f }.length().coerceAtMost(0.08f)
+        val actualSpeed = prevPos.sub(scene.camera.position).also { it.y = 0f }.length()
         prevPos.set(scene.camera.position)
-        if (horizontalSpeed > 0.01) {
-            bobTime += (horizontalSpeed * deltaTime).toFloat()
-            val bobMultiplier = if (isGhost) 100 else 480
-            val viewBob = MathF.sin(bobTime * bobMultiplier) * horizontalSpeed * 0.4f
+
+        val speedFactor = MathF.max(actualSpeed / frameSpeedBase, 0.0f)
+        val baseBob = 0.04f
+        val factor = baseBob * speedFactor
+        if (actualSpeed > 0.01) {
+            bobTime += (factor * deltaTime).toFloat()
+            val bobSpeed = if (isGhost) 150 else 480
+            val bobStrength = if (isGhost) 0.86f else 0.4f
+            val viewBob = MathF.sin(bobTime * bobSpeed) * MathF.min(factor, baseBob) * bobStrength
             scene.camera.position.y = height + viewBob
 
             if (prevBob < 0 && viewBob < 0 && viewBob > prevBob && !bobStop && !isGhost) {
