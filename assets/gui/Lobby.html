@@ -62,25 +62,46 @@
 </body>
 
 <script>
+    var container = document.getElementById('playerContainer');
+    var players = [];
+
     function setIsHost(host) {
         document.getElementById('startBtn').style.display = host ? 'inline-block' : 'none';
     }
 
-    var container = document.getElementById('playerContainer');
     function addPlayer(id, username, color) {
-        var item = document.createElement('div');
-        item.classList.add('player-item');
-        item.innerHTML = '<img class="player-icon" src="img/PlayerIcon/' + color + '.png"><div class="player-item-header">' + username + '</div>'
-        item.setAttribute('id', id);
-        container.appendChild(item);
+        players.push({ id, username, color });
+        rebuildList();
     }
 
     function removePlayer(id) {
-        var element = document.getElementById(id);
-        if (element)
-            element.parentNode.removeChild(element);
+        players = players.filter(p => p.id != id);
+        rebuildList();
     }
 
+    function rebuildList() {
+        // Sort by ID for consistency
+        players.sort((a, b) => {
+            if (a.id < b.id) return -1;
+            if (a.id > b.id) return 1;
+            return 0;
+        });
+
+        // Clear all old players
+        let elements = document.getElementsByClassName('player-item');
+        while (elements.length > 0) {
+            var playerElem = elements[0];
+            playerElem.parentNode.removeChild(playerElem);
+        }
+
+        // Add new players
+        for (let player of players) {
+            var playerElem = document.createElement('div');
+            playerElem.classList.add('player-item');
+            playerElem.innerHTML = `<img class="player-icon" src="img/PlayerIcon/${player.color}.png"><div class="player-item-header">${player.username}</div>`;
+            container.appendChild(playerElem);
+        }
+    }
 
 </script>
 
