@@ -42,7 +42,7 @@ class CollidingPlayerController : PlayerController {
         val sensitivity = this.sensitivity * deltaTime.toFloat()
 
         if (window.isKeyDown(GLFW.GLFW_KEY_LEFT_CONTROL)) {
-            speed *= 4
+            //speed *= 4
         }
         if (window.isKeyDown(GLFW.GLFW_KEY_W)) {
             velocity.add(scene.camera.direction.clone().mul(speed))

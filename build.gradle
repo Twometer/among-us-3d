@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.5.31'
+    id 'org.jetbrains.kotlin.jvm' version '1.6.0'
 }
 
 group 'de.twometer'
@@ -12,10 +12,21 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.5.31'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.6.0'
     implementation 'org.slf4j:slf4j-log4j12:1.7.32'
     implementation 'de.twometer:neko-engine:2.3.4'
-    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'com.google.code.gson:gson:2.8.9'
     implementation 'com.esotericsoftware:kryo:5.2.0'
     implementation 'kryonet:kryonet:2.21'
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": 'de.twometer.amogus.BootstrapKt'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy DuplicatesStrategy.EXCLUDE
+    archiveName 'among-us-3d.jar'
 }
